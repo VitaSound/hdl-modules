@@ -13,7 +13,7 @@ reg reset;
 initial
 begin
   reset = 1;
-  #0.1;
+  #10;
   reset = 0;
 end
 
