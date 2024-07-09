@@ -7,7 +7,9 @@ output reg cnt_edge,
 output reg signed [15:0]sin_val
 );
 
-integer freq = 0;
+integer freq = 500;
+real my_time = 0;
+real sin_real = 0;
 
 //function calculating sinus
 function real sin;
@@ -61,10 +63,6 @@ begin
    cnt_edge <= 1'b0;
   end
 end
-
-real my_time;
-real sin_real;
-
 
 //generate requested "freq" sinus
 always @(posedge cnt_edge)
