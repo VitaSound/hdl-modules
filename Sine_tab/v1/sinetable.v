@@ -18,13 +18,15 @@ module sinetable(clk, sin);
 		input [N:0] t4;
 		begin
 			case (t4)
-				`include "sin.v"  //"sin.vi"
+				8'd00: sin4 = 1'b0;   // добавила строку
+			    8'd01: sin4 = 1'b1;   // добавила строку
 				default: sin4 = {N{1'b0}};
 			endcase
-//			`include "sin_if.vi"   // !!!вот эта строка вызывает проблему
+
  		end
 	endfunction
 
+    
 	always @ (posedge clk)
 		begin
 			accumulator <= accumulator + 1'b1;

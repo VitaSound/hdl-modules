@@ -18,8 +18,6 @@ sinetable(
   .clk(clk), 
   .sin(sin));
 
-//sinewave sin1(clk, reset, cnt, cnt_edge, sin_val);
-
 //assume basic clock is 10Mhz
 
 initial clk=0;
