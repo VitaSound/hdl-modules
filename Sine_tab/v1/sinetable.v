@@ -14,8 +14,10 @@ module sinetable(clk, sin);
 	assign t_even = {1'b0, angle}; 
 	assign t_odd = {1'b1, {N{1'b0}}} - {1'b0, angle};
 
+    //input wire [N:0] t4 = 0; //
+
 	function [N-1:0] sin4;
-		input [N:0] t4;
+		input [N:0] t4;  //
 		begin
 			case (t4)
 				8'd00: sin4 = 1'b0;   // добавила строку

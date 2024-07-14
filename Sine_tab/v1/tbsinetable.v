@@ -1,20 +1,23 @@
 `timescale 1us / 1ns
 
-module tbsinewave();
+module tbsinetable();
 
 reg clk;
 //reg reset;
 
-wire [N:0] sin;
+wire [N:0] sin = 0;
+parameter N = 7;         //Зачем их объявлять и инициализировать
+parameter N_DIVIDE = 0; //повторно, ведь это сделано в
+                          //sinetable.vvvp qqq
+reg [N:0] t4 = 0;   //
 
+wire [N+1+N_DIVIDE:0] accumulator = 0;   //
+reg [N-1:0] angle = 0;   //
+reg [N:0] t_even = 0;   // 
+reg [N:0] t_odd = 0;   //
+reg [1:0] quadrant = 0;   //
 
-wire [N+1+N_DIVIDE:0] accumulator;   
-reg [N-1:0] angle;
-reg [N:0] t_even, t_odd;
-reg [1:0] quadrant;
-
-
-sinetable(
+sinetable STable(
   .clk(clk), 
   .sin(sin));
 
@@ -30,7 +33,7 @@ always
 initial
 begin
   $dumpfile("out.vcd");
-  $dumpvars(0,tbsinewave);
+  $dumpvars(0,tbsinetable);
 
   #10000;
 
