@@ -2,20 +2,13 @@
 
 module tbsinetable();
 
+parameter N = 7;
+
 reg clk;
+wire [N:0] sin;
 //reg reset;
 
-wire [N:0] sin = 0;
-parameter N = 7;         //Зачем их объявлять и инициализировать
-parameter N_DIVIDE = 0; //повторно, ведь это сделано в
-                          //sinetable.vvvp qqq
-reg [N:0] t4 = 0;   //
 
-wire [N+1+N_DIVIDE:0] accumulator = 0;   //
-reg [N-1:0] angle = 0;   //
-reg [N:0] t_even = 0;   // 
-reg [N:0] t_odd = 0;   //
-reg [1:0] quadrant = 0;   //
 
 sinetable STable(
   .clk(clk), 

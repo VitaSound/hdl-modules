@@ -3,18 +3,13 @@ module sinetable(clk, sin);
 	parameter N = 7; // размерность функции четверть-периода синуса
 
 	input clk;
-	output reg [N:0] sin;
+	output reg [N:0] sin = 0;
 
-	reg [N+1+N_DIVIDE:0] accumulator; // циклический счётчик изменяемый каждый такт
-	wire [N-1:0] angle;         // значение t внутри квадранта
-	wire [N:0] t_even, t_odd; // значения t4 для чётных и нечётных квадрантов
-	wire [1:0] quadrant;   // номер квадранта
-
-	assign {quadrant, angle} = accumulator[N+1+N_DIVIDE:N_DIVIDE];
-	assign t_even = {1'b0, angle}; 
-	assign t_odd = {1'b1, {N{1'b0}}} - {1'b0, angle};
-
-    //input wire [N:0] t4 = 0; //
+    reg [N+1+N_DIVIDE:0] accumulator = 0; // циклический счётчик изменяемый каждый такт
+	wire [N-1:0] angle = 0;         // значение t внутри квадранта
+	wire [N:0] t_even = 0; 
+	wire [N:0] t_odd = 0; // значения t4 для чётных и нечётных квадрантов
+	wire [1:0] quadrant = 0;   // номер квадранта
 
 	function [N-1:0] sin4;
 		input [N:0] t4;  // t4 
