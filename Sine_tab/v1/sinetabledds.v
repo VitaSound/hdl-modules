@@ -5,38 +5,23 @@ module sinetabledds(
     input wire RESET,
 
     input wire [31:0] DDS,               
-<<<<<<< HEAD
     output reg [31:0] DDSout_sine 
 );
-=======
-    output reg [31:0] DDSout_dds31, 
 
->>>>>>> 4b2a03209d8b43aea4f994786b0bed32c57f67aa
-    
 	parameter N = 7;         // размерность функции четверть-периода синуса
     
 	wire [N-1:0] angle = 0;  // значение t внутри квадранта
 	wire [N:0] t_even = 0;
-<<<<<<< HEAD
+
 	wire [N:0] t_odd = 0;   // значения t4 для чётных и нечётных квадрантов
 	wire [1:0] quadrant = 0; // номер квадранта
 
-=======
-	wire [N:0] t_odd = 0;    // значения t4 для чётных и нечётных квадрантов
-	wire [1:0] quadrant = 0; // номер квадранта
-);
->>>>>>> 4b2a03209d8b43aea4f994786b0bed32c57f67aa
-	
+
 	function [N-1:0] sin4;
 		input [N:0] t4;     // t4 
 		begin
-<<<<<<< HEAD
 			case (t4)
 				 8'd00: sin4 = 0.0000;    //sin(0.0000) = 0.0000
-=======
-				
-				 8'd00: sin4 = 0.0000;   //sin(0.0000) = 0.0000
->>>>>>> 4b2a03209d8b43aea4f994786b0bed32c57f67aa
                  8'd01: sin4 = 0.1710;    //sin(0.1718) = 0.1710
                  8'd02: sin4 = 0.3599;    //sin(0.3682) = 0.3599
                  8'd03: sin4 = 0.5350;    //sin(0.5645) = 0.5350
@@ -56,21 +41,12 @@ module sinetabledds(
 		begin
 			//accumulator <= accumulator + 1'b1;
 			case (quadrant)
-<<<<<<< HEAD
-			
+		
 				2'b00: DDSout_sine  <= {1'b1, sin4(t_even)};
 				2'b01: DDSout_sine  <= {1'b1, sin4(t_odd)};
 				2'b10: DDSout_sine  <= {1'b0, {N{1'b1}} - sin4(t_even)};
 				2'b11: DDSout_sine  <= {1'b0, {N{1'b1}} - sin4(t_odd)};
 			
-=======
-				//   DDSout_dds31 <= DDS;
-				// каккая разрядность исходя из нашего счётчика 2'b001
-				2'b00: DDSout_dds31 <= {1'b1, sin4(t_even)};
-				2'b01: DDSout_dds31 <= {1'b1, sin4(t_odd)};
-				2'b10: DDSout_dds31 <= {1'b0, {N{1'b1}} - sin4(t_even)};
-				2'b11: DDSout_dds31 <= {1'b0, {N{1'b1}} - sin4(t_odd)};
->>>>>>> 4b2a03209d8b43aea4f994786b0bed32c57f67aa
 			endcase
 		end
 
