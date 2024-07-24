@@ -21,6 +21,11 @@ reg [1:0] quadrant;
 
 initial NOTE = 8'd00000069;
 
+DDS DDS_1(
+  .CLK(CLK),
+  .RESET(RESET),
+  .ADDER(100000),
+  .DDS(DDS));
 
 sinetabledds STableDDS(
   .CLK(CLK),
