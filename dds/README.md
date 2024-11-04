@@ -2,4 +2,4 @@
 
 DDS generator module
 
-![dds]([http://url/to/img.png](https://raw.githubusercontent.com/VitaSound/hdl-modules/refs/heads/main/dds/test.png))
+![dds](https://github.com/VitaSound/hdl-modules/blob/main/dds/test.png?raw=true)
