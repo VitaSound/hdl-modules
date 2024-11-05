@@ -4,6 +4,8 @@
 
 Источник [git@github.com:UA3MQJ/fpga-synth.git](https://github.com/UA3MQJ/fpga-synth)
 
+[powerup_reset - Генератор автоматического сигнала сброса и сброса по кнопке](/powerup_reset/README.md)
+
 # окружение
 
 Все модули разработаны и протестированы в icarus verilog
