@@ -10,6 +10,7 @@
 | - | ------ | --- | --- |
 | 1 | [powerup_reset](/powerup_reset/README.md) | Генератор автоматического сигнала сброса и сброса по кнопке | ![dds](https://github.com/VitaSound/hdl-modules/blob/main/powerup_reset/test.png?raw=true) |
 | 2 | [dds](/dds/README.md) | Генератор базовой цифровой пилы | ![dds](https://github.com/VitaSound/hdl-modules/blob/main/dds/test.png?raw=true) |
+| 2 | [dds_transform](/dds_transform/README.md) | Преобразователи формы базовой цифровой пилы <br><br> [dds2saw.v](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/dds2saw.v) - пила <br> [dds2revsaw.v](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/dds2revsaw.v) - обратная пила <br> [dds2tria.v](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/dds2tria.v) - треугольник <br> [dds2meandr.v](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/dds2meandr.v) - меандр <br> [dds2pwm.v](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/dds2pwm.v) - PWM c 7-битной регулировкой % | ![dds](https://github.com/VitaSound/hdl-modules/blob/main/dds_transform/test.png?raw=true) |
 
 # окружение
 
