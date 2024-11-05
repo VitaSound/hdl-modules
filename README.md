@@ -4,7 +4,10 @@
 
 Источник [git@github.com:UA3MQJ/fpga-synth.git](https://github.com/UA3MQJ/fpga-synth)
 
-[powerup_reset - Генератор автоматического сигнала сброса и сброса по кнопке](/powerup_reset/README.md)
+# назначение модулей
+1 [powerup_reset](/powerup_reset/README.md)  - Генератор автоматического сигнала сброса и сброса по кнопке
+
+2 [dds](/dds/README.md)  - Генератор базовой цифровой пилы
 
 # окружение
 
