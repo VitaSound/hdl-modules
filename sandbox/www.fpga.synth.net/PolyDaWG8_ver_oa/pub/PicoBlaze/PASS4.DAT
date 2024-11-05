@@ -1,0 +1,5576 @@
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Program: MIDICTRL.psm (polyphonic)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  Author: Scott R. Gravenhorst
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;    Date: 01-25-2007
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;Rev date: 10-24-2008
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Version: 1.23
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;----------------------------------------------------------------------------------------
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.03 Add control ports for 4 NCOs pitch values.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.04 system exclusive message input implemetation
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          sysex mfr ID 7F
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.05 Combine all single bit flags into one register.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          Attempt to combine byte counts into one register instead of two
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          to facilitate register usage in more complex dual UART ISR.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.06 Added parameter update via sysex.  Sysex data message is in address/data
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          format.  Address currently starts at 0x20 and ends at 0x7F because sysex
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          data values (including the address value) can't be larger than 0x7F.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          If ports become scarce, this can be chaged to also allow 0x00 - 0x1F at
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          the expense of external circuitry rework.  Sysex data is applied to
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          to synth by using the address value to select the port using a register
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          as a port pointer. Note that no address range checking is performed.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.07 Added selectable waveform NCOs
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.08 Remove sysex message type, add model number byte.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.09 sysex address space changed to 00 to 7F from 20 to 7F
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.10 sysex address space expanded to 14 bits.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.11 Add constant MIDI_TRANSPOSE.  This provides a way to give more range to the
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          upper end of the keyboard for when large offsets used.  Without this
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          constant (subtracted from all MIDI note numbers), this program will subtract
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          octaves until the note number no longer has bit 7 set.  Actual pitch is then
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          adjusted in the hardware in the NCO (nco_v8.v) module.  For the Korg
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          Wavestation, I've found that hex 14 works well.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.12 Add LCD Project name and author text.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.13 This file switches to the DWG synth, first version.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          Notes are presented in MIDI note number, not note - octave.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  POLYSYNTH...
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.14 First polysynth, 2 strings.  Some of the notes above here no longer apply.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.15 4 strings.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.16 6 strings.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.17 Piano like action, sustain pedal
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.18 8 strings.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.19 Discovered a problem with the way the sustain pedal works.  rework here and
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;          in the main module (PolyDaWG8.v)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.20 dual display for defining what mod wheel does.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.21 Voices stolen from keys held down.  Hardware is different, ver_l required.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.22 Changed LCD display of mode from N/O to Norm/Orig
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Ver 1.23 Remove LCD code for Avnet board
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; MIDI UART input and synth control program.  Receives and interprets MIDI data.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; MIDI support includes what Korg Wavestation can send.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; note on/off, mod wheel, pitch wheel, joystick X and Y, channel pressure, sustain pedal.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Note: DATAbyte1 represents the first data byte for commands which use 2 data bytes.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;       DATAbyte2 represents the second data byte for commands which use 2 data bytes.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;       DATAbyte2 represents the only data byte for commands which use 1 data byte.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MFR_ID
+  OP1 VALUE-MFR_ID
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; my mfr ID - Change this if you want a different ID
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MODEL_NUMBER
+  OP1 VALUE-MODEL_NUMBER
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; 00 = GateMan-I; 01 = PolyDaWG6
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-UNIT_NUMBER
+  OP1 VALUE-UNIT_NUMBER
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; unit number
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDI_TRANSPOSE
+  OP1 VALUE-MIDI_TRANSPOSE
+   OPERAND2-14
+  OP2 VALUE-14
+    COMMENT-; how much to SUBTRACT from MIDI note numbers for note on/off messages
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; this gives more range on the high end
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Bit definition constants as masks
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-rxready_bit
+  OP1 VALUE-rxready_bit
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; bit mask to sense for rx data available
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_bit
+  OP1 VALUE-MIDIbyteAVAILABLE_bit
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_bit
+  OP1 VALUE-TTYbyteAVAILABLE_bit
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_bit
+  OP1 VALUE-MESSAGEcomplete_bit
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_set
+  OP1 VALUE-MIDIbyteAVAILABLE_set
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_set
+  OP1 VALUE-TTYbyteAVAILABLE_set
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_set
+  OP1 VALUE-MESSAGEcomplete_set
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_clr
+  OP1 VALUE-MIDIbyteAVAILABLE_clr
+   OPERAND2-FE
+  OP2 VALUE-FE
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_clr
+  OP1 VALUE-TTYbyteAVAILABLE_clr
+   OPERAND2-FD
+  OP2 VALUE-FD
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_clr
+  OP1 VALUE-MESSAGEcomplete_clr
+   OPERAND2-FB
+  OP2 VALUE-FB
+    COMMENT-; FLAGS register TEST mask
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDI_UARTstatus_bit
+  OP1 VALUE-MIDI_UARTstatus_bit
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTY_UARTstatus_bit
+  OP1 VALUE-TTY_UARTstatus_bit
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; MIDI CONSTANTS
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; message type constants
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_NoteOff
+  OP1 VALUE-K_NoteOff
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_NoteOn
+  OP1 VALUE-K_NoteOn
+   OPERAND2-90
+  OP2 VALUE-90
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_PolyKeyPressure
+  OP1 VALUE-K_PolyKeyPressure
+   OPERAND2-A0
+  OP2 VALUE-A0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ControllerChange
+  OP1 VALUE-K_ControllerChange
+   OPERAND2-B0
+  OP2 VALUE-B0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ProgramChange
+  OP1 VALUE-K_ProgramChange
+   OPERAND2-C0
+  OP2 VALUE-C0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ChannelPressure
+  OP1 VALUE-K_ChannelPressure
+   OPERAND2-D0
+  OP2 VALUE-D0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_PitchBend
+  OP1 VALUE-K_PitchBend
+   OPERAND2-E0
+  OP2 VALUE-E0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_System
+  OP1 VALUE-K_System
+   OPERAND2-F0
+  OP2 VALUE-F0
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Controller Change byte 1 constants:
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MOD_WHEEL
+  OP1 VALUE-MOD_WHEEL
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUSTAIN
+  OP1 VALUE-SUSTAIN
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_X
+  OP1 VALUE-JOYSTICK_X
+   OPERAND2-10
+  OP2 VALUE-10
+    COMMENT-; Korg Wavestation, don't know about others.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_Y
+  OP1 VALUE-JOYSTICK_Y
+   OPERAND2-11
+  OP2 VALUE-11
+    COMMENT-; Korg Wavestation, don't know about others.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ALL_NOTES_OFF
+  OP1 VALUE-ALL_NOTES_OFF
+   OPERAND2-7B
+  OP2 VALUE-7B
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;; READ ONLY PORTS:
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; UART
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-UARTstatusport
+  OP1 VALUE-UARTstatusport
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; port number for rx and tx status (read only)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIrxdataport
+  OP1 VALUE-MIDIrxdataport
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; port number for rx data register (read only)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Slide switches
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SWITCH_PORT
+  OP1 VALUE-SWITCH_PORT
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; port number for slide switches (read only)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYrxdataport
+  OP1 VALUE-TTYrxdataport
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; port number for rx data register (read only)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TRANSPOSE
+  OP1 VALUE-TRANSPOSE
+   OPERAND2-03
+  OP2 VALUE-03
+    COMMENT-; port number for transposition factor
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MODWHEELSTATE
+  OP1 VALUE-MODWHEELSTATE
+   OPERAND2-05
+  OP2 VALUE-05
+    COMMENT-; what state the mod wheel usage is in, bit 0
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ACTIVE
+  OP1 VALUE-ACTIVE
+   OPERAND2-06
+  OP2 VALUE-06
+    COMMENT-; vibrational state of each string, one bit per string
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;; WRITE ONLY PORTS:
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Global ports [02-0F], affect all voices:
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-CHANNEL_PRESSURE_PORT
+  OP1 VALUE-CHANNEL_PRESSURE_PORT
+   OPERAND2-F0
+  OP2 VALUE-F0
+    COMMENT-; channel pressure value, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-PITCH_WHEEL_MSB_PORT
+  OP1 VALUE-PITCH_WHEEL_MSB_PORT
+   OPERAND2-F1
+  OP2 VALUE-F1
+    COMMENT-; pitch wheel MSB, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-PITCH_WHEEL_LSB_PORT
+  OP1 VALUE-PITCH_WHEEL_LSB_PORT
+   OPERAND2-F2
+  OP2 VALUE-F2
+    COMMENT-; pitch wheel LSB, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MOD_WHEEL_PORT
+  OP1 VALUE-MOD_WHEEL_PORT
+   OPERAND2-11
+  OP2 VALUE-11
+    COMMENT-; modulation wheel, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_X_PORT
+  OP1 VALUE-JOYSTICK_X_PORT
+   OPERAND2-F4
+  OP2 VALUE-F4
+    COMMENT-; joystick X, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_Y_PORT
+  OP1 VALUE-JOYSTICK_Y_PORT
+   OPERAND2-F5
+  OP2 VALUE-F5
+    COMMENT-; joystick Y, global
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VOICE_SELECT_PORT
+  OP1 VALUE-VOICE_SELECT_PORT
+   OPERAND2-F6
+  OP2 VALUE-F6
+    COMMENT-; For poly, selects the voice to talk to when
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; sending or updating voice info.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUSTAIN_PORT
+  OP1 VALUE-SUSTAIN_PORT
+   OPERAND2-12
+  OP2 VALUE-12
+    COMMENT-; FF when depressed, 00 when not depressed.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-GATE_PORT
+  OP1 VALUE-GATE_PORT
+   OPERAND2-13
+  OP2 VALUE-13
+    COMMENT-; GATE signal, per voice
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL0_PORT
+  OP1 VALUE-VEL0_PORT
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; ports for sending velocity (per voice) to synth
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL1_PORT
+  OP1 VALUE-VEL1_PORT
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL2_PORT
+  OP1 VALUE-VEL2_PORT
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL3_PORT
+  OP1 VALUE-VEL3_PORT
+   OPERAND2-03
+  OP2 VALUE-03
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL4_PORT
+  OP1 VALUE-VEL4_PORT
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL5_PORT
+  OP1 VALUE-VEL5_PORT
+   OPERAND2-05
+  OP2 VALUE-05
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL6_PORT
+  OP1 VALUE-VEL6_PORT
+   OPERAND2-06
+  OP2 VALUE-06
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL7_PORT
+  OP1 VALUE-VEL7_PORT
+   OPERAND2-07
+  OP2 VALUE-07
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE0_PORT
+  OP1 VALUE-NOTE0_PORT
+   OPERAND2-08
+  OP2 VALUE-08
+    COMMENT-; ports for sending note number (per voice) to synth
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE1_PORT
+  OP1 VALUE-NOTE1_PORT
+   OPERAND2-09
+  OP2 VALUE-09
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE2_PORT
+  OP1 VALUE-NOTE2_PORT
+   OPERAND2-0A
+  OP2 VALUE-0A
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE3_PORT
+  OP1 VALUE-NOTE3_PORT
+   OPERAND2-0B
+  OP2 VALUE-0B
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE4_PORT
+  OP1 VALUE-NOTE4_PORT
+   OPERAND2-0C
+  OP2 VALUE-0C
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE5_PORT
+  OP1 VALUE-NOTE5_PORT
+   OPERAND2-0D
+  OP2 VALUE-0D
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE6_PORT
+  OP1 VALUE-NOTE6_PORT
+   OPERAND2-0E
+  OP2 VALUE-0E
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE7_PORT
+  OP1 VALUE-NOTE7_PORT
+   OPERAND2-0F
+  OP2 VALUE-0F
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-LED_PORT
+  OP1 VALUE-LED_PORT
+   OPERAND2-FE
+  OP2 VALUE-FE
+    COMMENT-; for diagnostics, may be removed later...
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-resetport
+  OP1 VALUE-resetport
+   OPERAND2-FF
+  OP2 VALUE-FF
+    COMMENT-; this port doesn't actually output anything.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Writing any data it's address resets the UART.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;; SCRATCH PAD RAM ADDRESSES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE0
+  OP1 VALUE-NOTE0
+   OPERAND2-20
+  OP2 VALUE-20
+    COMMENT-; save the note number for lookup later (to manage note off messages)
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE1
+  OP1 VALUE-NOTE1
+   OPERAND2-21
+  OP2 VALUE-21
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE2
+  OP1 VALUE-NOTE2
+   OPERAND2-22
+  OP2 VALUE-22
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE3
+  OP1 VALUE-NOTE3
+   OPERAND2-23
+  OP2 VALUE-23
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE4
+  OP1 VALUE-NOTE4
+   OPERAND2-24
+  OP2 VALUE-24
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE5
+  OP1 VALUE-NOTE5
+   OPERAND2-25
+  OP2 VALUE-25
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE6
+  OP1 VALUE-NOTE6
+   OPERAND2-26
+  OP2 VALUE-26
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE7
+  OP1 VALUE-NOTE7
+   OPERAND2-27
+  OP2 VALUE-27
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-GATES
+  OP1 VALUE-GATES
+   OPERAND2-30
+  OP2 VALUE-30
+    COMMENT-; spRAM storage for maintaining the gates
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ROUNDROBIN
+  OP1 VALUE-ROUNDROBIN
+   OPERAND2-31
+  OP2 VALUE-31
+    COMMENT-; used for selecting a "random" string when all are currently busy
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUS
+  OP1 VALUE-SUS
+   OPERAND2-32
+  OP2 VALUE-32
+    COMMENT-; used to save sustain pedal state.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIinputBYTE
+  OP1 VALUE-MIDIinputBYTE
+   OPERAND2-3E
+  OP2 VALUE-3E
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYinputBYTE
+  OP1 VALUE-TTYinputBYTE
+   OPERAND2-3F
+  OP2 VALUE-3F
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; System Exclusive Message structure:
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; MFR ID
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; MODEL NUMBER
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; UNIT NUMBER
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; PARAMETER ADDRESS MSB
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; PARAMETER ADDRESS LSB
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; PARAMETER DATA
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SYSEX_MSB_PORT
+  OP1 VALUE-SYSEX_MSB_PORT
+   OPERAND2-E0
+  OP2 VALUE-E0
+    COMMENT-; most significant 7 bits of the sysex address space
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; ports 00 through 7F are for sysex updatable registers
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Name and reserve registers.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s0
+  OP1 VALUE-s0
+   OPERAND2-MIDIbyte
+  OP2 VALUE-MIDIbyte
+    COMMENT-; latest received MIDI byte
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s1
+  OP1 VALUE-s1
+   OPERAND2-RUNNINGstatus
+  OP2 VALUE-RUNNINGstatus
+    COMMENT-; holds the current MIDI running status value
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s2
+  OP1 VALUE-s2
+   OPERAND2-MessageTYPE
+  OP2 VALUE-MessageTYPE
+    COMMENT-; Message type, i.e., high nybble
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s3
+  OP1 VALUE-s3
+   OPERAND2-MessageCHANNEL
+  OP2 VALUE-MessageCHANNEL
+    COMMENT-; Message channel, i.e., low nybble
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; DATAbyteCOUNT is the counter that controls what happens to MIDI data bytes.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; DATAbyteCOUNTrunstat holds the data byte count value to load into DATAbyteCOUNT to refresh
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; it when a message comes in assuming valid running status.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s4
+  OP1 VALUE-s4
+   OPERAND2-DATAbyteCOUNT
+  OP2 VALUE-DATAbyteCOUNT
+    COMMENT-; how many more bytes to satisfy the current message
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s5
+  OP1 VALUE-s5
+   OPERAND2-DATAbyteCOUNTrunstat
+  OP2 VALUE-DATAbyteCOUNTrunstat
+    COMMENT-; holds replenishment value for DATAbyteCOUNT for running status
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s6
+  OP1 VALUE-s6
+   OPERAND2-DATAbyte1
+  OP2 VALUE-DATAbyte1
+    COMMENT-; for current message storage of data byte 1
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s7
+  OP1 VALUE-s7
+   OPERAND2-DATAbyte2
+  OP2 VALUE-DATAbyte2
+    COMMENT-; for current message storage of data byte 2
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;       1 means a complete MIDI message is ready to process
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; The code which processes this message will reset MESSAGE_COMPLETE to zero
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; s8  IS UNUSED
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s9
+  OP1 VALUE-s9
+   OPERAND2-COMMANDbyte
+  OP2 VALUE-COMMANDbyte
+    COMMENT-; command byte, contains command nybble and channel nybble of current message
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sA
+  OP1 VALUE-sA
+   OPERAND2-FLAGS
+  OP2 VALUE-FLAGS
+    COMMENT-; FLAGS register contains single bit flags
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sB
+  OP1 VALUE-sB
+   OPERAND2-SYSEX
+  OP2 VALUE-SYSEX
+    COMMENT-; sysex state machine state register
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sC
+  OP1 VALUE-sC
+   OPERAND2-UARTbyte
+  OP2 VALUE-UARTbyte
+    COMMENT-; incoming UART data byte, used by ISR
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; sD    used for destination pointer, considered temporary data storage
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; sE    used for a source pointer, considered temporary data storage.  sysex mode stores addr (port) here.
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sF
+  OP1 VALUE-sF
+   OPERAND2-TEMP
+  OP2 VALUE-TEMP
+    COMMENT-; local loop or routine temp storage
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;; CODE STARTS HERE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-ADDRESS
+   OPERAND1-000
+  OP1 VALUE-000
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-000
+      LABEL-cold_start
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; initialize storage
+    ADDRESS-000
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-resetport
+  OP2 VALUE-FF
+    COMMENT-; Causes reset by addressing port 80-FF.  content doesn't matter.
+    ADDRESS-001
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-002
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-003
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-RUNNINGstatus
+  OP1 VALUE-s1
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-004
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+  OP1 VALUE-s4
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-005
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNTrunstat
+  OP1 VALUE-s5
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-006
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-007
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-008
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-009
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-00A
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-GATE_PORT
+  OP2 VALUE-13
+    COMMENT-; force GATEs off
+    ADDRESS-00B
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL0_PORT
+  OP2 VALUE-00
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-00C
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL1_PORT
+  OP2 VALUE-01
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-00D
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL2_PORT
+  OP2 VALUE-02
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-00E
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL3_PORT
+  OP2 VALUE-03
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-00F
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL4_PORT
+  OP2 VALUE-04
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-010
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL5_PORT
+  OP2 VALUE-05
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-011
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL6_PORT
+  OP2 VALUE-06
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-012
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VEL7_PORT
+  OP2 VALUE-07
+    COMMENT-; force VELOCITY to zero
+    ADDRESS-013
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-PITCH_WHEEL_LSB_PORT
+  OP2 VALUE-F2
+    COMMENT-
+    ADDRESS-014
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-VOICE_SELECT_PORT
+  OP2 VALUE-F6
+    COMMENT-; for monosynth, set this to zero always.
+    ADDRESS-015
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; ensure both gates are off at startup.
+    ADDRESS-016
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-ROUNDROBIN
+  OP2 VALUE-31
+    COMMENT-
+    ADDRESS-017
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-SUS
+  OP2 VALUE-32
+    COMMENT-
+    ADDRESS-018
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-
+    ADDRESS-019
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-PITCH_WHEEL_MSB_PORT
+  OP2 VALUE-F1
+    COMMENT-
+    ADDRESS-01A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-FF
+  OP2 VALUE-FF
+    COMMENT-; set no-keys-down flag
+    ADDRESS-01B
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; store in RAM location 00
+    ADDRESS-01C
+      LABEL-
+INSTRUCTION-ENABLE
+   OPERAND1-INTERRUPT
+  OP1 VALUE-INTERRUPT
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Wait for and process MIDI Bytes.
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This is the main dispatch loop that monitors the ISR's MIDIbyteVALID flag register and MESSAGE_COMPLETE flag.
+    ADDRESS-01D
+      LABEL-idle
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-01D
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-MODWHEELSTATE
+  OP2 VALUE-05
+    COMMENT-
+    ADDRESS-01E
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MESSAGEcomplete_bit
+  OP2 VALUE-04
+    COMMENT-
+    ADDRESS-01F
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-ProcessMessage
+  OP2 VALUE-077
+    COMMENT-
+    ADDRESS-020
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MIDIbyteAVAILABLE_bit
+  OP2 VALUE-01
+    COMMENT-; see if isr set the byte available flag
+    ADDRESS-021
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-GetMIDIbyte
+  OP2 VALUE-027
+    COMMENT-
+    ADDRESS-022
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-TTYbyteAVAILABLE_bit
+  OP2 VALUE-02
+    COMMENT-
+    ADDRESS-023
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-
+    ADDRESS-024
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;GetTTYbyte:
+    ADDRESS-024
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-TTYinputBYTE
+  OP2 VALUE-3F
+    COMMENT-
+    ADDRESS-025
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-TTYbyteAVAILABLE_clr
+  OP2 VALUE-FD
+    COMMENT-; clear the MIDI byte available bit
+    ADDRESS-026
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Procbyte
+  OP1 VALUE-029
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-027
+      LABEL-GetMIDIbyte
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-027
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-MIDIinputBYTE
+  OP2 VALUE-3E
+    COMMENT-
+    ADDRESS-028
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MIDIbyteAVAILABLE_clr
+  OP2 VALUE-FE
+    COMMENT-; clear the MIDI byte available bit
+    ADDRESS-029
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-029
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-029
+      LABEL-Procbyte
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-029
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; there is a byte to process
+    ADDRESS-029
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; First test for active sensing byte - nothing but problems, so get rid of it now.
+    ADDRESS-029
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-FE
+  OP2 VALUE-FE
+    COMMENT-
+    ADDRESS-02A
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-
+    ADDRESS-02B
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-; is high bit set?
+    ADDRESS-02C
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-MIDI_STATUS_BYTE
+  OP2 VALUE-05E
+    COMMENT-
+    ADDRESS-02D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; We have a data byte because bit 7 is zero.
+    ADDRESS-02D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; check if we're in sysex mode:
+    ADDRESS-02D
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-02E
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PerformanceData
+  OP2 VALUE-056
+    COMMENT-
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Deal with sysex message
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Sysexe is handled with a state machine.  Register SYSEX holds the current state.
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Setting the state to 7F causes the state machine to ignore the rest of any sysex message
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; and wait for a F7 byte.
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-02F
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-030
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-CheckID
+  OP2 VALUE-03D
+    COMMENT-; check mfr ID
+    ADDRESS-031
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-
+    ADDRESS-032
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ModelNumber
+  OP2 VALUE-042
+    COMMENT-; check model number
+    ADDRESS-033
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-03
+  OP2 VALUE-03
+    COMMENT-
+    ADDRESS-034
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-UnitNumber
+  OP2 VALUE-047
+    COMMENT-; check unit number
+    ADDRESS-035
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-
+    ADDRESS-036
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ParameterAddrMSB
+  OP2 VALUE-04C
+    COMMENT-; set parameter address
+    ADDRESS-037
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-05
+  OP2 VALUE-05
+    COMMENT-
+    ADDRESS-038
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ParameterAddrLSB
+  OP2 VALUE-050
+    COMMENT-
+    ADDRESS-039
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-06
+  OP2 VALUE-06
+    COMMENT-
+    ADDRESS-03A
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ParameterData
+  OP2 VALUE-053
+    COMMENT-; set parameter data
+    ADDRESS-03B
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-
+    ADDRESS-03C
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  JUMP Z, idle                              ; we just jump to idle to simply wait for F7 to turn off sysex mode
+    ADDRESS-03C
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; above instruction removed because we go idle regardless
+    ADDRESS-03C
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-03D
+      LABEL-CheckID
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-03D
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; move to next state, check UnitNumber
+    ADDRESS-03E
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-MFR_ID
+  OP2 VALUE-7F
+    COMMENT-; this device's mfr ID
+    ADDRESS-03F
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-; if this is ours, go to idle and wait
+    ADDRESS-040
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; not our message, bypass rest of message.
+    ADDRESS-041
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-042
+      LABEL-ModelNumber
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-042
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-03
+  OP2 VALUE-03
+    COMMENT-
+    ADDRESS-043
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-MODEL_NUMBER
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-044
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-; if this is ours, go to idle and wait
+    ADDRESS-045
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; not our message, bypass rest of message.
+    ADDRESS-046
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-047
+      LABEL-UnitNumber
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-047
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; set for parameter addr MSB mode
+    ADDRESS-048
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-UNIT_NUMBER
+  OP2 VALUE-00
+    COMMENT-; compare message type byte, 00=parameter
+    ADDRESS-049
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-
+    ADDRESS-04A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; not our message, bypass rest of message.
+    ADDRESS-04B
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-04C
+      LABEL-ParameterAddrMSB
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-04C
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-05
+  OP2 VALUE-05
+    COMMENT-; set for parameter addr LSB mode
+    ADDRESS-04D
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-; get the MSB byte
+    ADDRESS-04E
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-SYSEX_MSB_PORT
+  OP2 VALUE-E0
+    COMMENT-; store the byte in the external parameter selection hardware
+    ADDRESS-04F
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-050
+      LABEL-ParameterAddrLSB
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-050
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-06
+  OP2 VALUE-06
+    COMMENT-; set for parameter data mode
+    ADDRESS-051
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-; save the address byte in sE  NOTE: sE is temporary storage elsewhere, but should be safe here
+    ADDRESS-052
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-053
+      LABEL-ParameterData
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-053
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; set to wait for F7
+    ADDRESS-054
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-(sE)
+  OP2 VALUE-(sE)
+    COMMENT-; send data byte to port number in sE (the address byte).
+    ADDRESS-055
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-056
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-056
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-056
+      LABEL-PerformanceData
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-056
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyteCOUNT
+  OP1 VALUE-s4
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; decrement...
+    ADDRESS-057
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-byte2
+  OP2 VALUE-05A
+    COMMENT-; if equal to 0 now, it was 1, so this is byte2
+    ADDRESS-058
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-; save this byte as data byte 1
+    ADDRESS-059
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-05A
+      LABEL-byte2
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; in all cases, this is the last data byte.  Save it and set MESSAGE_COMPLETE
+    ADDRESS-05A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-; save this byte as data byte 2
+    ADDRESS-05B
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MESSAGEcomplete_set
+  OP2 VALUE-04
+    COMMENT-; set message complete bit
+    ADDRESS-05C
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+  OP1 VALUE-s4
+   OPERAND2-DATAbyteCOUNTrunstat
+  OP2 VALUE-s5
+    COMMENT-; set the count again, next message could be running status data.
+    ADDRESS-05D
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-05E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-05E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This is a status or command byte.
+    ADDRESS-05E
+      LABEL-MIDI_STATUS_BYTE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; high bit is set, now determine what sort of message this is
+    ADDRESS-05E
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-
+    ADDRESS-05F
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageCHANNEL
+  OP1 VALUE-s3
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-
+    ADDRESS-060
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-F0
+  OP2 VALUE-F0
+    COMMENT-; MessageTYPE now contains only upper nybble of MIDI command/status byte.
+    ADDRESS-061
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageCHANNEL
+  OP1 VALUE-s3
+   OPERAND2-0F
+  OP2 VALUE-0F
+    COMMENT-; MessageCHANNEL contains only the channel nybble
+    ADDRESS-062
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_System
+  OP2 VALUE-F0
+    COMMENT-; If high nybble == F, then this is a special message
+    ADDRESS-063
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-NotFx
+  OP2 VALUE-06C
+    COMMENT-
+    ADDRESS-064
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; We are here because this byte if Fx
+    ADDRESS-064
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; decode and act on other Fx messages here.  For now, it's just a jump to idle
+    ADDRESS-064
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-F7
+  OP2 VALUE-F7
+    COMMENT-; end of sysex message
+    ADDRESS-065
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-NotF7
+  OP2 VALUE-068
+    COMMENT-
+    ADDRESS-066
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; sysex off.
+    ADDRESS-067
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-068
+      LABEL-NotF7
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-068
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+  OP1 VALUE-s0
+   OPERAND2-F0
+  OP2 VALUE-F0
+    COMMENT-; F0 ?  (start of sysex message)
+    ADDRESS-069
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-
+    ADDRESS-06A
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; We have an F0
+    ADDRESS-06A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; set sysex state flag to check mfr ID
+    ADDRESS-06B
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-06C
+      LABEL-NotFx
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-06C
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+  OP1 VALUE-sB
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; sysex always goes off on any status byte.
+    ADDRESS-06D
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-COMMANDbyte
+  OP1 VALUE-s9
+   OPERAND2-MIDIbyte
+  OP2 VALUE-s0
+    COMMENT-; remember this message's command byte.
+    ADDRESS-06E
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_ProgramChange
+  OP2 VALUE-C0
+    COMMENT-; is this PROGRAM CHANGE ?
+    ADDRESS-06F
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ONE_DATA_BYTE
+  OP2 VALUE-074
+    COMMENT-
+    ADDRESS-070
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_ChannelPressure
+  OP2 VALUE-D0
+    COMMENT-; is this CHANNEL PRESSURE ?
+    ADDRESS-071
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-ONE_DATA_BYTE
+  OP2 VALUE-074
+    COMMENT-
+    ADDRESS-072
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+  OP1 VALUE-s4
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; If not channel pressure or program change, then 2 bytes of data
+    ADDRESS-073
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SetCount
+  OP1 VALUE-075
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-074
+      LABEL-ONE_DATA_BYTE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-074
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+  OP1 VALUE-s4
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-075
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; set count source for replenishing DATAbyteCOUNT when no status byte is sent (running status)
+    ADDRESS-075
+      LABEL-SetCount
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-075
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNTrunstat
+  OP1 VALUE-s5
+   OPERAND2-DATAbyteCOUNT
+  OP2 VALUE-s4
+    COMMENT-
+    ADDRESS-076
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; A complete message is ready to process...
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Message type determines the number of data bytes.
+    ADDRESS-077
+      LABEL-ProcessMessage
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-077
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MESSAGEcomplete_clr
+  OP2 VALUE-FB
+    COMMENT-; clear the message complete flag
+    ADDRESS-078
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; See if this is our message.  If not, go idle, if yes, do the message.
+    ADDRESS-078
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-COMMANDbyte
+  OP2 VALUE-s9
+    COMMENT-; get the current command byte into TEMP
+    ADDRESS-079
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-0F
+  OP2 VALUE-0F
+    COMMENT-; isolate only the channel.
+    ADDRESS-07A
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-SWITCH_PORT
+  OP2 VALUE-02
+    COMMENT-; get current MIDI channel number for this hardware
+    ADDRESS-07B
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-TEMP
+  OP2 VALUE-sF
+    COMMENT-; compare MIDI channel setting with current running status channel number
+    ADDRESS-07C
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-; JUMP to idle if not our channel number.
+    ADDRESS-07D
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-RUNNINGstatus
+  OP1 VALUE-s1
+   OPERAND2-COMMANDbyte
+  OP2 VALUE-s9
+    COMMENT-; this is a message on my channel so set running status.
+    ADDRESS-07E
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-RUNNINGstatus
+  OP2 VALUE-s1
+    COMMENT-
+    ADDRESS-07F
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-F0
+  OP2 VALUE-F0
+    COMMENT-; get message type nybble
+    ADDRESS-080
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This is where we act on complete messages.
+    ADDRESS-080
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; JUMP table of vectors to different message type needs.
+    ADDRESS-080
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_NoteOff
+  OP2 VALUE-80
+    COMMENT-
+    ADDRESS-081
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-NOTE_OFF
+  OP2 VALUE-08F
+    COMMENT-
+    ADDRESS-082
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_NoteOn
+  OP2 VALUE-90
+    COMMENT-
+    ADDRESS-083
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-NOTE_ON
+  OP2 VALUE-08F
+    COMMENT-
+    ADDRESS-084
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_PolyKeyPressure
+  OP2 VALUE-A0
+    COMMENT-
+    ADDRESS-085
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-POLY_KEY_PRESSURE
+  OP2 VALUE-14D
+    COMMENT-
+    ADDRESS-086
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_ControllerChange
+  OP2 VALUE-B0
+    COMMENT-
+    ADDRESS-087
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-CONTROLLER_CHANGE
+  OP2 VALUE-131
+    COMMENT-
+    ADDRESS-088
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_ProgramChange
+  OP2 VALUE-C0
+    COMMENT-
+    ADDRESS-089
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PROGRAM_CHANGE
+  OP2 VALUE-14D
+    COMMENT-
+    ADDRESS-08A
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_ChannelPressure
+  OP2 VALUE-D0
+    COMMENT-
+    ADDRESS-08B
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-CHANNEL_PRESSURE
+  OP2 VALUE-148
+    COMMENT-
+    ADDRESS-08C
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+  OP1 VALUE-s2
+   OPERAND2-K_PitchBend
+  OP2 VALUE-E0
+    COMMENT-
+    ADDRESS-08D
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PITCH_BEND
+  OP2 VALUE-14A
+    COMMENT-
+    ADDRESS-08E
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; anything else, toss.
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; This section will:
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; toggle the gate signal if it's on.
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; turn gate on if it's off.
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;
+    ADDRESS-08F
+      LABEL-NOTE_ON
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-08F
+      LABEL-NOTE_OFF
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;SET_SYNTH:
+    ADDRESS-08F
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-s8
+  OP1 VALUE-s8
+   OPERAND2-TRANSPOSE
+  OP2 VALUE-03
+    COMMENT-; sample the value of TRANSPOSE port
+    ADDRESS-090
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; is velocity zero?
+    ADDRESS-091
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK
+  OP2 VALUE-0CE
+    COMMENT-; If not, we pluck a string
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+    ADDRESS-092
+      LABEL-RELEASE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; "Release" refers to when the synth key is released.
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; Determine to which string the note-off message belongs.
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; The current note numbers are stored in scratch pad RAM
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; NOTE0 - NOTE7 and velocity values of VEL0 - VEL7
+    ADDRESS-092
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; get current gates state
+    ADDRESS-093
+      LABEL-TRYREL01
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-093
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; is bit 0 on?
+    ADDRESS-094
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL02
+  OP2 VALUE-098
+    COMMENT-
+    ADDRESS-095
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE0
+  OP2 VALUE-20
+    COMMENT-
+    ADDRESS-096
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-097
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL0
+  OP2 VALUE-0BC
+    COMMENT-
+    ADDRESS-098
+      LABEL-TRYREL02
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-098
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; is bit 1 on?
+    ADDRESS-099
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL04
+  OP2 VALUE-09D
+    COMMENT-
+    ADDRESS-09A
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE1
+  OP2 VALUE-21
+    COMMENT-
+    ADDRESS-09B
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-09C
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL1
+  OP2 VALUE-0BE
+    COMMENT-
+    ADDRESS-09D
+      LABEL-TRYREL04
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-09D
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; is bit 2 on?
+    ADDRESS-09E
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL08
+  OP2 VALUE-0A2
+    COMMENT-
+    ADDRESS-09F
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE2
+  OP2 VALUE-22
+    COMMENT-
+    ADDRESS-0A0
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0A1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL2
+  OP2 VALUE-0C0
+    COMMENT-
+    ADDRESS-0A2
+      LABEL-TRYREL08
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0A2
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-08
+  OP2 VALUE-08
+    COMMENT-; is bit 3 on?
+    ADDRESS-0A3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL10
+  OP2 VALUE-0A7
+    COMMENT-
+    ADDRESS-0A4
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE3
+  OP2 VALUE-23
+    COMMENT-
+    ADDRESS-0A5
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0A6
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL3
+  OP2 VALUE-0C2
+    COMMENT-
+    ADDRESS-0A7
+      LABEL-TRYREL10
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0A7
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-10
+  OP2 VALUE-10
+    COMMENT-; is bit 4 on?
+    ADDRESS-0A8
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL20
+  OP2 VALUE-0AC
+    COMMENT-
+    ADDRESS-0A9
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE4
+  OP2 VALUE-24
+    COMMENT-
+    ADDRESS-0AA
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0AB
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL4
+  OP2 VALUE-0C4
+    COMMENT-
+    ADDRESS-0AC
+      LABEL-TRYREL20
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0AC
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-20
+  OP2 VALUE-20
+    COMMENT-; is bit 5 on?
+    ADDRESS-0AD
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL40
+  OP2 VALUE-0B1
+    COMMENT-
+    ADDRESS-0AE
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE5
+  OP2 VALUE-25
+    COMMENT-
+    ADDRESS-0AF
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0B0
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL5
+  OP2 VALUE-0C6
+    COMMENT-
+    ADDRESS-0B1
+      LABEL-TRYREL40
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0B1
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-; is bit 6 on?
+    ADDRESS-0B2
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-TRYREL80
+  OP2 VALUE-0B6
+    COMMENT-
+    ADDRESS-0B3
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE6
+  OP2 VALUE-26
+    COMMENT-
+    ADDRESS-0B4
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0B5
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL6
+  OP2 VALUE-0C8
+    COMMENT-
+    ADDRESS-0B6
+      LABEL-TRYREL80
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0B6
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-; is bit 7 on?
+    ADDRESS-0B7
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-NONEBUSY
+  OP2 VALUE-0BB
+    COMMENT-
+    ADDRESS-0B8
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-NOTE7
+  OP2 VALUE-27
+    COMMENT-
+    ADDRESS-0B9
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-DATAbyte1
+  OP2 VALUE-s6
+    COMMENT-
+    ADDRESS-0BA
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-REL7
+  OP2 VALUE-0CA
+    COMMENT-
+    ADDRESS-0BB
+      LABEL-NONEBUSY
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0BB
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; If we are here, we didn't find the current note number in the strings note number table
+    ADDRESS-0BB
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; What else can I do?
+    ADDRESS-0BC
+      LABEL-REL0
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0BC
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-FE
+  OP2 VALUE-FE
+    COMMENT-; sE has new GATES value
+    ADDRESS-0BD
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0BE
+      LABEL-REL1
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0BE
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-FD
+  OP2 VALUE-FD
+    COMMENT-; sE has new GATES value
+    ADDRESS-0BF
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C0
+      LABEL-REL2
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C0
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-FB
+  OP2 VALUE-FB
+    COMMENT-; sE has new GATES value
+    ADDRESS-0C1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C2
+      LABEL-REL3
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C2
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-F7
+  OP2 VALUE-F7
+    COMMENT-; sE has new GATES value
+    ADDRESS-0C3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C4
+      LABEL-REL4
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C4
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-EF
+  OP2 VALUE-EF
+    COMMENT-; sE has new GATES value
+    ADDRESS-0C5
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C6
+      LABEL-REL5
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C6
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-DF
+  OP2 VALUE-DF
+    COMMENT-; sE has new GATES value
+    ADDRESS-0C7
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C8
+      LABEL-REL6
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0C8
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-BF
+  OP2 VALUE-BF
+    COMMENT-; sE has new GATES value
+    ADDRESS-0C9
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+  OP1 VALUE-0CB
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0CA
+      LABEL-REL7
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0CA
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-7F
+  OP2 VALUE-7F
+    COMMENT-; sE has new GATES value
+    ADDRESS-0CB
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  JUMP relsave  ; not necessary
+    ADDRESS-0CB
+      LABEL-relsave
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; save the new GATES state upon release
+    ADDRESS-0CB
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; update SP RAM
+    ADDRESS-0CC
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-GATE_PORT
+  OP2 VALUE-13
+    COMMENT-; update synth hardware
+    ADDRESS-0CD
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; finished processing the note-off
+    ADDRESS-0CE
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+    ADDRESS-0CE
+      LABEL-PLUCK
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0CE
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; determine which string to use
+    ADDRESS-0CE
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-SUS
+  OP2 VALUE-32
+    COMMENT-; Check sustain pedal state
+    ADDRESS-0CF
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-; note: FETCH instruction does not change flags
+    ADDRESS-0D0
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PEDALUP
+  OP2 VALUE-0D3
+    COMMENT-
+    ADDRESS-0D1
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; The pedal is held down.  So first try to use an inactive voice before stealing
+    ADDRESS-0D1
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-ACTIVE
+  OP2 VALUE-06
+    COMMENT-; get vibrational state of all strings
+    ADDRESS-0D2
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-STRINGTEST
+  OP1 VALUE-0D4
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0D3
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; First look for an unused voice by checking for unbusy voices.
+    ADDRESS-0D3
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This needs to take into account that some keys can be held down
+    ADDRESS-0D3
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; and should not be stolen if there are any unbusy voices.
+    ADDRESS-0D3
+      LABEL-PEDALUP
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0D3
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; first get the state of the gates.
+    ADDRESS-0D4
+      LABEL-STRINGTEST
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0D4
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0D5
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK0
+  OP2 VALUE-0FA
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0D6
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0D7
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK1
+  OP2 VALUE-100
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0D8
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0D9
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK2
+  OP2 VALUE-106
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0DA
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-08
+  OP2 VALUE-08
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0DB
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK3
+  OP2 VALUE-10C
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0DC
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-10
+  OP2 VALUE-10
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0DD
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK4
+  OP2 VALUE-112
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0DE
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-20
+  OP2 VALUE-20
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0DF
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK5
+  OP2 VALUE-118
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0E0
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0E1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK6
+  OP2 VALUE-11E
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0E2
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-; check if this voice is a held key
+    ADDRESS-0E3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-PLUCK7
+  OP2 VALUE-124
+    COMMENT-; voice is idle, pluck it.
+    ADDRESS-0E4
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; If we fall through to here, all voices are busy.
+    ADDRESS-0E4
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; assign with round robin when all voices are busy
+    ADDRESS-0E4
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This algorithm will steal a voice that is already busy
+    ADDRESS-0E4
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-ROUNDROBIN
+  OP2 VALUE-31
+    COMMENT-
+    ADDRESS-0E5
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-RR1
+  OP2 VALUE-0F8
+    COMMENT-; if zero, go load a 01
+    ADDRESS-0E6
+      LABEL-
+INSTRUCTION-SL0
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; shift left for next cycle
+    ADDRESS-0E7
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-ROUNDROBIN
+  OP2 VALUE-31
+    COMMENT-; store for next cycle - hence "round robin"
+    ADDRESS-0E8
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; sE contains string to be plucked, check each
+    ADDRESS-0E9
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK0
+  OP2 VALUE-0FA
+    COMMENT-; string bit for 1 and vector to the pluck code for it.
+    ADDRESS-0EA
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-
+    ADDRESS-0EB
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK1
+  OP2 VALUE-100
+    COMMENT-
+    ADDRESS-0EC
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-
+    ADDRESS-0ED
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK2
+  OP2 VALUE-106
+    COMMENT-
+    ADDRESS-0EE
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-08
+  OP2 VALUE-08
+    COMMENT-
+    ADDRESS-0EF
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK3
+  OP2 VALUE-10C
+    COMMENT-
+    ADDRESS-0F0
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-10
+  OP2 VALUE-10
+    COMMENT-
+    ADDRESS-0F1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK4
+  OP2 VALUE-112
+    COMMENT-
+    ADDRESS-0F2
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-20
+  OP2 VALUE-20
+    COMMENT-
+    ADDRESS-0F3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK5
+  OP2 VALUE-118
+    COMMENT-
+    ADDRESS-0F4
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-
+    ADDRESS-0F5
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK6
+  OP2 VALUE-11E
+    COMMENT-
+    ADDRESS-0F6
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-
+    ADDRESS-0F7
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-PLUCK7
+  OP2 VALUE-124
+    COMMENT-
+    ADDRESS-0F8
+      LABEL-RR1
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0F8
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; load a one
+    ADDRESS-0F9
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-ROUNDROBIN
+  OP2 VALUE-31
+    COMMENT-;   into ROUNDROBIN.
+    ADDRESS-0FA
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  JUMP PLUCK0   ; jump not necessary, fall through                ; use string 0
+    ADDRESS-0FA
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; send note data to string we will pluck
+    ADDRESS-0FA
+      LABEL-PLUCK0
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-0FA
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE0
+  OP2 VALUE-20
+    COMMENT-; save note value in SP RAM
+    ADDRESS-0FB
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-0FC
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE0_PORT
+  OP2 VALUE-08
+    COMMENT-
+    ADDRESS-0FD
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL0_PORT
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-0FE
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-01
+  OP2 VALUE-01
+    COMMENT-; set gate flag bit 0, use string 0
+    ADDRESS-0FF
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-100
+      LABEL-PLUCK1
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-100
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE1
+  OP2 VALUE-21
+    COMMENT-
+    ADDRESS-101
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-102
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE1_PORT
+  OP2 VALUE-09
+    COMMENT-; update string 1 note value
+    ADDRESS-103
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL1_PORT
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-104
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-02
+  OP2 VALUE-02
+    COMMENT-; set gate flag bit 2, use string 1
+    ADDRESS-105
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-106
+      LABEL-PLUCK2
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-106
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE2
+  OP2 VALUE-22
+    COMMENT-
+    ADDRESS-107
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-108
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE2_PORT
+  OP2 VALUE-0A
+    COMMENT-; update string 2 note value
+    ADDRESS-109
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL2_PORT
+  OP2 VALUE-02
+    COMMENT-
+    ADDRESS-10A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-04
+  OP2 VALUE-04
+    COMMENT-; set gate flag bit 4, use string 2
+    ADDRESS-10B
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-10C
+      LABEL-PLUCK3
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-10C
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE3
+  OP2 VALUE-23
+    COMMENT-
+    ADDRESS-10D
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-10E
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE3_PORT
+  OP2 VALUE-0B
+    COMMENT-; update string 3 note value
+    ADDRESS-10F
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL3_PORT
+  OP2 VALUE-03
+    COMMENT-
+    ADDRESS-110
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-08
+  OP2 VALUE-08
+    COMMENT-; set gate flag bit 8, use string 3
+    ADDRESS-111
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-112
+      LABEL-PLUCK4
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-112
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE4
+  OP2 VALUE-24
+    COMMENT-
+    ADDRESS-113
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-114
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE4_PORT
+  OP2 VALUE-0C
+    COMMENT-; update string 4 note value
+    ADDRESS-115
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL4_PORT
+  OP2 VALUE-04
+    COMMENT-
+    ADDRESS-116
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-10
+  OP2 VALUE-10
+    COMMENT-; set gate flag bit 10, use string 3
+    ADDRESS-117
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-118
+      LABEL-PLUCK5
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-118
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE5
+  OP2 VALUE-25
+    COMMENT-
+    ADDRESS-119
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-11A
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE5_PORT
+  OP2 VALUE-0D
+    COMMENT-; update string 5 note value
+    ADDRESS-11B
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL5_PORT
+  OP2 VALUE-05
+    COMMENT-
+    ADDRESS-11C
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-20
+  OP2 VALUE-20
+    COMMENT-; set gate flag bit 20 use string 3
+    ADDRESS-11D
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-11E
+      LABEL-PLUCK6
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-11E
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE6
+  OP2 VALUE-26
+    COMMENT-
+    ADDRESS-11F
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-120
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE6_PORT
+  OP2 VALUE-0E
+    COMMENT-; update string 6 note value
+    ADDRESS-121
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL6_PORT
+  OP2 VALUE-06
+    COMMENT-
+    ADDRESS-122
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-40
+  OP2 VALUE-40
+    COMMENT-; set gate flag bit 40use string 3
+    ADDRESS-123
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+  OP1 VALUE-129
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; go sent the gate on signal
+    ADDRESS-124
+      LABEL-PLUCK7
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-124
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE7
+  OP2 VALUE-27
+    COMMENT-
+    ADDRESS-125
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-s8
+  OP2 VALUE-s8
+    COMMENT-
+    ADDRESS-126
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-NOTE7_PORT
+  OP2 VALUE-0F
+    COMMENT-; update string 7 note value
+    ADDRESS-127
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-VEL7_PORT
+  OP2 VALUE-07
+    COMMENT-
+    ADDRESS-128
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+  OP1 VALUE-sF
+   OPERAND2-80
+  OP2 VALUE-80
+    COMMENT-; set gate flag bit 80 use string 3
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;  JUMP SendGATE   ; fall through                            ; go sent the gate on signal
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; TEMP now contains a single bit which represents the gate to turn on.
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; First force the gate in question off, XOR the pluck bit in TEMP with GATES, then
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; send the byte to gates.  If the GATES bit was on, it will go off.  If it was off
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; it will go on.  In the second case, the second OUTPUT instruction doesn't matter
+    ADDRESS-129
+      LABEL-SendGATE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-129
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; get current gates state
+    ADDRESS-12A
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-TEMP
+  OP2 VALUE-sF
+    COMMENT-; copy the gate bit to turn on into sE for inversion
+    ADDRESS-12B
+      LABEL-
+INSTRUCTION-XOR
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-sD
+  OP2 VALUE-sD
+    COMMENT-; XOR the pluck bit in TEMP with GATES
+    ADDRESS-12C
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+  OP1 VALUE-sE
+   OPERAND2-GATE_PORT
+  OP2 VALUE-13
+    COMMENT-; update the synth
+    ADDRESS-12D
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-TEMP
+  OP2 VALUE-sF
+    COMMENT-; OR in the gate we want to turn on with the current gates status
+    ADDRESS-12E
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-GATE_PORT
+  OP2 VALUE-13
+    COMMENT-; update the gates status
+    ADDRESS-12F
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-; save new gates state
+    ADDRESS-130
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-131
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-131
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-131
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-131
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-131
+      LABEL-CONTROLLER_CHANGE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; handle mod wheel, sustain and joystick here
+    ADDRESS-131
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-MOD_WHEEL
+  OP2 VALUE-01
+    COMMENT-
+    ADDRESS-132
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-tstCCsus
+  OP2 VALUE-135
+    COMMENT-
+    ADDRESS-133
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-MOD_WHEEL_PORT
+  OP2 VALUE-11
+    COMMENT-
+    ADDRESS-134
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-135
+      LABEL-tstCCsus
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-135
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-SUSTAIN
+  OP2 VALUE-40
+    COMMENT-; is it a sustain message?
+    ADDRESS-136
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-tstCCjoyx
+  OP2 VALUE-13A
+    COMMENT-
+    ADDRESS-137
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-SUSTAIN_PORT
+  OP2 VALUE-12
+    COMMENT-; update synth
+    ADDRESS-138
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-SUS
+  OP2 VALUE-32
+    COMMENT-; save sustain state, (maybe) need it for release logic
+    ADDRESS-139
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-13A
+      LABEL-tstCCjoyx
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-13A
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-JOYSTICK_X
+  OP2 VALUE-10
+    COMMENT-
+    ADDRESS-13B
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-tstCCjoyy
+  OP2 VALUE-13E
+    COMMENT-
+    ADDRESS-13C
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-JOYSTICK_X_PORT
+  OP2 VALUE-F4
+    COMMENT-
+    ADDRESS-13D
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-13E
+      LABEL-tstCCjoyy
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-13E
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-JOYSTICK_Y
+  OP2 VALUE-11
+    COMMENT-
+    ADDRESS-13F
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-tstCCallnotesoff
+  OP2 VALUE-142
+    COMMENT-
+    ADDRESS-140
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-JOYSTICK_Y_PORT
+  OP2 VALUE-F5
+    COMMENT-
+    ADDRESS-141
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-142
+      LABEL-tstCCallnotesoff
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-142
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-ALL_NOTES_OFF
+  OP2 VALUE-7B
+    COMMENT-
+    ADDRESS-143
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+  OP1 VALUE-NZ
+   OPERAND2-idle
+  OP2 VALUE-01D
+    COMMENT-; we don't recognize this CC
+    ADDRESS-144
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-00
+  OP2 VALUE-00
+    COMMENT-
+    ADDRESS-145
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-GATES
+  OP2 VALUE-30
+    COMMENT-
+    ADDRESS-146
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sD
+  OP1 VALUE-sD
+   OPERAND2-GATE_PORT
+  OP2 VALUE-13
+    COMMENT-
+    ADDRESS-147
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-148
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-148
+      LABEL-CHANNEL_PRESSURE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; handle channel pressure here
+    ADDRESS-148
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-CHANNEL_PRESSURE_PORT
+  OP2 VALUE-F0
+    COMMENT-
+    ADDRESS-149
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-14A
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14A
+      LABEL-PITCH_BEND
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-14A
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+  OP1 VALUE-s7
+   OPERAND2-PITCH_WHEEL_MSB_PORT
+  OP2 VALUE-F1
+    COMMENT-
+    ADDRESS-14B
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+  OP1 VALUE-s6
+   OPERAND2-PITCH_WHEEL_LSB_PORT
+  OP2 VALUE-F2
+    COMMENT-; Writing to this port triggers second buffer write of ext. 16 bit register.
+    ADDRESS-14C
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-14D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; IGNORE THESE MESSAGES
+    ADDRESS-14D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; Here we just jump to the idle loop.  My keyboard can't send these, so I don't care.  Maybe you do?
+    ADDRESS-14D
+      LABEL-PROGRAM_CHANGE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This synth doesn't react to this...
+    ADDRESS-14D
+      LABEL-POLY_KEY_PRESSURE
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; This synth doesn't react to this...
+    ADDRESS-14D
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+  OP1 VALUE-01D
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; so ignore
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; SUBROUTINES
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; ISR - Handles MIDI and TTY rx data arrivals
+    ADDRESS-14E
+      LABEL-isr
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-14E
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-UARTstatusport
+  OP2 VALUE-00
+    COMMENT-; read both UARTs rx status bits
+    ADDRESS-14F
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-C0
+  OP2 VALUE-C0
+    COMMENT-; only the bits 6 and 7
+    ADDRESS-150
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-UARTbyte
+  OP2 VALUE-sC
+    COMMENT-; save status bits in FLAGS register
+    ADDRESS-151
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MIDI_UARTstatus_bit
+  OP2 VALUE-40
+    COMMENT-; is the MIDI UART status bit set? 40
+    ADDRESS-152
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-test_TTY
+  OP2 VALUE-156
+    COMMENT-; if not, go test the TTY UART status bit
+    ADDRESS-153
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-MIDIrxdataport
+  OP2 VALUE-01
+    COMMENT-; MIDI UART status bit was set, update MIDIbyte
+    ADDRESS-154
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-MIDIinputBYTE
+  OP2 VALUE-3E
+    COMMENT-
+    ADDRESS-155
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-MIDIbyteAVAILABLE_set
+  OP2 VALUE-01
+    COMMENT-; Notify idle loop that a new MIDI byte is available
+    ADDRESS-156
+      LABEL-test_TTY
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-156
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-TTY_UARTstatus_bit
+  OP2 VALUE-80
+    COMMENT-; is the TTY UART status bit set?  80
+    ADDRESS-157
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+  OP1 VALUE-Z
+   OPERAND2-isr_exit
+  OP2 VALUE-15B
+    COMMENT-; if not, we're done
+    ADDRESS-158
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-TTYrxdataport
+  OP2 VALUE-04
+    COMMENT-; TTY UART status bit was set, update MIDIbyte
+    ADDRESS-159
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-UARTbyte
+  OP1 VALUE-sC
+   OPERAND2-TTYinputBYTE
+  OP2 VALUE-3F
+    COMMENT-
+    ADDRESS-15A
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-TTYbyteAVAILABLE_set
+  OP2 VALUE-02
+    COMMENT-; Notify idle loop that a new TTY byte is available
+    ADDRESS-15B
+      LABEL-isr_exit
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-15B
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+  OP1 VALUE-sA
+   OPERAND2-3F
+  OP2 VALUE-3F
+    COMMENT-; turn off both UART rx status bits
+    ADDRESS-15C
+      LABEL-
+INSTRUCTION-RETURNI
+   OPERAND1-ENABLE
+  OP1 VALUE-ENABLE
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-; return from ISR, enable interrupts
+    ADDRESS-15D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-15D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;; Interrupt Vector
+    ADDRESS-15D
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+  OP1 VALUE-
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ADDRESS-3FF
+      LABEL-
+INSTRUCTION-ADDRESS
+   OPERAND1-3FF
+  OP1 VALUE-3FF
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-
+    ADDRESS-3FF
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-isr
+  OP1 VALUE-14E
+   OPERAND2-
+  OP2 VALUE-
+    COMMENT-

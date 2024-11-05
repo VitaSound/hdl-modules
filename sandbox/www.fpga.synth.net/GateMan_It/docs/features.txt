@@ -1,0 +1,275 @@
+Gate Man I
+
+Author: Scott Gravenhorst
+
+GateMan I
+
+    * GateMan_Is.zip - GateMan_Is.zip (GateMan I, version s) 
+
+A MIDI monosynth written in Verilog.
+
+4 NCOs, 1 NCF, 1 NCA and 2 ADSRs, one for the NCF, one for the NCA.
+
+Feature list for GateMan I - Designed by Scott Gravenhorst
+
+Fair use restictions apply. All of the source code is posted within the zip
+file. I'm not a licensing giant, but I'd like to consider this "open source".
+If you modify it and make it better, I'd appreciate it if you would post your
+version of the code. Please note that while most of the code here is original
+code, there are bits and pieces contributed by others, namely by Eric Brombaugh
+(the filter I used to implement portamento) and Jim Patchell (who's UART code is
+used here with small modifications). You will find attribution in the source
+code.
+
+GateMan I is a MIDI controlled digital monosynth implemented in an FPGA. It is 
+mostly self contained when using a Xilinx Spartan-3E Start Kit, but I'm quite 
+sure that it could be easily ported to other architectures. For a S3Esk, you 
+need make only 2 external connections with a small amount of additional 
+hardware. Those connections are a MIDI receiver and the audio output. I used a 
+6N138 opto-isolator, but you can use whatever you like, just bear in mind that 
+some optos will invert the output signal, others will not. If the signal needs 
+inversion, there is a commented line of code that when uncommented will invert 
+the signal once again and fix the inversion.
+
+The FPGA used to develop this synthesizer is a Xilinx XC3S500E. This project 
+uses about one half of it's resources. Equivalent gate count is about 195,000. 
+11 dedicated multipliers and 2 block RAMs are used.
+
+Design Paradigm Notes:
+
+First, note that this is my first FPGA project. I am not an FPGA engineer nor an
+electronics engineer. This project was part of my learning process and it is 
+presented for others to observe both the good and the bad parts of this design.
+
+That said, this project is not intended to demonstrate "best practice" in design. 
+There are many places where I chose to use a brute force method for two reasons: 
+1) the FPGA I used is far larger than this project required and 
+2) to keep things simple and visually unobfuscated.
+
+If I had to do it all over again, there are many things I would do very 
+differently, however, this project works. Some things that might be valuable to 
+an observer are the way in which portamento is implemented and the noise 
+modulation of NCO pitch.
+
+Better design practices will be included in GateMan II which is yet only a 
+concept, but will be a more advanced version of GateMan I with more NCOs, more 
+and better envelope generators, probably a better filter and modulation routing.
+
+Also note the use of instantiated multiplier primitives. This was done out of 
+frustration with the sometimes inconsistent inference of multipliers using 
+WebPACK ISE. During development, sometimes the count of MULT18X18SIO multipliers 
+was just plain wrong. I decided that while instantiating the multiplier 
+primitives is messier looking and isn't easily portable, there is no mistake 
+about how many there are. I tried to allow ISE to infer one specific multiplier 
+that multiplies a 5 bit constant by a 7 bit varying value because the inference 
+sometimes created a multiplier out of adders instead of using a MULT18X18SIO. 
+This wasn't consistent though, so I've now coded this "multiplier" with three 
+adds. Not really a big deal, there are plenty of dedicated multipliers left 
+over. But this is rather un-nice because while I'd like to infer logic/adder 
+created multiplies, I don't want ISE to go crazy allocating multiplier resources 
+that are unnecessary. Using the primitives forces me to think about the bit 
+width and get warnings about bit width when I don't get it right. ISE will infer 
+a multiplier made of several primitives simply because I didn't make bit widths 
+the right size - and it won't tell me that it did this. I'd rather just do the 
+messy instantiation and get the warnings and also be certain of what is inferred 
+and what is real.
+
+                           * * * Important * * *
+
+All synth parameters are initialized to zero at startup. Because of this, no 
+sound will be made until a patch is loaded. The patch editor PE.BAS has values 
+that initialize the synth to a basic sound.
+
+Global Features:
+
+    * Globally effective coarse and fine master tuning.
+    * Globally effective transpose (in semitones)
+    * Globally effective amplification factor useful when the filter attenuates 
+      the GateMan output heavily. Note that there is no goof proofing of this 
+      feature, it is entirely possible to set this too high and cause a binary 
+      wrapped distorted output. On any test patch, it's best to start with a 
+      value of zero an increment it as needed, it is also recommended to test 
+      this setting with the audio amplifier monitor level WAY DOWN. You have 
+      been warned. 
+
+MIDI Controller:
+
+The MIDI controller is a PicoBlaze instance which receives MIDI data and 
+controls the synth. The MIDI controller is also responsible for system exclusive
+parameter data updates. The Xilinx Spartan-3E Starter Kit has a DCE port on 
+which the MIDI controller also listens (at 19.2 kilobaud) for system exclusive 
+messages. System exclusive messages may also be sent over MIDI - but at this 
+time (04-04-2007), that feature has not yet been tested. The PicoBlaze assembly 
+code is original code.
+
+Note that the system exclusive message structure contains a manufacturer's 
+number (I've set this to 7F), a model number (zero, which applies to GateMan I) 
+and a unit number (zero). These values are all hard coded in the assembly 
+language source. The code is fairly well commented, so you should be able to 
+find and alter these values. Also, the patch editor described at the bottom of 
+this Wiki entry uses the values described here so if you change them and expect 
+to use the QBASIC patch editor, you will need to modify it as well.
+
+In the zip file, you will find a GIF file with a schematic of the MIDI receiver 
+hardware I used (employs a 6N138).
+
+Numerically Controlled Oscillators:
+
+4 NCOs - each with 4 selectable output waveforms:
+
+  sawtooth - provided directly by the phase accumulator output.
+
+  triangle - provided by logic connected to the sawtooth output.
+
+  pulse - provided by logic connected to the triangle output.
+        - modulation of width routable to mod wheel, velocity or pressure.
+
+  sine - provided by a 1/4 wave sine lookup table.
+
+    * Each NCO is level adjustable.
+    * Each NCO can be coarse offset in pitch by semitones.
+    * Each NCO can be fine tuned individually which can give very nice phasing.
+    * Each NCO supports individual portamento time.
+    * Each NCO supports pitch noise modulation with separate noise generators. 
+      The 4 noise generators are 61, 62, 63 and 64 bit LFSRs. They are clocked
+      such that each LFSR presents 18 new bits of data each for DAC sample 
+      enable.
+    * NCO pitch wheel response is set at plus or minus one octave. 
+
+NCO Hardware:
+
+The 4 NCOs are RAM based phase accumulator numerically controlled oscillators. 
+Because of the small number of NCOs and the bit width of the phase accumulators
+in this synth, distributed RAM resources were used. The phase accumulators are 
+52 bits wide for two main reasons, the DAC update rate is 1 MHz and I wanted 
+high pitch resolution for nice phasing effects when the NCOs are slightly 
+detuned.
+
+Portamento:
+
+If you play digital synths, you know that most, if not all digital synths for 
+some reason do not implement portamento. Perhaps the engineers felt that 
+musicians are so clever that they can actually play melodies using the pitch 
+wheel. I'm not one of them, so I thought that I could emulate the effect as it 
+is done in the analogue world, that is, to pass the pitch data stream through an 
+RC type filter before applying it to an NCO. A single stage IIR digital filter 
+is just such an RC emulation. This idea worked well and I used a multiplierless 
+IIR filter suggested by Eric Brombaugh. This saves two multiplier resources, but 
+the filter isn't easily tuned. Since the pitch data stream is not audio, I 
+thought that I wouldn't have to worry about aliasing, so I decided to control 
+the filter's "RC charge time" by varying the sample rate. This worked amazingly 
+well and made for a very simple human interface, you simply change one number in 
+the sysex parameter set to change the portamento time. The IIR filter hardware is 
+RAM accumulator based and is shared among the 4 NCOs, but each NCO has it's own 
+portamento time value which can produce interesting detuning effects during pitch 
+change transitions.
+
+Sine Wave Output:
+
+The sinewave selection for any NCO is provided by a very standard technique of using a 1/4 wave sine table with address logic to invert and fold the address space to create a full sinewave. The input to the sine table address logic is the triangle wave which is derived from the sawtooth waveform. The table is 18 bits wide and uses 1024 locations. Because of the address space folding, the table (10 address bits) performs like it has 11 address bits. When I did this, I thought that I would have to interpolate, but I tried it first to see how it looks on an oscope and listened for audible problems. I found no visible stair stepping and heard no audible problems using the table's output directly. Thus there is no interpolator for this table (which keeps things simpler). One of the reasons I got away with this is that the FPGA I used is big enough that I could blow resources on a large table. If the FPGA were smaller, or the synth much more complex, I would have had to use a smaller table and likely also interpolation.
+
+Tuning:
+
+GateMan I uses a 16 location lookup table 22 bits wide to process tuning information. MIDI note numbers are converted by the MCU into a basic note number 0 through 11 (thus only 12 of the 16 locations in the table are actually used) that is used to address the lookup table. Linear interpolation is controlled by both the master tuning value and the individual NCO fine tune values to provide very precise control over the 4 NCOs and a +/- one semitone fine tuning range. The table provides a phase increment value that is used by the NCO to control the sawtooth output frequency. The process used to create the basic note number (0 through 11) also provides an integer representing the octave in which the note resides. The synth hardware left shifts the phase increment value provided by the table by the value of the octave number. Together, these numbers provide a full range of pitches with simple hardware. Please see the Verilog source code for more details.
+
+Noise Modulation of Pitch:
+
+The pitch of any NCO can be modulated by noise. Each NCO has a separate noise generator LFSR (different lengths and taps, 61, 62, 63 and 64 bits). This guarantees that the noise generators do not track each other and the length of the LFSR guarantees that you will not hear a repeating pattern. The noise is passed through a simple IIR filter with 32 bandwidth settings. The value of the control byte is composed of the bandwidth value (bits 0 through 4). See sysex_map.txt for more details on these settings. Noise modulation of pitch provides a variety of sounds that range from what sounds like pure noise which seems spectrum range controlled to melodic tonal noise to what I would call a "dirty organ" sound. Quite fun to play with. When using this feature, keep in mind that lower bandwidth settings result in lower overall noise level. This can be compensated using the modulation level setting. Filter bandwidth and modulation level together provide a wide range of possible tonal qualities. When the filter bandwidth is set low and the noise modulation level is set low, with NCOs tuned to the same basic pitch, you will get a very nice random phasing effect.
+
+As already mentioned, when using low settings of bandwidth, the noise output can be low, however, I have found that for my taste there is enough amplitude to do what I need it to do as designed (my main use of this feature is to provide slight random detuning to cause random phasing effects for held notes) - however, this may not be the case for you. You are invited to modify the source code and put in a configurable amplifier much like the main level amplifier I already designed in.
+
+Pitch Wheel Implementation:
+
+The pitch wheel provides a fixed plus or minus one octave range. This is accomplished arithmetically by multiplying the NCO phase increment values by the output of the wheel interpreted by a table, linear interpolated, which maps the wheel values to values that range from 0.5 to 2.0 (fixed point decimal) such that centered, the value is 1.0, pushed all the way forward the value is 2.0 and all the way down is 0.5.
+
+Numerically Controlled Filter:
+
+GateMan I has one NCF provided after the NCO outputs are summed. It is a simple single stage numerically tunable recursive IIR filter. It includes a cubing function circuit to linearize (to a degree) the response to frequency values. Please see the Verilog source code for more filter details.
+
+Note that this filter has no resonance. It will also attentuate more heavily as the frequency value decreases. Because of this, the NCF and it's ADSR can cause both a change in both timbre and amplitude level. If the filter attenuates too much, you can use the amplifier sysex parameter to boost the signal, but be careful with this - when I set this, I always set the audio mixer level to zero and look at the signal with an oscope first. If set too high, the amplifier setting can cause really nasty wrapping distortion that will be full output. So use this with care - I suggest setting up the other parameters FIRST and then adjust the amplifier LAST. If you have amplifier set higher than zero, and then change other characteristics, you may encounter the bad loud nasty distortion - so be careful and be warned. Most of the time, amplifier can be left set to zero.
+
+Attack Decay Sustain Release Envelope Generators:
+
+ADSR for NCF
+
+    * The NCF ADSR peak value can be modulated with velocity or mod wheel.
+    * The NCF ADSR sustain level can be modulated with velocity or mod wheel. If sustain is set to zero either with a modulator or sysex parameter setting, it acts like an AR. 
+
+ADSR for NCA
+
+    * The NCA ADSR sustain level can be controlled with velocity or mod wheel. If sustain is set to zero either with a modulator or sysex parameter setting, it acts like an AR. Note that the modulation using wheel or velocity only sets a static sustain value for that note, it does not vary sustain once the note is active. 
+
+Modulation and Routing:
+
+The Verilog code contains hardware that can implement:
+
+    * Routable Velocity
+    * Routable Channel Pressure
+    * Routable Modulation Wheel
+    * Routable Joystick X Axis
+    * Routable Joystick Y Axis
+    * Routable Pitch Wheel 
+
+Not all of these are used in the current design, but modifications can be made to include them. Registers are already included that capture these values if sent to the MIDI controller. Some of these are included in the routing hardware as designed.
+
+System Exclusive Message Support:
+
+System Exclusive messages may be transmit via MIDI or via the TTY port built into the S3Esk. The TTY port can be used to support patch editors written in languages as common as QBASIC (a QBASIC patch editor is included with the source code, see PE.BAS). Through the TTY port, a complete patch can be transmit in about 1 second. Please note that the data funnel I wrote to implement this feature is not perfect and can cause notes to stick on if you try to play notes during the transmission of patch parameter data. Future versions of the MIDI controller code may alleviate this. For now, it stands as "good enough". Note that the structure of sysex messages is identical regardless of whether MIDI or TTY is used for data transmission. The TTY port receives data at 19.2 kilobaud. Because of the noted serial transmission caveats, it may not be possible to transmit performance control sysex messages with this synthesizer.
+
+S3Esk Buttons and Rotary Encoder:
+
+Master tuning is accomplished using the rotary encoder. Additionally, when holding down the west button, the tuning amount is set to coarse mode (64x) so that you can quickly get close to another instrument and then finish by releasing the button for fine tuning (1x).
+
+The east button is a master system reset, this resets the MCU to a known workable state and will stop any playing (stuck) notes. Note that when reset is pressed, the synth will output a short note and then stop. I haven't yet tracked down that cause of this, but will probably do so for GateMan II. I don't normally need to use the reset button, so this is a minor cosmetic flaw.
+
+Synth Configuration:
+
+Below is a very basic structure diagram of GateMan I, a rather traditional configuration, similar to the PAiA FatMan, but with 4 oscillators each with 4 selectable waveforms and some extra features.
+
+   +---------------[MCU]------------+-------+
+   |                                |       |
+   |                                |       |
+   |    +-------+--[NCO]----+       |       |
+   |    |       |           |       |       |
+   |    | noise-+           |       V       V
+   |    |                   |     ADSR    ADSR
+   |    +-------+--[NCO]----+       |       | 
+   |    |       |           |       |       |
+   V    | noise-+           |       V       V
+ pitch--+                 [SUM]---[NCF]---[NCA]---[DAC]---> audio out
+        | noise-+           |
+        |       |           |
+        +-------+--[NCO]----+
+        |                   |
+        | noise-+           |
+        |       |           |
+        +-------+--[NCO]----+
+
+Patch Editor:
+
+This project comes with a simple patch editor written in QBASIC. As released on 04-04-2007, it functions to adjust patch settings in GateMan I (s). Please note that this is a work in progress and as such, some things are not finished nor are they the way others may expect or want them to be. The program expects to use COM1 to send data to the Xilinx Spartan-3E Starter Kit DCE serial port. Patch data can also potentially be sent via MIDI sysexe messages, but I have not yet tested this and QBASIC won't do this. This patch editor tool can be used to discover what GateMan I can do. At this time, there is no patch save to disk function. That will come in a future release, it is not in this version because I wanted to get GateMan I finished and on the Wiki - hence these caveats and disclaimers.
+
+The patch editor is ready to use when you start it. Use the cursor keys to navigate the screen. To change a value, select the desired parameter and use + or - (without shift) to change the value by 1 (+ without shift is =). Hold the shift key down to change by 10. The 'u' key updates the synth with all of the settings shown on the screen. The patch editor allows editing of all GateMan I parameters. 'h' gives a help screen. Hit escape to exit.
+
+The patch editor is program file PE.BAS in the pe folder within the zip file.
+
+For the audio output, I used this circuit connected to DAC output A:
+
+                                10uF
+  From S3Esk DAC output A  >-----|(---+------> audio output
+                                +     |
+                                      /
+                                      \ 
+                                      / 10K
+                                      \
+                                      /
+                                      |
+                                     GND
+
+Here's an MP3 of a Mozart synth quartet - please someone email the name of this beautiful piece to "music dot maker at gee tee ee dot net" (that's me in non-spam-ese)
+
+    * GateMen_Mozart_Synth_Quartet.mp3 - GateMen Mozart Synth Quartet 
+
+This piece is played by four GateMan sythesizers.
+
+Many thanks to the FGPA-Synth list membership for their help and suggestions.

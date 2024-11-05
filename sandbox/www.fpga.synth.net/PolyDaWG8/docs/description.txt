@@ -1,0 +1,157 @@
+   
+           [ PolyDaWG/8 ver_j]
+
+A 8 voice polyphonic MIDI synthesizer based on the Karplus-Strong single delay line with 
+pickup position string model.
+
+Designed by Scott R. Gravenhorst, 24-Aug-2007
+
+----------------------------------------------------------------------------------------------
+
+Slide Switches:
+
+Switch [1:0] select MIDI channel 1 through 4
+
+Switch 2 controls the excitation pulse shape:
+  off = velocity controlled rectangular pulse
+   on = fixed width sawtooth pluck
+
+Switch 3 Controls filter contour setting
+  off = better for drums, set bandwidth low
+   on = better for strings, set bandwidth high
+
+
+LEDs display the upper 8 bits of the filter rotary encoder value which is a 
+basic indication of the filter setting (because this value is then modified
+by the note number received on each string pluck, see Verilog code).
+
+The following is a block diagram of one of the 8 digital waveguide "strings".
+
+                                                   Length gives
+excite               Length gives pitch            pickup position
+\                      \                            \
+ >--[add]-->-[CLIP]->-[variable delay line]--->---[variable delay line]->-[subtract]--> out
+      |                                     |   |                              |
+      ^           STRING LOOP               V   V         COMB FILTER          ^
+      |                                     |   |                              |
+      ---[invert]--<-----<--[Variable IIR]---   -->----->------->------>---->---
+                           \
+                           Timbre
+
+The reflection point filter (Variable IIR) is controlled using the rotary encoder.  Clockwise
+rotation increases the filter's bandwidth.  Higher bandwidth will give a more metallic
+sound with longer sustain.  Lowering the bandwidth shortens sustain.  If the bandwidth is
+low enough, you will get drum-like sounds (kind of like tonal bongos or congas).  For drum
+sounds, switch 3 should be set off so that the entire range becomes drum sounds.  For 
+plucked strings, set switch 3 on for consistent string sounds accross the instrument's range.
+
+The pickup position is controlled with the MIDI modulation wheel.  It affects the sound much
+like an electric guitar's pickup position.  Note that because of dirty RAM after moving the 
+wheel, the synth may produce a low level of noise while moving the wheel.  The noise abates 
+as soon as the wheel stops moving.  If I find a way to fix this, I will (future version).  
+For now, the mod wheel is meant as an easy way to set the pickup position without sysex.  It 
+is probably not good to use it as a performance control in this version.
+
+The sustain pedal acts like a piano's.  Undepressed, each note played is held only as long
+as the key is held down.  Depressed, each note played rings until the pedal is released.
+Note that this synth is only 6 voice polyphonic, so if sustain is held down and more than 
+6 notes are played, an older ringing string will be "stolen" to produce the newest note's
+sound.
+
+I have found that two of these instruments on the same MIDI channel with slightly different 
+filter settings sound very full and rich.  This is due to the fact that the filter provides
+a small delay which varies with bandwidth.  Thus different filter settings will change
+not only the timbre of the string, but also the pitch.
+
+The basic pitch range of the instrument is determined by the sample rate.  As it exists in
+the zip file, the system is programmed for 250 KHz.  You can change this to 125 KHz to
+lower the instrument one octave.  The range is 3.5 octaves regardless of the sample rate.
+
+------------------------------------------------------------------------------------------
+========================== CONTROLLING THE PICKUP POSITION ===============================
+------------------------------------------------------------------------------------------
+
+ver_j:
+
+Controlling the pickup position:
+
+There are two modes for controlling the pickup position, Normal and Original.
+
+The machine powers on in Normal mode.
+
+You can look at the lower right corner of the LCD to determine the mode.  N for normal,
+O for original.  A bit cheesey, I know, but it works.
+
+Normal Mode:
+  The mod wheel selects 1 of 8 keyboard follow configurations.
+
+  SETTING     CHARACTER
+     0        very treble, low moderate keyboard tracking
+     1        treble, moderate keyboard tracking
+     2        full keyboard tracking
+     3        bass, moderate keyboard tracking
+     4        bass, low moderate keyboard tracking
+     5        bass, low keyboard tracking
+     6        very bass, slight keyboard tracking
+     7        bassiest, very slight keyboard tracking
+
+     The current mode will be displayed in the LEDs while button SOUTH is depressed.
+     Otherwise, the LEDs display the rotary encoder value.
+
+Original Mode:
+  This is the first control mechanism I designed and it has it's uses.  In this mode, the
+  pickup position is not adjusted according to the note played.  Instead, the position value
+  is controlled by the modulation wheel and it's value is applied to all notes regardless
+  of the length of the string loop waveguide.
+
+-------------------------------------------------------------------------------------------
+========================================== ver_n ==========================================
+-------------------------------------------------------------------------------------------
+
+Between ver_j and ver_n there were many changes.  Please see the source code for full details.
+
+ver_m was the first to compile under ISE 9.2i.  The main feature is the use of RAMs wherever
+possible.  It contains one large RAM used for the 8 string waveguides.  This RAM is made up of 
+block RAM elements and is inferred as 16384 locations by 18 bits wide.  A single RAM is also 
+used for all of the comb filter delay lines.  The comb filter RAM is 2048 locations by 18 bits 
+wide distributed RAM and is inferred.
+
+ver_n uses a different tuning ROM with the zero element set to all ones to express the longest
+waveguide length.  The rest of the lengths are computed based on the zero element.  This system 
+does not, however, produce a "concert pitch" tuned instrument with 250KHz sample rate, but does 
+allow one additional "in tune" note (5 cent rule) over the old method.  To compensate for the 
+fact that the ROM doesn't produce a concert pitch tuned instrument with a sample rate of 250KHz, 
+the sample rate can now be changed in small increments.  I'm not sure that the resolution of this
+system is enough, but it seems usable.
+
+Other improvements include changing the design from a flat flipflop heavy design to one which
+uses RAMs to store values required be each string.  Design speed computes at about 78 MHz which
+is somewhat faster than the flat design, but not fast enough to run at 100 MHz.  The filter 
+computation time was reduced to 3 clocks from 4 which reduced the total time to compute the harp 
+from 65 to 57 clocks.
+
+A voice assigment bug was discovered in the MIDI contoller PSM code which has been fixed at
+ver_l.
+
+The ver_m release fixes a design problem that caused a transposition of one note lower.  ver_m 
+moved the system up 11 notes to fix this.  ver_m is a fixed sample rate system (250 KHz).
+
+ver_n is a tunable design with the caveat that I don't like how coarse the tuning granularity
+is.  Tuning is done by inserting a number of "no operation" clocks after the 25 50th clock
+used by the SPI DAC module.  This synth is closely but approximately tuned to concert pitch
+on power up.  Tuning is accomplished with the rotary encoder when the synth is in "Tune" mode.
+The current mode is displayed in the LCD.  Valid modes are Tune, Norm and Orig.  Norm and Orig
+refer to how the comb filter delay line length is derived.  Orig is a simple single value 
+from the mod wheel that is the same regardless of the note played.  Norm mode causes the mod
+wheel to select one of 8 computations which include the current waveguide length as part
+of the calculation.  This gives each setting a different keyboard follow character.  The effect
+is subtle, but audible.
+
+-------------------------------------------------------------------------------------------
+
+From the perspective of using only the computational resources of this FPGA (XC3S500E), this
+design is maxed out.  To get any more strings or dimensions, more RAM is required.  It would
+seem that an external RAM would accomplish this because the design is fast enough to accomodate
+more waveguides were they available.  I am trying to decide whether to add an external DAC
+to allow easier use of the on board SDRAM or to add a static RAM which will be much easier
+to interface in HDL than the SDRAM.

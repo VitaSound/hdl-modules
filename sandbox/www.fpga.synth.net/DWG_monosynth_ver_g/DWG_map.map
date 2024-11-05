@@ -1,0 +1,74 @@
+Release 9.2.02i Map J.38
+Xilinx Map Application Log File for Design 'DWG'
+
+Design Information
+------------------
+Command Line   : C:\Xilinx92i\bin\nt\map.exe -ise
+I:/Xilinx/SRG/synth/MONOSYNTH/DWG/single_DL/ver_a/ver_a.ise -intstyle ise -p
+xc3s500e-fg320-4 -cm area -pr b -k 4 -c 100 -o DWG_map.ncd DWG.ngd DWG.pcf 
+Target Device  : xc3s500e
+Target Package : fg320
+Target Speed   : -4
+Mapper Version : spartan3e -- $Revision: 1.36 $
+Mapped Date    : Wed Aug 15 12:12:08 2007
+
+Mapping design into LUTs...
+Running directed packing...
+Running delay-based LUT packing...
+Running related packing...
+
+Design Summary
+--------------
+
+Design Summary:
+Number of errors:      0
+Number of warnings:    6
+Logic Utilization:
+  Number of Slice Flip Flops:         461 out of   9,312    4%
+  Number of 4 input LUTs:             713 out of   9,312    7%
+Logic Distribution:
+  Number of occupied Slices:                          534 out of   4,656   11%
+    Number of Slices containing only related logic:     534 out of     534  100%
+    Number of Slices containing unrelated logic:          0 out of     534    0%
+      *See NOTES below for an explanation of the effects of unrelated logic
+Total Number of 4 input LUTs:            856 out of   9,312    9%
+  Number used as logic:                713
+  Number used as a route-thru:          67
+  Number used for Dual Port RAMs:       16
+    (Two LUTs used per Dual Port RAM)
+  Number used for 32x1 RAMs:            52
+    (Two LUTs used per 32x1 RAM)
+  Number used as Shift registers:        8
+  Number of bonded IOBs:               42 out of     232   18%
+    IOB Flip Flops:                    13
+  Number of Block RAMs:                3 out of      20   15%
+  Number of GCLKs:                     2 out of      24    8%
+  Number of BSCANs:                    1 out of       1  100%
+  Number of MULT18X18SIOs:              2 out of      20   10%
+
+Total equivalent gate count for design:  216,030
+Additional JTAG gate count for IOBs:  2,016
+Peak Memory Usage:  147 MB
+Total REAL time to MAP completion:  11 secs 
+Total CPU time to MAP completion:   6 secs 
+
+NOTES:
+
+   Related logic is defined as being logic that shares connectivity - e.g. two
+   LUTs are "related" if they share common inputs.  When assembling slices,
+   Map gives priority to combine logic that is related.  Doing so results in
+   the best timing performance.
+
+   Unrelated logic shares no connectivity.  Map will only begin packing
+   unrelated logic into a slice once 99% of the slices are occupied through
+   related logic packing.
+
+   Note that once logic distribution reaches the 99% level through related
+   logic packing, this does not mean the device is completely utilized.
+   Unrelated logic packing will then begin, continuing until all usable LUTs
+   and FFs are occupied.  Depending on your timing budget, increased levels of
+   unrelated logic packing may adversely affect the overall timing performance
+   of your design.
+
+Mapping completed.
+See MAP report file "DWG_map.mrp" for details.

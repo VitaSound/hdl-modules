@@ -1,0 +1,55 @@
+module tuning_ROM (addr, out_hi, out_lo);
+  input [3:0] addr;
+  output [21:0] out_hi;
+  output [21:0] out_lo;
+  wire [3:0] addr;
+  wire [21:0] out_hi;
+  wire [21:0] out_lo;
+
+  LUT4 #(.INIT(16'b0000000001101110)) LUT4tuningROMhi00 ( .O(out_hi[0]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000000010100010)) LUT4tuningROMhi01 ( .O(out_hi[1]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000101110100010)) LUT4tuningROMhi02 ( .O(out_hi[2]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100000100011)) LUT4tuningROMhi03 ( .O(out_hi[3]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000001000001110)) LUT4tuningROMhi04 ( .O(out_hi[4]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000000011110110)) LUT4tuningROMhi05 ( .O(out_hi[5]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100011000100)) LUT4tuningROMhi06 ( .O(out_hi[6]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100111010010)) LUT4tuningROMhi07 ( .O(out_hi[7]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000000100010011)) LUT4tuningROMhi08 ( .O(out_hi[8]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100011001011)) LUT4tuningROMhi09 ( .O(out_hi[9]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000010101011001)) LUT4tuningROMhi10 ( .O(out_hi[10]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000000000011000)) LUT4tuningROMhi11 ( .O(out_hi[11]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111011111110)) LUT4tuningROMhi12 ( .O(out_hi[12]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011011011011)) LUT4tuningROMhi13 ( .O(out_hi[13]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000110011001100)) LUT4tuningROMhi14 ( .O(out_hi[14]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000001001101111)) LUT4tuningROMhi15 ( .O(out_hi[15]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111000100101)) LUT4tuningROMhi16 ( .O(out_hi[16]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000010010110110)) LUT4tuningROMhi17 ( .O(out_hi[17]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011100111000)) LUT4tuningROMhi18 ( .O(out_hi[18]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011111000000)) LUT4tuningROMhi19 ( .O(out_hi[19]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011111111111)) LUT4tuningROMhi20 ( .O(out_hi[20]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100000000000)) LUT4tuningROMhi21 ( .O(out_hi[21]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+
+  LUT4 #(.INIT(16'b0000011100101101)) LUT4tuningROMlo00 ( .O(out_lo[0]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011101111100)) LUT4tuningROMlo01 ( .O(out_lo[1]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000101000111110)) LUT4tuningROMlo02 ( .O(out_lo[2]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111110001101)) LUT4tuningROMlo03 ( .O(out_lo[3]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011001111010)) LUT4tuningROMlo04 ( .O(out_lo[4]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000100000100011)) LUT4tuningROMlo05 ( .O(out_lo[5]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011110110110)) LUT4tuningROMlo06 ( .O(out_lo[6]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011100111011)) LUT4tuningROMlo07 ( .O(out_lo[7]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111100101101)) LUT4tuningROMlo08 ( .O(out_lo[8]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000001010010001)) LUT4tuningROMlo09 ( .O(out_lo[9]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000010010110100)) LUT4tuningROMlo10 ( .O(out_lo[10]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000101111001100)) LUT4tuningROMlo11 ( .O(out_lo[11]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000001000110000)) LUT4tuningROMlo12 ( .O(out_lo[12]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111110110111)) LUT4tuningROMlo13 ( .O(out_lo[13]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000101110011000)) LUT4tuningROMlo14 ( .O(out_lo[14]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000011011011111)) LUT4tuningROMlo15 ( .O(out_lo[15]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111001001010)) LUT4tuningROMlo16 ( .O(out_lo[16]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000101101101100)) LUT4tuningROMlo17 ( .O(out_lo[17]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000110001110000)) LUT4tuningROMlo18 ( .O(out_lo[18]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111110000000)) LUT4tuningROMlo19 ( .O(out_lo[19]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000111111111111)) LUT4tuningROMlo20 ( .O(out_lo[20]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+  LUT4 #(.INIT(16'b0000000000000000)) LUT4tuningROMlo21 ( .O(out_lo[21]), .I0(addr[0]), .I1(addr[1]), .I2(addr[2]), .I3(addr[3]) );
+endmodule
+

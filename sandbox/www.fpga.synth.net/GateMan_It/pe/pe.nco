@@ -1,0 +1,63 @@
+coarse tune in semitones                0 - 67
+1
+&h00,&h01,&h02,&h03
+67
+0
+0,0,0,0
+
+fine tune per NCO                -4095 - +4095
+2
+&h04,&h06,&h08,&h0A
+8191
+-4096
+4096,4096,4096,4096
+
+NCO levels                           0 - 16383
+2
+&h12,&h14,&h16,&h18
+16383
+0
+16383,16383,16383,16383
+
+noise modulation level               0 - 16383
+2
+&h36,&h38,&h3A,&h3C
+16383 
+0
+0,0,0,0
+                     
+wave form:            0=tri 1=saw 2=PWM 3=sine
+1
+&h0C,&h0D,&h0E,&h0F
+3
+0
+0,0,0,0
+
+portamento time                      0 - 16383
+2
+&h46,&h48,&h4A,&h4C
+16383
+0
+0,0,0,0
+
+PWM source   0=cfg 1=chan pres 2=vel 3=mod whl
+1
+&h32,&h33,&h34,&h35
+3
+0
+0,0,0,0
+
+PWM static cfg'd val when PWM src=0    127=50%
+1
+&h4E,&h4F,&h50,&h51
+127
+0
+127,127,127,127
+
+noise filter bandwidth                  0 - 31
+1
+&h40,&h41,&h42,&h43
+31
+0
+0,0,0,0
+---end

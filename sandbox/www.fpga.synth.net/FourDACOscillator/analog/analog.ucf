@@ -1,0 +1,73 @@
+# Constraints for 'picoblaze_dac_control'.
+#
+# Revision C of the Spartan-3E Starter Kit.
+#
+# Ken Chapman - Xilinx Ltd - November 2005
+# Revised : 21st February 2006
+#
+# Period constraint for 50MHz operation
+#
+NET "clk" PERIOD = 20.0ns HIGH 50%;
+#
+# I/O constraints for Spartan-3E Starter Kit (Rev.C)
+#
+# soldered 50MHz Clock
+# 
+NET "clk" LOC = "C9" | IOSTANDARD = LVTTL;
+#
+# SPI devices 
+#
+NET "spi_sck"      LOC = "U16" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_sdi"      LOC = "T4"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_sdo"      LOC = "N10" | IOSTANDARD = LVCMOS33;
+NET "spi_rom_cs"   LOC = "U3"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_amp_cs"   LOC = "N7"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_adc_conv" LOC = "P11" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_dac_cs"   LOC = "N8"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_amp_shdn" LOC = "P7"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "spi_dac_clr"  LOC = "P8"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+#
+#
+# Strata Flash (need to disable to use SDO signal of the SPI bus) 
+#
+NET "strataflash_oe" LOC = "C18" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 2;
+NET "strataflash_ce" LOC = "D16" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 2;
+NET "strataflash_we" LOC = "D17" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 2;
+#
+#
+# Platform Flash (need to disable to use SDO signal of the SPI bus) 
+#
+NET "platformflash_oe" LOC = "T3" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 2;
+#
+#
+# Simple LEDs 
+# Require only 3.5mA. 
+#
+NET "led<0>" LOC = "F12" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<1>" LOC = "E12" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<2>" LOC = "E11" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<3>" LOC = "F11" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<4>" LOC = "C11" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<5>" LOC = "D11" | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<6>" LOC = "E9"  | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+NET "led<7>" LOC = "F9"  | IOSTANDARD = LVTTL | SLEW = SLOW | DRIVE = 4;
+#
+#
+# Rotary encoder. 
+#   Rotation contacts require pull UP resistors to provide High level.
+#   Press contact requires pull DOWN resistor to provide Low when not pressed..
+#
+NET "rotary_a"     LOC = "K18" | IOSTANDARD = LVTTL | PULLUP;
+NET "rotary_b"     LOC = "G18" | IOSTANDARD = LVTTL | PULLUP;
+#
+#
+# Slide Switches. 
+#
+NET "sw<0>" LOC = "L13" | IOSTANDARD = LVTTL | PULLUP ;
+NET "sw<1>" LOC = "L14" | IOSTANDARD = LVTTL | PULLUP ;
+NET "sw<2>" LOC = "H18" | IOSTANDARD = LVTTL | PULLUP ;
+NET "sw<3>" LOC = "N17" | IOSTANDARD = LVTTL | PULLUP ;
+#
+#
+# End of File
+#

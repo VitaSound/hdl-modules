@@ -17,6 +17,14 @@ https://iverilog.fandom.com/wiki/Installation_Guide#Ubuntu_Linux
 
 для просмотра gtkwave
 
+# sandbox
+
+песочница со всем подряд
+
+самый первый сайт 
+
+https://sites.google.com/site/analogsynthdiy/sobstvennye-razrabotki/sintezator-na-baze-plis/z---ssylki
+
 
 # заметки
 

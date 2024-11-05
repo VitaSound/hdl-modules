@@ -1,0 +1,28 @@
+GateManPoly DAC Window analysis:
+
+  reg [11:0] DACreg = 12'b100000000000;    // Data for SPI DAC
+  reg [5:0] WINDOW;   // register holds the number of shifts of the window
+
+WINDOW is updated by sysex.
+
+// DAC
+  reg  [20:0] NEXT_DAC;  
+  wire [11:0] DAC_WIN;             // 12 bit movable window
+  wire [20:0] DAC_SHIFTER;         // wider than DAC
+  assign DAC_SHIFTER = NEXT_DAC << WINDOW;
+  assign DAC_WIN = DAC_SHIFTER[20:9];   
+
+
+In the DACena state of the state machine:
+
+      DACreg <= {~DAC_WIN[11],DAC_WIN[10:0]};
+
+The structure {~DAC_WIN[11],DAC_WIN[10:0]} replaces the need to 
+add 12'h800 to convert signed values to the unsigned DAC requirement.
+
+
+
+
+This scheme is for the 12 bit DAC on the S-3Esk.  It has notably poorly
+named registers.
+

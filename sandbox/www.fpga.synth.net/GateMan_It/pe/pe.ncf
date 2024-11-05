@@ -1,0 +1,48 @@
+Attack rate
+2
+&h1E
+16383
+16383
+
+Decay rate
+2
+&h20
+16383
+100
+
+Sustain level
+2
+&h22
+16383
+8192
+
+Release rate
+2
+&h24
+16383
+100
+
+Peak value
+2
+&h26
+&HCB2
+&HCB2
+
+Minimum value
+2
+&h28
+16383
+256
+
+Peak mod source     0 & 1=cfg'd val, 2=vel, 3=mod wheel
+1
+&h3E
+3
+0
+
+Sustain mod source  0 & 1=cfg'd val, 2=vel, 3=mod wheel
+1
+&h3F
+3
+0
+---end---

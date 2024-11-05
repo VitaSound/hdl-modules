@@ -1,0 +1,3485 @@
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Program: MIDICTRL.psm (polyphonic)
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  Author: Scott R. Gravenhorst
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;    Date: 01-25-2007
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;Rev date: 10-24-2008
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Version: 1.23
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;----------------------------------------------------------------------------------------
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.03 Add control ports for 4 NCOs pitch values.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.04 system exclusive message input implemetation
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          sysex mfr ID 7F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.05 Combine all single bit flags into one register.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          Attempt to combine byte counts into one register instead of two
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          to facilitate register usage in more complex dual UART ISR.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.06 Added parameter update via sysex.  Sysex data message is in address/data
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          format.  Address currently starts at 0x20 and ends at 0x7F because sysex
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          data values (including the address value) can't be larger than 0x7F.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          If ports become scarce, this can be chaged to also allow 0x00 - 0x1F at
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          the expense of external circuitry rework.  Sysex data is applied to
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          to synth by using the address value to select the port using a register
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          as a port pointer. Note that no address range checking is performed.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.07 Added selectable waveform NCOs
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.08 Remove sysex message type, add model number byte.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.09 sysex address space changed to 00 to 7F from 20 to 7F
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.10 sysex address space expanded to 14 bits.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.11 Add constant MIDI_TRANSPOSE.  This provides a way to give more range to the
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          upper end of the keyboard for when large offsets used.  Without this
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          constant (subtracted from all MIDI note numbers), this program will subtract
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          octaves until the note number no longer has bit 7 set.  Actual pitch is then
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          adjusted in the hardware in the NCO (nco_v8.v) module.  For the Korg
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          Wavestation, I've found that hex 14 works well.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.12 Add LCD Project name and author text.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.13 This file switches to the DWG synth, first version.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          Notes are presented in MIDI note number, not note - octave.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  POLYSYNTH...
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.14 First polysynth, 2 strings.  Some of the notes above here no longer apply.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.15 4 strings.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.16 6 strings.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.17 Piano like action, sustain pedal
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.18 8 strings.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.19 Discovered a problem with the way the sustain pedal works.  rework here and
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;          in the main module (PolyDaWG8.v)
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.20 dual display for defining what mod wheel does.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.21 Voices stolen from keys held down.  Hardware is different, ver_l required.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.22 Changed LCD display of mode from N/O to Norm/Orig
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Ver 1.23 Remove LCD code for Avnet board
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; MIDI UART input and synth control program.  Receives and interprets MIDI data.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; MIDI support includes what Korg Wavestation can send.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; note on/off, mod wheel, pitch wheel, joystick X and Y, channel pressure, sustain pedal.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Note: DATAbyte1 represents the first data byte for commands which use 2 data bytes.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;       DATAbyte2 represents the second data byte for commands which use 2 data bytes.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;       DATAbyte2 represents the only data byte for commands which use 1 data byte.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MFR_ID
+   OPERAND2-7F
+    COMMENT-; my mfr ID - Change this if you want a different ID
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MODEL_NUMBER
+   OPERAND2-01
+    COMMENT-; 00 = GateMan-I; 01 = PolyDaWG6
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-UNIT_NUMBER
+   OPERAND2-00
+    COMMENT-; unit number
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDI_TRANSPOSE
+   OPERAND2-14
+    COMMENT-; how much to SUBTRACT from MIDI note numbers for note on/off messages
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; this gives more range on the high end
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Bit definition constants as masks
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-rxready_bit
+   OPERAND2-02
+    COMMENT-; bit mask to sense for rx data available
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_bit
+   OPERAND2-01
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_bit
+   OPERAND2-02
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_bit
+   OPERAND2-04
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_set
+   OPERAND2-01
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_set
+   OPERAND2-02
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_set
+   OPERAND2-04
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIbyteAVAILABLE_clr
+   OPERAND2-FE
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYbyteAVAILABLE_clr
+   OPERAND2-FD
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MESSAGEcomplete_clr
+   OPERAND2-FB
+    COMMENT-; FLAGS register TEST mask
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDI_UARTstatus_bit
+   OPERAND2-40
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTY_UARTstatus_bit
+   OPERAND2-80
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; MIDI CONSTANTS
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; message type constants
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_NoteOff
+   OPERAND2-80
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_NoteOn
+   OPERAND2-90
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_PolyKeyPressure
+   OPERAND2-A0
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ControllerChange
+   OPERAND2-B0
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ProgramChange
+   OPERAND2-C0
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_ChannelPressure
+   OPERAND2-D0
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_PitchBend
+   OPERAND2-E0
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-K_System
+   OPERAND2-F0
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Controller Change byte 1 constants:
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MOD_WHEEL
+   OPERAND2-01
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUSTAIN
+   OPERAND2-40
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_X
+   OPERAND2-10
+    COMMENT-; Korg Wavestation, don't know about others.
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_Y
+   OPERAND2-11
+    COMMENT-; Korg Wavestation, don't know about others.
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ALL_NOTES_OFF
+   OPERAND2-7B
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;; READ ONLY PORTS:
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; UART
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-UARTstatusport
+   OPERAND2-00
+    COMMENT-; port number for rx and tx status (read only)
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIrxdataport
+   OPERAND2-01
+    COMMENT-; port number for rx data register (read only)
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Slide switches
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SWITCH_PORT
+   OPERAND2-02
+    COMMENT-; port number for slide switches (read only)
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYrxdataport
+   OPERAND2-04
+    COMMENT-; port number for rx data register (read only)
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TRANSPOSE
+   OPERAND2-03
+    COMMENT-; port number for transposition factor
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MODWHEELSTATE
+   OPERAND2-05
+    COMMENT-; what state the mod wheel usage is in, bit 0
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ACTIVE
+   OPERAND2-06
+    COMMENT-; vibrational state of each string, one bit per string
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;; WRITE ONLY PORTS:
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Global ports [02-0F], affect all voices:
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-CHANNEL_PRESSURE_PORT
+   OPERAND2-F0
+    COMMENT-; channel pressure value, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-PITCH_WHEEL_MSB_PORT
+   OPERAND2-F1
+    COMMENT-; pitch wheel MSB, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-PITCH_WHEEL_LSB_PORT
+   OPERAND2-F2
+    COMMENT-; pitch wheel LSB, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MOD_WHEEL_PORT
+   OPERAND2-11
+    COMMENT-; modulation wheel, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_X_PORT
+   OPERAND2-F4
+    COMMENT-; joystick X, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-JOYSTICK_Y_PORT
+   OPERAND2-F5
+    COMMENT-; joystick Y, global
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VOICE_SELECT_PORT
+   OPERAND2-F6
+    COMMENT-; For poly, selects the voice to talk to when
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; sending or updating voice info.
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUSTAIN_PORT
+   OPERAND2-12
+    COMMENT-; FF when depressed, 00 when not depressed.
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-GATE_PORT
+   OPERAND2-13
+    COMMENT-; GATE signal, per voice
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL0_PORT
+   OPERAND2-00
+    COMMENT-; ports for sending velocity (per voice) to synth
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL1_PORT
+   OPERAND2-01
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL2_PORT
+   OPERAND2-02
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL3_PORT
+   OPERAND2-03
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL4_PORT
+   OPERAND2-04
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL5_PORT
+   OPERAND2-05
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL6_PORT
+   OPERAND2-06
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-VEL7_PORT
+   OPERAND2-07
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE0_PORT
+   OPERAND2-08
+    COMMENT-; ports for sending note number (per voice) to synth
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE1_PORT
+   OPERAND2-09
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE2_PORT
+   OPERAND2-0A
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE3_PORT
+   OPERAND2-0B
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE4_PORT
+   OPERAND2-0C
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE5_PORT
+   OPERAND2-0D
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE6_PORT
+   OPERAND2-0E
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE7_PORT
+   OPERAND2-0F
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-LED_PORT
+   OPERAND2-FE
+    COMMENT-; for diagnostics, may be removed later...
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-resetport
+   OPERAND2-FF
+    COMMENT-; this port doesn't actually output anything.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Writing any data it's address resets the UART.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;; SCRATCH PAD RAM ADDRESSES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE0
+   OPERAND2-20
+    COMMENT-; save the note number for lookup later (to manage note off messages)
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE1
+   OPERAND2-21
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE2
+   OPERAND2-22
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE3
+   OPERAND2-23
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE4
+   OPERAND2-24
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE5
+   OPERAND2-25
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE6
+   OPERAND2-26
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-NOTE7
+   OPERAND2-27
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-GATES
+   OPERAND2-30
+    COMMENT-; spRAM storage for maintaining the gates
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-ROUNDROBIN
+   OPERAND2-31
+    COMMENT-; used for selecting a "random" string when all are currently busy
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SUS
+   OPERAND2-32
+    COMMENT-; used to save sustain pedal state.
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-MIDIinputBYTE
+   OPERAND2-3E
+    COMMENT-
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-TTYinputBYTE
+   OPERAND2-3F
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; System Exclusive Message structure:
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; MFR ID
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; MODEL NUMBER
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; UNIT NUMBER
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; PARAMETER ADDRESS MSB
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; PARAMETER ADDRESS LSB
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; PARAMETER DATA
+      LABEL-
+INSTRUCTION-CONSTANT
+   OPERAND1-SYSEX_MSB_PORT
+   OPERAND2-E0
+    COMMENT-; most significant 7 bits of the sysex address space
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; ports 00 through 7F are for sysex updatable registers
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Name and reserve registers.
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s0
+   OPERAND2-MIDIbyte
+    COMMENT-; latest received MIDI byte
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s1
+   OPERAND2-RUNNINGstatus
+    COMMENT-; holds the current MIDI running status value
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s2
+   OPERAND2-MessageTYPE
+    COMMENT-; Message type, i.e., high nybble
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s3
+   OPERAND2-MessageCHANNEL
+    COMMENT-; Message channel, i.e., low nybble
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; DATAbyteCOUNT is the counter that controls what happens to MIDI data bytes.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; DATAbyteCOUNTrunstat holds the data byte count value to load into DATAbyteCOUNT to refresh
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; it when a message comes in assuming valid running status.
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s4
+   OPERAND2-DATAbyteCOUNT
+    COMMENT-; how many more bytes to satisfy the current message
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s5
+   OPERAND2-DATAbyteCOUNTrunstat
+    COMMENT-; holds replenishment value for DATAbyteCOUNT for running status
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s6
+   OPERAND2-DATAbyte1
+    COMMENT-; for current message storage of data byte 1
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s7
+   OPERAND2-DATAbyte2
+    COMMENT-; for current message storage of data byte 2
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;       1 means a complete MIDI message is ready to process
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; The code which processes this message will reset MESSAGE_COMPLETE to zero
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; s8  IS UNUSED
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-s9
+   OPERAND2-COMMANDbyte
+    COMMENT-; command byte, contains command nybble and channel nybble of current message
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sA
+   OPERAND2-FLAGS
+    COMMENT-; FLAGS register contains single bit flags
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sB
+   OPERAND2-SYSEX
+    COMMENT-; sysex state machine state register
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sC
+   OPERAND2-UARTbyte
+    COMMENT-; incoming UART data byte, used by ISR
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; sD    used for destination pointer, considered temporary data storage
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; sE    used for a source pointer, considered temporary data storage.  sysex mode stores addr (port) here.
+      LABEL-
+INSTRUCTION-NAMEREG
+   OPERAND1-sF
+   OPERAND2-TEMP
+    COMMENT-; local loop or routine temp storage
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;; CODE STARTS HERE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-ADDRESS
+   OPERAND1-000
+   OPERAND2-
+    COMMENT-
+      LABEL-cold_start
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; initialize storage
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-MessageTYPE
+   OPERAND2-resetport
+    COMMENT-; Causes reset by addressing port 80-FF.  content doesn't matter.
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MIDIbyte
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-FLAGS
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-RUNNINGstatus
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNTrunstat
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte1
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte2
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-GATE_PORT
+    COMMENT-; force GATEs off
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL0_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL1_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL2_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL3_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL4_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL5_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL6_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VEL7_PORT
+    COMMENT-; force VELOCITY to zero
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-PITCH_WHEEL_LSB_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-VOICE_SELECT_PORT
+    COMMENT-; for monosynth, set this to zero always.
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+   OPERAND2-GATES
+    COMMENT-; ensure both gates are off at startup.
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+   OPERAND2-ROUNDROBIN
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+   OPERAND2-SUS
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-40
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-TEMP
+   OPERAND2-PITCH_WHEEL_MSB_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-FF
+    COMMENT-; set no-keys-down flag
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-TEMP
+   OPERAND2-00
+    COMMENT-; store in RAM location 00
+      LABEL-
+INSTRUCTION-ENABLE
+   OPERAND1-INTERRUPT
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Wait for and process MIDI Bytes.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This is the main dispatch loop that monitors the ISR's MIDIbyteVALID flag register and MESSAGE_COMPLETE flag.
+      LABEL-idle
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-TEMP
+   OPERAND2-MODWHEELSTATE
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+   OPERAND2-MESSAGEcomplete_bit
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-ProcessMessage
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+   OPERAND2-MIDIbyteAVAILABLE_bit
+    COMMENT-; see if isr set the byte available flag
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-GetMIDIbyte
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+   OPERAND2-TTYbyteAVAILABLE_bit
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-idle
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;GetTTYbyte:
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-MIDIbyte
+   OPERAND2-TTYinputBYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+   OPERAND2-TTYbyteAVAILABLE_clr
+    COMMENT-; clear the MIDI byte available bit
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Procbyte
+   OPERAND2-
+    COMMENT-
+      LABEL-GetMIDIbyte
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-MIDIbyte
+   OPERAND2-MIDIinputBYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+   OPERAND2-MIDIbyteAVAILABLE_clr
+    COMMENT-; clear the MIDI byte available bit
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-Procbyte
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; there is a byte to process
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; First test for active sensing byte - nothing but problems, so get rid of it now.
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-FE
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-idle
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-MIDIbyte
+   OPERAND2-80
+    COMMENT-; is high bit set?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-MIDI_STATUS_BYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; We have a data byte because bit 7 is zero.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; check if we're in sysex mode:
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PerformanceData
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Deal with sysex message
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Sysexe is handled with a state machine.  Register SYSEX holds the current state.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Setting the state to 7F causes the state machine to ignore the rest of any sysex message
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; and wait for a F7 byte.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-01
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-CheckID
+    COMMENT-; check mfr ID
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-02
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ModelNumber
+    COMMENT-; check model number
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-03
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-UnitNumber
+    COMMENT-; check unit number
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-04
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ParameterAddrMSB
+    COMMENT-; set parameter address
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-05
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ParameterAddrLSB
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-06
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ParameterData
+    COMMENT-; set parameter data
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-SYSEX
+   OPERAND2-7F
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  JUMP Z, idle                              ; we just jump to idle to simply wait for F7 to turn off sysex mode
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; above instruction removed because we go idle regardless
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-CheckID
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-02
+    COMMENT-; move to next state, check UnitNumber
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-MFR_ID
+    COMMENT-; this device's mfr ID
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-idle
+    COMMENT-; if this is ours, go to idle and wait
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-7F
+    COMMENT-; not our message, bypass rest of message.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-ModelNumber
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-03
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-MODEL_NUMBER
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-idle
+    COMMENT-; if this is ours, go to idle and wait
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-7F
+    COMMENT-; not our message, bypass rest of message.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-UnitNumber
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-04
+    COMMENT-; set for parameter addr MSB mode
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-UNIT_NUMBER
+    COMMENT-; compare message type byte, 00=parameter
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-idle
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-7F
+    COMMENT-; not our message, bypass rest of message.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-ParameterAddrMSB
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-05
+    COMMENT-; set for parameter addr LSB mode
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+   OPERAND2-MIDIbyte
+    COMMENT-; get the MSB byte
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+   OPERAND2-SYSEX_MSB_PORT
+    COMMENT-; store the byte in the external parameter selection hardware
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-ParameterAddrLSB
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-06
+    COMMENT-; set for parameter data mode
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+   OPERAND2-MIDIbyte
+    COMMENT-; save the address byte in sE  NOTE: sE is temporary storage elsewhere, but should be safe here
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-ParameterData
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-7F
+    COMMENT-; set to wait for F7
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-MIDIbyte
+   OPERAND2-(sE)
+    COMMENT-; send data byte to port number in sE (the address byte).
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-PerformanceData
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyteCOUNT
+   OPERAND2-01
+    COMMENT-; decrement...
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-byte2
+    COMMENT-; if equal to 0 now, it was 1, so this is byte2
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte1
+   OPERAND2-MIDIbyte
+    COMMENT-; save this byte as data byte 1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-byte2
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; in all cases, this is the last data byte.  Save it and set MESSAGE_COMPLETE
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyte2
+   OPERAND2-MIDIbyte
+    COMMENT-; save this byte as data byte 2
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+   OPERAND2-MESSAGEcomplete_set
+    COMMENT-; set message complete bit
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+   OPERAND2-DATAbyteCOUNTrunstat
+    COMMENT-; set the count again, next message could be running status data.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This is a status or command byte.
+      LABEL-MIDI_STATUS_BYTE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; high bit is set, now determine what sort of message this is
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageTYPE
+   OPERAND2-MIDIbyte
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageCHANNEL
+   OPERAND2-MIDIbyte
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageTYPE
+   OPERAND2-F0
+    COMMENT-; MessageTYPE now contains only upper nybble of MIDI command/status byte.
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageCHANNEL
+   OPERAND2-0F
+    COMMENT-; MessageCHANNEL contains only the channel nybble
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_System
+    COMMENT-; If high nybble == F, then this is a special message
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-NotFx
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; We are here because this byte if Fx
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; decode and act on other Fx messages here.  For now, it's just a jump to idle
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-F7
+    COMMENT-; end of sysex message
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-NotF7
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-00
+    COMMENT-; sysex off.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-NotF7
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MIDIbyte
+   OPERAND2-F0
+    COMMENT-; F0 ?  (start of sysex message)
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-idle
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; We have an F0
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-01
+    COMMENT-; set sysex state flag to check mfr ID
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-NotFx
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-SYSEX
+   OPERAND2-00
+    COMMENT-; sysex always goes off on any status byte.
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-COMMANDbyte
+   OPERAND2-MIDIbyte
+    COMMENT-; remember this message's command byte.
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_ProgramChange
+    COMMENT-; is this PROGRAM CHANGE ?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ONE_DATA_BYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_ChannelPressure
+    COMMENT-; is this CHANNEL PRESSURE ?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-ONE_DATA_BYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+   OPERAND2-02
+    COMMENT-; If not channel pressure or program change, then 2 bytes of data
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SetCount
+   OPERAND2-
+    COMMENT-
+      LABEL-ONE_DATA_BYTE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNT
+   OPERAND2-01
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; set count source for replenishing DATAbyteCOUNT when no status byte is sent (running status)
+      LABEL-SetCount
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-DATAbyteCOUNTrunstat
+   OPERAND2-DATAbyteCOUNT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; A complete message is ready to process...
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Message type determines the number of data bytes.
+      LABEL-ProcessMessage
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+   OPERAND2-MESSAGEcomplete_clr
+    COMMENT-; clear the message complete flag
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; See if this is our message.  If not, go idle, if yes, do the message.
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-COMMANDbyte
+    COMMENT-; get the current command byte into TEMP
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-TEMP
+   OPERAND2-0F
+    COMMENT-; isolate only the channel.
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-sD
+   OPERAND2-SWITCH_PORT
+    COMMENT-; get current MIDI channel number for this hardware
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-TEMP
+    COMMENT-; compare MIDI channel setting with current running status channel number
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-idle
+    COMMENT-; JUMP to idle if not our channel number.
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-RUNNINGstatus
+   OPERAND2-COMMANDbyte
+    COMMENT-; this is a message on my channel so set running status.
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-MessageTYPE
+   OPERAND2-RUNNINGstatus
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-MessageTYPE
+   OPERAND2-F0
+    COMMENT-; get message type nybble
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This is where we act on complete messages.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; JUMP table of vectors to different message type needs.
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_NoteOff
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-NOTE_OFF
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_NoteOn
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-NOTE_ON
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_PolyKeyPressure
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-POLY_KEY_PRESSURE
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_ControllerChange
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-CONTROLLER_CHANGE
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_ProgramChange
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PROGRAM_CHANGE
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_ChannelPressure
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-CHANNEL_PRESSURE
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-MessageTYPE
+   OPERAND2-K_PitchBend
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PITCH_BEND
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-; anything else, toss.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; This section will:
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; toggle the gate signal if it's on.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; turn gate on if it's off.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;
+      LABEL-NOTE_ON
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-NOTE_OFF
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;SET_SYNTH:
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-s8
+   OPERAND2-TRANSPOSE
+    COMMENT-; sample the value of TRANSPOSE port
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte2
+   OPERAND2-00
+    COMMENT-; is velocity zero?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK
+    COMMENT-; If not, we pluck a string
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+      LABEL-RELEASE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; "Release" refers to when the synth key is released.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; Determine to which string the note-off message belongs.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; The current note numbers are stored in scratch pad RAM
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; NOTE0 - NOTE7 and velocity values of VEL0 - VEL7
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sE
+   OPERAND2-GATES
+    COMMENT-; get current gates state
+      LABEL-TRYREL01
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-01
+    COMMENT-; is bit 0 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL02
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE0
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL0
+    COMMENT-
+      LABEL-TRYREL02
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-02
+    COMMENT-; is bit 1 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL04
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE1
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL1
+    COMMENT-
+      LABEL-TRYREL04
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-04
+    COMMENT-; is bit 2 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL08
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE2
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL2
+    COMMENT-
+      LABEL-TRYREL08
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-08
+    COMMENT-; is bit 3 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL10
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE3
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL3
+    COMMENT-
+      LABEL-TRYREL10
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-10
+    COMMENT-; is bit 4 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL20
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE4
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL4
+    COMMENT-
+      LABEL-TRYREL20
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-20
+    COMMENT-; is bit 5 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL40
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE5
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL5
+    COMMENT-
+      LABEL-TRYREL40
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-40
+    COMMENT-; is bit 6 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-TRYREL80
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE6
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL6
+    COMMENT-
+      LABEL-TRYREL80
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-80
+    COMMENT-; is bit 7 on?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-NONEBUSY
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-NOTE7
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-sD
+   OPERAND2-DATAbyte1
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-REL7
+    COMMENT-
+      LABEL-NONEBUSY
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; If we are here, we didn't find the current note number in the strings note number table
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-; What else can I do?
+      LABEL-REL0
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-FE
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL1
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-FD
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL2
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-FB
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL3
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-F7
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL4
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-EF
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL5
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-DF
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL6
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-BF
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-relsave
+   OPERAND2-
+    COMMENT-
+      LABEL-REL7
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-sE
+   OPERAND2-7F
+    COMMENT-; sE has new GATES value
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  JUMP relsave  ; not necessary
+      LABEL-relsave
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; save the new GATES state upon release
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+   OPERAND2-GATES
+    COMMENT-; update SP RAM
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+   OPERAND2-GATE_PORT
+    COMMENT-; update synth hardware
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-; finished processing the note-off
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+      LABEL-PLUCK
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; determine which string to use
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-TEMP
+   OPERAND2-SUS
+    COMMENT-; Check sustain pedal state
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-TEMP
+   OPERAND2-00
+    COMMENT-; note: FETCH instruction does not change flags
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PEDALUP
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; The pedal is held down.  So first try to use an inactive voice before stealing
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-TEMP
+   OPERAND2-ACTIVE
+    COMMENT-; get vibrational state of all strings
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-STRINGTEST
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; First look for an unused voice by checking for unbusy voices.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This needs to take into account that some keys can be held down
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; and should not be stolen if there are any unbusy voices.
+      LABEL-PEDALUP
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-TEMP
+   OPERAND2-GATES
+    COMMENT-; first get the state of the gates.
+      LABEL-STRINGTEST
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-01
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK0
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-02
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK1
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-04
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK2
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-08
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK3
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-10
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK4
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-20
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK5
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-40
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK6
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-TEMP
+   OPERAND2-80
+    COMMENT-; check if this voice is a held key
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-PLUCK7
+    COMMENT-; voice is idle, pluck it.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; If we fall through to here, all voices are busy.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; assign with round robin when all voices are busy
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This algorithm will steal a voice that is already busy
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sE
+   OPERAND2-ROUNDROBIN
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-RR1
+    COMMENT-; if zero, go load a 01
+      LABEL-
+INSTRUCTION-SL0
+   OPERAND1-sE
+   OPERAND2-
+    COMMENT-; shift left for next cycle
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+   OPERAND2-ROUNDROBIN
+    COMMENT-; store for next cycle - hence "round robin"
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-01
+    COMMENT-; sE contains string to be plucked, check each
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK0
+    COMMENT-; string bit for 1 and vector to the pluck code for it.
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-02
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK1
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-04
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK2
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-08
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK3
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-10
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK4
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-20
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK5
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-40
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK6
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-sE
+   OPERAND2-80
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-PLUCK7
+    COMMENT-
+      LABEL-RR1
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+   OPERAND2-01
+    COMMENT-; load a one
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sE
+   OPERAND2-ROUNDROBIN
+    COMMENT-;   into ROUNDROBIN.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  JUMP PLUCK0   ; jump not necessary, fall through                ; use string 0
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; send note data to string we will pluck
+      LABEL-PLUCK0
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE0
+    COMMENT-; save note value in SP RAM
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE0_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL0_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-01
+    COMMENT-; set gate flag bit 0, use string 0
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK1
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE1
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE1_PORT
+    COMMENT-; update string 1 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL1_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-02
+    COMMENT-; set gate flag bit 2, use string 1
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK2
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE2
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE2_PORT
+    COMMENT-; update string 2 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL2_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-04
+    COMMENT-; set gate flag bit 4, use string 2
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK3
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE3
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE3_PORT
+    COMMENT-; update string 3 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL3_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-08
+    COMMENT-; set gate flag bit 8, use string 3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK4
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE4
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE4_PORT
+    COMMENT-; update string 4 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL4_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-10
+    COMMENT-; set gate flag bit 10, use string 3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK5
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE5
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE5_PORT
+    COMMENT-; update string 5 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL5_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-20
+    COMMENT-; set gate flag bit 20 use string 3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK6
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE6
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE6_PORT
+    COMMENT-; update string 6 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL6_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-40
+    COMMENT-; set gate flag bit 40use string 3
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-SendGATE
+   OPERAND2-
+    COMMENT-; go sent the gate on signal
+      LABEL-PLUCK7
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE7
+    COMMENT-
+      LABEL-
+INSTRUCTION-SUB
+   OPERAND1-DATAbyte1
+   OPERAND2-s8
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-NOTE7_PORT
+    COMMENT-; update string 7 note value
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-VEL7_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-TEMP
+   OPERAND2-80
+    COMMENT-; set gate flag bit 80 use string 3
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;  JUMP SendGATE   ; fall through                            ; go sent the gate on signal
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; TEMP now contains a single bit which represents the gate to turn on.
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; First force the gate in question off, XOR the pluck bit in TEMP with GATES, then
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; send the byte to gates.  If the GATES bit was on, it will go off.  If it was off
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; it will go on.  In the second case, the second OUTPUT instruction doesn't matter
+      LABEL-SendGATE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-FETCH
+   OPERAND1-sD
+   OPERAND2-GATES
+    COMMENT-; get current gates state
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sE
+   OPERAND2-TEMP
+    COMMENT-; copy the gate bit to turn on into sE for inversion
+      LABEL-
+INSTRUCTION-XOR
+   OPERAND1-sE
+   OPERAND2-sD
+    COMMENT-; XOR the pluck bit in TEMP with GATES
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sE
+   OPERAND2-GATE_PORT
+    COMMENT-; update the synth
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-sD
+   OPERAND2-TEMP
+    COMMENT-; OR in the gate we want to turn on with the current gates status
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sD
+   OPERAND2-GATE_PORT
+    COMMENT-; update the gates status
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sD
+   OPERAND2-GATES
+    COMMENT-; save new gates state
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-CONTROLLER_CHANGE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; handle mod wheel, sustain and joystick here
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+   OPERAND2-MOD_WHEEL
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-tstCCsus
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-MOD_WHEEL_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-tstCCsus
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+   OPERAND2-SUSTAIN
+    COMMENT-; is it a sustain message?
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-tstCCjoyx
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-SUSTAIN_PORT
+    COMMENT-; update synth
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-DATAbyte2
+   OPERAND2-SUS
+    COMMENT-; save sustain state, (maybe) need it for release logic
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-tstCCjoyx
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+   OPERAND2-JOYSTICK_X
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-tstCCjoyy
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-JOYSTICK_X_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-tstCCjoyy
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+   OPERAND2-JOYSTICK_Y
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-tstCCallnotesoff
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-JOYSTICK_Y_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-tstCCallnotesoff
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-COMPARE
+   OPERAND1-DATAbyte1
+   OPERAND2-ALL_NOTES_OFF
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-NZ
+   OPERAND2-idle
+    COMMENT-; we don't recognize this CC
+      LABEL-
+INSTRUCTION-LOAD
+   OPERAND1-sD
+   OPERAND2-00
+    COMMENT-
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-sD
+   OPERAND2-GATES
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-sD
+   OPERAND2-GATE_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-CHANNEL_PRESSURE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; handle channel pressure here
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-CHANNEL_PRESSURE_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-PITCH_BEND
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte2
+   OPERAND2-PITCH_WHEEL_MSB_PORT
+    COMMENT-
+      LABEL-
+INSTRUCTION-OUTPUT
+   OPERAND1-DATAbyte1
+   OPERAND2-PITCH_WHEEL_LSB_PORT
+    COMMENT-; Writing to this port triggers second buffer write of ext. 16 bit register.
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; IGNORE THESE MESSAGES
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; Here we just jump to the idle loop.  My keyboard can't send these, so I don't care.  Maybe you do?
+      LABEL-PROGRAM_CHANGE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This synth doesn't react to this...
+      LABEL-POLY_KEY_PRESSURE
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-; This synth doesn't react to this...
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-idle
+   OPERAND2-
+    COMMENT-; so ignore
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; SUBROUTINES
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; ISR - Handles MIDI and TTY rx data arrivals
+      LABEL-isr
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+   OPERAND2-UARTstatusport
+    COMMENT-; read both UARTs rx status bits
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-UARTbyte
+   OPERAND2-C0
+    COMMENT-; only the bits 6 and 7
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+   OPERAND2-UARTbyte
+    COMMENT-; save status bits in FLAGS register
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+   OPERAND2-MIDI_UARTstatus_bit
+    COMMENT-; is the MIDI UART status bit set? 40
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-test_TTY
+    COMMENT-; if not, go test the TTY UART status bit
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+   OPERAND2-MIDIrxdataport
+    COMMENT-; MIDI UART status bit was set, update MIDIbyte
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-UARTbyte
+   OPERAND2-MIDIinputBYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+   OPERAND2-MIDIbyteAVAILABLE_set
+    COMMENT-; Notify idle loop that a new MIDI byte is available
+      LABEL-test_TTY
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-TEST
+   OPERAND1-FLAGS
+   OPERAND2-TTY_UARTstatus_bit
+    COMMENT-; is the TTY UART status bit set?  80
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-Z
+   OPERAND2-isr_exit
+    COMMENT-; if not, we're done
+      LABEL-
+INSTRUCTION-INPUT
+   OPERAND1-UARTbyte
+   OPERAND2-TTYrxdataport
+    COMMENT-; TTY UART status bit was set, update MIDIbyte
+      LABEL-
+INSTRUCTION-STORE
+   OPERAND1-UARTbyte
+   OPERAND2-TTYinputBYTE
+    COMMENT-
+      LABEL-
+INSTRUCTION-OR
+   OPERAND1-FLAGS
+   OPERAND2-TTYbyteAVAILABLE_set
+    COMMENT-; Notify idle loop that a new TTY byte is available
+      LABEL-isr_exit
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-AND
+   OPERAND1-FLAGS
+   OPERAND2-3F
+    COMMENT-; turn off both UART rx status bits
+      LABEL-
+INSTRUCTION-RETURNI
+   OPERAND1-ENABLE
+   OPERAND2-
+    COMMENT-; return from ISR, enable interrupts
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;; Interrupt Vector
+      LABEL-
+INSTRUCTION-
+   OPERAND1-
+   OPERAND2-
+    COMMENT-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      LABEL-
+INSTRUCTION-ADDRESS
+   OPERAND1-3FF
+   OPERAND2-
+    COMMENT-
+      LABEL-
+INSTRUCTION-JUMP
+   OPERAND1-isr
+   OPERAND2-
+    COMMENT-

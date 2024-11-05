@@ -1,0 +1,80 @@
+This project is a digital waveguide experiment (physical model).  
+Access to the system is provided by an embedded MIDI controller.
+
+The main components of the system are two 18 bit wide x 2048 
+location RAMs (block RAM) acting as digital delay lines, two 
+simple numerically tunable filters (identical to the filters 
+used in the GateMan-I synth), a simple nonlinearity and a 
+numerically moveable pickup.
+
+The 2 RAMs are used to pass a signal from one end to the other,
+each RAM is dedicated to one direction, one left and one right.
+The pickup is a selectable tap point on each RAM which is summed
+to provide the system's output signal to the DAC.
+
+Each RAM can connects through a nonlinearity at the input of 
+it's IIR filter.  The output of each filter is then routed to
+the input of the "other" RAM delay line.  The delay lines are
+both clocked simultaneously at 500 KHz.
+
+Additionally, each filter's output is inverted before applying it
+to the receiving delay line.
+
+The nonlinearity consists of logic which monitors the delay line
+output amplitude and controls the gain applied to the signal 
+passing through it.  The threshhold of switching from unity gain
+to low gain is 3/4 of positive max amplitude and 3/4 of negative 
+max amplitude.  Between the threshholds, gain is unity, when the 
+signal crosses the threshhold, the gain is reduced.  This simple 
+nonlinearity adds harmonic content and makes the sound more 
+interesting, under some conditions it is rather bell-like.
+
+The rotary encoder is programmed to control the IIR filters' 
+bandwidth.  The WEST pushbutton switch allows for much faster 
+change of the filters' bandwidth value.  Both endpoint filters
+are controlled by the same bandwidth parameter.
+
+The EAST button is a squelch/dampen control.  SOUTH controls the
+LED display and NORTH is an MCU system reset.
+
+Hard clipping is employed to prevent overflow distortion when the
+system is excited while it is already vibrating.
+
+Excitation is applied through logic which sums the current output
+of IIR1 with the excitation signal.  In this experiment, only a
+rectangular pulse is available, however, simple changes to the
+code can control the width of the pulse.  Current code sets the
+pulse at a proportion of the waveguide delay line length.
+
+Here's an ASCII diagram of the system:
+
+                                                     length
+                         BW                          control
+                         |                              |
+  +--> nonlinearity --> IIR0 --> sign inversion --> delay line ----->----->----->-------+
+  |                                                    |                                |
+  |                                                    |                                |
+  |                             pickup                 |                                |
+  ^       +--------------------> SUM <-----------------+                                V
+  |       |                       |                                                     |
+  |       |                       +----> OUTPUT                                         |
+  |       |                                                                             |
+  +-<- delay line <-- hard clip <-- SUM <-- sign inversion <-- IIR1 <-- nonlinearity <--+
+            |                        ^                          |
+          length                     |                          BW
+          control                    +--< Excitation input
+
+=========================================================================================
+Slide Switches:
+
+Switch [1:0] select MIDI channel 1 through 4
+
+Switch 2 controls the excitation pulse shape:
+  off = velocity controlled rectangular pulse
+   on = fixed width sawtooth pluck
+
+Switch 3 Controls filter contour setting
+  off = better for drums, set bandwidth low
+   on = better for strings, set bandwidth high
+
+
