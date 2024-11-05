@@ -2,7 +2,7 @@
 
 Репозиторий, в котором будут собраны все модули
 
-Источник [git@github.com:UA3MQJ/fpga-synth.git](https://github.com/UA3MQJ/fpga-synth)
+Наработки постепенно переосмысливаются и переносятся из [git@github.com:UA3MQJ/fpga-synth.git](https://github.com/UA3MQJ/fpga-synth)
 
 # назначение модулей
 
