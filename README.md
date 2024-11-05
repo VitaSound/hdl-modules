@@ -5,6 +5,12 @@
 Источник [git@github.com:UA3MQJ/fpga-synth.git](https://github.com/UA3MQJ/fpga-synth)
 
 # назначение модулей
+
+| N | Module | Description | Img |
+| - | ------ | --- | --- |
+| 1 | [powerup_reset](/powerup_reset/README.md) | Генератор автоматического сигнала сброса и сброса по кнопке | ![dds](https://github.com/VitaSound/hdl-modules/blob/main/powerup_reset/test.png?raw=true) |
+| 2 | [dds](/dds/README.md) | Генератор базовой цифровой пилы | ![dds](https://github.com/VitaSound/hdl-modules/blob/main/dds/test.png?raw=true) |
+
 1 [powerup_reset](/powerup_reset/README.md)  - Генератор автоматического сигнала сброса и сброса по кнопке
 
 2 [dds](/dds/README.md)  - Генератор базовой цифровой пилы
