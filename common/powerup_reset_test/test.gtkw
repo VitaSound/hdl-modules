@@ -1,0 +1,24 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Wed Nov  6 21:24:26 2024
+[*]
+[dumpfile] "/home/sea/hdl-modules/common/powerup_reset_test/out.vcd"
+[dumpfile_mtime] "Wed Nov  6 21:23:31 2024"
+[dumpfile_size] 1391787
+[savefile] "/home/sea/hdl-modules/common/powerup_reset_test/test.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-20.000000 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 78
+[sst_expanded] 1
+[sst_vpaned_height] 157
+@28
+testbench.clk50M
+testbench.key0
+@29
+testbench.rst
+[pattern_trace] 1
+[pattern_trace] 0
