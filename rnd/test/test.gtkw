@@ -1,0 +1,47 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Wed Nov  6 15:43:00 2024
+[*]
+[dumpfile] "/home/sea/hdl-modules/rnd/test/out.vcd"
+[dumpfile_mtime] "Wed Nov  6 15:41:42 2024"
+[dumpfile_size] 19723502
+[savefile] "/home/sea/hdl-modules/rnd/test/test.gtkw"
+[timestart] 0
+[size] 1318 611
+[pos] 303 38
+*-23.000000 12170000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 290
+[sst_expanded] 1
+[sst_vpaned_height] 110
+@28
+testbench.clk
+testbench.signal_out_rnd1
+@8022
+testbench.signal_out_rnd8[7:0]
+@20000
+-
+-
+-
+-
+-
+-
+-
+-
+-
+@8023
+testbench.signal_out_rndx[3:0]
+@20000
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+[pattern_trace] 1
+[pattern_trace] 0
