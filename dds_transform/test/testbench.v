@@ -8,7 +8,7 @@ module testbench();
   wire [WIDTH-1:0] tria_signal_out;
   wire [WIDTH-1:0] saw_signal_out;
   wire [WIDTH-1:0] revsaw_signal_out;
-  wire [WIDTH-1:0] meandr_signal_out;
+  wire [WIDTH-1:0] square_signal_out;
   wire [WIDTH-1:0] pwm_signal_out;
   
   
@@ -52,9 +52,9 @@ module testbench();
     .signal_out(revsaw_signal_out)
   );
   
-  dds2meandr #(WIDTH) dds2meandr_1(
+  dds2square #(WIDTH) dds2square_1(
     .signal_in(signal_out),
-    .signal_out(meandr_signal_out)
+    .signal_out(square_signal_out)
   );
 
   

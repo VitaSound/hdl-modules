@@ -1,0 +1,66 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Wed Nov  6 09:06:00 2024
+[*]
+[dumpfile] "/home/sea/hdl-modules/vca/test/out.vcd"
+[dumpfile_mtime] "Wed Nov  6 09:04:53 2024"
+[dumpfile_size] 28541309
+[savefile] "/home/sea/hdl-modules/vca/test/test.gtkw"
+[timestart] 0
+[size] 1318 784
+[pos] -1 -1
+*-23.000000 12170000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 290
+[sst_expanded] 1
+[sst_vpaned_height] 147
+@8022
+testbench.dds1_signal_out[31:0]
+@20000
+-
+@8022
+testbench.dds2_signal_out[31:0]
+@20000
+-
+@8022
+testbench.square_signal_out[31:0]
+@20000
+-
+-
+-
+@8022
+testbench.tria_signal_out[31:0]
+@20000
+-
+-
+-
+@8022
+testbench.vca_signal_out[31:0]
+@20000
+-
+-
+-
+@8022
+testbench.vcaw_signal_out[31:0]
+@20000
+-
+-
+-
+@8022
+testbench.vca32_signal_out[31:0]
+@20000
+-
+-
+-
+-
+-
+@8420
+testbench.vca_1.s_in[8:0]
+testbench.vca_1.s_cv[8:0]
+testbench.vca_3.s_in[16:0]
+testbench.vca_3.s_cv[16:0]
+@8421
+testbench.vca_3.result_s[32:0]
+[pattern_trace] 1
+[pattern_trace] 0
