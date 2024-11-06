@@ -15,5 +15,4 @@ module dds #(parameter WIDTH = 32)(clk, reset, adder, signal_out);
 		else
 			signal_out <= signal_out + adder;
 	end
-
 endmodule
