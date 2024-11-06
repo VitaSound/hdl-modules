@@ -1,0 +1,30 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Wed Nov  6 22:01:18 2024
+[*]
+[dumpfile] "/home/sea/hdl-modules/common/strobe_gen_test/out.vcd"
+[dumpfile_mtime] "Wed Nov  6 21:59:13 2024"
+[dumpfile_size] 3883301
+[savefile] "/home/sea/hdl-modules/common/strobe_gen_test/test.gtkw"
+[timestart] 1633000
+[size] 1064 418
+[pos] -1 -1
+*-20.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 92
+@28
+testbench.clk50M
+testbench.signal_out_2
+testbench.signal_out_2_up
+testbench.signal_out_3
+@29
+testbench.signal_out_3_up
+@8028
+testbench.signal_out_4
+@28
+testbench.signal_out_4_up
+[pattern_trace] 1
+[pattern_trace] 0
