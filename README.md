@@ -44,7 +44,4 @@ https://sites.google.com/site/analogsynthdiy/sobstvennye-razrabotki/sintezator-n
 
 # заметки
 
-06.07.2024 - test git
-07.07.2024 год
 
-07.07.2024 - Windows 10 version
