@@ -1,17 +1,19 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Tue Apr 15 13:37:50 2025
+[*] Tue Apr 15 22:00:27 2025
 [*]
 [dumpfile] "/home/sea/hdl-modules/adsr/test/out.vcd"
-[dumpfile_mtime] "Tue Apr 15 13:36:39 2025"
-[dumpfile_size] 3510628
+[dumpfile_mtime] "Tue Apr 15 22:00:22 2025"
+[dumpfile_size] 3564772
 [savefile] "/home/sea/hdl-modules/adsr/test/test.gtkw"
 [timestart] 0
 [size] 1398 759
 [pos] -1 -1
-*-20.363789 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-24.363789 1590000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[treeopen] testbench.adsr_1.
 [sst_width] 269
-[signals_width] 159
+[signals_width] 234
 [sst_expanded] 1
 [sst_vpaned_height] 213
 @28
@@ -28,7 +30,29 @@ testbench.dout[0:255]
 @20000
 -
 -
-@20001
+-
+@28
+testbench.rst
+testbench.gate
+@22
+testbench.a[3:0]
+testbench.d[3:0]
+testbench.s[3:0]
+testbench.r[3:0]
+@8023
+testbench.signal_out_3[15:0]
+@8022
+testbench.adsr_1.accumulator[15:0]
+@20000
+-
+-
+-
+@28
+testbench.adsr_1.overflow_max
+testbench.adsr_1.overflow_min
+testbench.adsr_1.state[2:0]
+@20000
+-
 -
 [pattern_trace] 1
 [pattern_trace] 0
