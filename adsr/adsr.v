@@ -11,12 +11,22 @@
  *    .                  `  .
  *  ---------------------------->
  *                             t
+ 
+ даже если работать на частоте 44100,
+ и прибавлять минимальное значение - 1.
+ то период не будет длиннее 2х секунд при 16 битах.
+
+ https://docs.google.com/spreadsheets/d/1mJjj54YKQSbWEbEiOg4bpXEgip-hPy3FrPeEfphbzk0/edit?gid=1902719290#gid=1902719290
+
+поэтому решено аккумулятор для ADSR примернять 24 бита
+и субдискр - 48000. 
  */
 module adsr #(
-		parameter SAMPLE_CLK_FREQ = 44100,
+		parameter SAMPLE_CLK_FREQ = 48000,
+		parameter MASTER_CLK_FREQ = 50000000,
 		parameter WIDTH = 8,
 		parameter CTRL_WIDTH = 4,
-		parameter ACCUMULATOR_BITS = 16
+		parameter ACCUMULATOR_BITS = 24
 
 	)
 	(
@@ -55,11 +65,11 @@ module adsr #(
 		accumulator = 0;
 	end
 
-	function [(WIDTH - 1):0] attack_table;
+	function [(ACCUMULATOR_BITS - 1):0] attack_table;
 		input [(CTRL_WIDTH-1):0] param;
 		begin
 			case(param)
-				4'b0000: attack_table = `CALCULATE_PHASE_INCREMENT(0.002);  // 33554
+				4'b0000: attack_table = `CALCULATE_PHASE_INCREMENT(0.002); //0.002 
 				4'b0001: attack_table = `CALCULATE_PHASE_INCREMENT(0.008);
 				4'b0010: attack_table = `CALCULATE_PHASE_INCREMENT(0.016);
 				4'b0011: attack_table = `CALCULATE_PHASE_INCREMENT(0.024);
@@ -80,11 +90,11 @@ module adsr #(
 		end
 	endfunction
 
-	function [(WIDTH - 1):0] decay_release_table;
+	function [(ACCUMULATOR_BITS - 1):0] decay_release_table;
 		input [(CTRL_WIDTH-1):0] param;
 		begin
 			case(param)
-				4'b0000: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.006);
+				4'b0000: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.006); //0.006
 				4'b0001: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.024);
 				4'b0010: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.048);
 				4'b0011: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.072);
@@ -108,20 +118,20 @@ module adsr #(
 
 	// value to add to accumulator during attack phase
 	// calculated from lookup table below based on attack parameter
-	reg [(WIDTH - 1):0] attack_step;
+	reg [(ACCUMULATOR_BITS - 1):0] attack_step;
 	always @(a) begin
 		attack_step <= attack_table(a); // convert 4-bit value into phase increment amount
 	end
 
 	// value to add to accumulator during decay phase
 	// calculated from lookup table below based on decay parameter
-	reg [(WIDTH - 1):0] decay_step;
+	reg [(ACCUMULATOR_BITS - 1):0] decay_step;
 	always @(d) begin
 		decay_step <= decay_release_table(d); // convert 4-bit value into phase increment amount
 	end
 
 	
-	reg [(WIDTH - 1):0] release_inc;
+	reg [(ACCUMULATOR_BITS - 1):0] release_inc;
 	always @(r) begin
 		release_inc <= decay_release_table(r); // convert 4-bit value into phase increment amount
 	end
@@ -147,6 +157,7 @@ module adsr #(
 						if (overflow_max) begin
 							state <= RELEASE;
 						end else begin
+							state <= ATTACK;
 							accumulator <= next_acc_inc;
 						end
 					end
