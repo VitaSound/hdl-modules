@@ -30,10 +30,10 @@ module adsr #(
 
 	)
 	(
-		clk, rst, low_clk, gate, a, d, s, r, signal_out
+		clk, rst, low_strobe, gate, a, d, s, r, signal_out
 	);
 
-	input wire clk, rst, low_clk;
+	input wire clk, rst, low_strobe;
 	output wire [(ACCUMULATOR_BITS - 1):0] signal_out;
 
 	input wire gate;
@@ -158,7 +158,11 @@ module adsr #(
 							state <= RELEASE;
 						end else begin
 							state <= ATTACK;
-							accumulator <= next_acc_inc;
+							if (low_strobe) begin
+								accumulator <= next_acc_inc;
+							end else begin
+								accumulator <= accumulator;
+							end
 						end
 					end
 				end
@@ -170,7 +174,11 @@ module adsr #(
 						if (overflow_max) begin
 							state <= DECAY;
 						end else begin
-							accumulator <= next_acc_inc;
+							if (low_strobe) begin
+								accumulator <= next_acc_inc;
+							end else begin
+								accumulator <= accumulator;
+							end
 						end
 					end
 				end
@@ -182,7 +190,11 @@ module adsr #(
 						if (upderflow_sust) begin
 							state <= SUSTAIN;
 						end else begin
-							accumulator <= next_acc_dec;
+							if (low_strobe) begin
+								accumulator <= next_acc_dec;
+							end else begin
+								accumulator <= accumulator;
+							end
 						end
 					end
 				end

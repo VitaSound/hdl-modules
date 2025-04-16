@@ -20,6 +20,15 @@ module testbench();
     .signal_out(signal_out_2)
   );
 
+  wire signal_48strobe;
+
+  strobe_gen strobe_gen_48(
+    .clk(clk50M),
+    .f(signal_out_2),
+    .signal_out(signal_48strobe)
+  );
+
+
   // генератор сброса
   powerup_reset res_gen(
     .clk(clk50M),
@@ -47,16 +56,19 @@ module testbench();
 	reg [3:0] s;
 	reg [3:0] r;
 	reg gate;
+  reg wft;
 
   initial a <= 4'b0000;
   initial d <= 0;
   initial s <= 4'b0111;
   initial r <= 0;
   initial gate <= 0;
+  initial wft <=1;
 
   adsr adsr_1(
     .clk(clk50M),
-    .low_clk(signal_out_2),
+    // .low_strobe(signal_48strobe), // ТЕСТ 48000
+    .low_strobe(wft || signal_48strobe), // ТЕСТ ВОЛНОФОРМ
     .rst(rst),
     .gate(gate),
     .a(a), .d(d), .s(s), .r(r),
@@ -82,7 +94,7 @@ module testbench();
     #200 gate <= 0;
 
 
-    #10000 gate <= 1;
+    #10000 gate <= 1; wft <=0;
     #5000 a <= 0; d <= 0;
     #5000 a <= 1; d <= 1;
     #5000 a <= 2; d <= 2;

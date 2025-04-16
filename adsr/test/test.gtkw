@@ -1,21 +1,21 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Wed Apr 16 10:38:29 2025
+[*] Wed Apr 16 11:03:12 2025
 [*]
 [dumpfile] "/home/sea/hdl-modules/adsr/test/out.vcd"
-[dumpfile_mtime] "Wed Apr 16 10:37:52 2025"
-[dumpfile_size] 10303370
+[dumpfile_mtime] "Wed Apr 16 11:02:54 2025"
+[dumpfile_size] 3709734
 [savefile] "/home/sea/hdl-modules/adsr/test/test.gtkw"
 [timestart] 0
 [size] 1920 1058
 [pos] -1 -1
-*-24.363789 58029000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-24.363789 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] testbench.
 [treeopen] testbench.adsr_1.
 [sst_width] 269
 [signals_width] 234
 [sst_expanded] 1
-[sst_vpaned_height] 300
+[sst_vpaned_height] 269
 @28
 testbench.clk50M
 testbench.signal_out_2
@@ -54,9 +54,8 @@ testbench.adsr_1.state[2:0]
 -
 @24
 testbench.adsr_1.attack_step[23:0]
-@28
-testbench.adsr_1.low_clk
-@25
 testbench.adsr_1.decay_step[23:0]
+@29
+testbench.adsr_1.low_strobe
 [pattern_trace] 1
 [pattern_trace] 0
