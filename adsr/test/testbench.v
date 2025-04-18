@@ -94,7 +94,7 @@ module testbench();
     #200 gate <= 0;
 
 
-    #10000 gate <= 1; wft <=0;
+    #10000 gate <= 1; wft <=0mk;
     #5000 a <= 0; d <= 0;
     #5000 a <= 1; d <= 1;
     #5000 a <= 2; d <= 2;
