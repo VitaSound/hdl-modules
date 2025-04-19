@@ -79,7 +79,8 @@ VL_ATTR_COLD void Vgenerator___024root___ctor_var_reset(Vgenerator___024root* vl
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vgenerator___024root___ctor_var_reset\n"); );
     // Body
     vlSelf->clk = VL_RAND_RESET_I(1);
+    vlSelf->enable = VL_RAND_RESET_I(1);
     vlSelf->audio_out = VL_RAND_RESET_I(1);
-    vlSelf->generator__DOT__counter = VL_RAND_RESET_I(32);
+    vlSelf->generator__DOT__counter = VL_RAND_RESET_I(16);
     vlSelf->__Vtrigprevexpr___TOP__clk__0 = VL_RAND_RESET_I(1);
 }

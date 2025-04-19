@@ -15,10 +15,11 @@ class alignas(VL_CACHE_LINE_BYTES) Vgenerator___024root final : public Verilated
 
     // DESIGN SPECIFIC STATE
     VL_IN8(clk,0,0);
+    VL_IN8(enable,0,0);
     VL_OUT8(audio_out,0,0);
     CData/*0:0*/ __Vtrigprevexpr___TOP__clk__0;
     CData/*0:0*/ __VactContinue;
-    IData/*31:0*/ generator__DOT__counter;
+    SData/*15:0*/ generator__DOT__counter;
     IData/*31:0*/ __VactIterCount;
     VlTriggerVec<1> __VactTriggered;
     VlTriggerVec<1> __VnbaTriggered;

@@ -25,6 +25,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vgenerator VL_NOT_FINAL : public VerilatedMod
     // The application code writes and reads these signals to
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
+    VL_IN8(&enable,0,0);
     VL_OUT8(&audio_out,0,0);
 
     // CELLS

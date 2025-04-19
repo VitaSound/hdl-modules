@@ -10,6 +10,7 @@ Vgenerator::Vgenerator(VerilatedContext* _vcontextp__, const char* _vcname__)
     : VerilatedModel{*_vcontextp__}
     , vlSymsp{new Vgenerator__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
+    , enable{vlSymsp->TOP.enable}
     , audio_out{vlSymsp->TOP.audio_out}
     , rootp{&(vlSymsp->TOP)}
 {

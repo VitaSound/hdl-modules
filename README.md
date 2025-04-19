@@ -50,3 +50,6 @@ sudo apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp
 
 
 sudo apt-get install libasound-dev verilator
+
+sudo apt install --reinstall alsa-base alsa-utils
+

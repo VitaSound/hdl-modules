@@ -16,16 +16,20 @@ VL_INLINE_OPT void Vgenerator___024root___nba_sequent__TOP__0(Vgenerator___024ro
     Vgenerator__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vgenerator___024root___nba_sequent__TOP__0\n"); );
     // Init
-    IData/*31:0*/ __Vdly__generator__DOT__counter;
+    SData/*15:0*/ __Vdly__generator__DOT__counter;
     __Vdly__generator__DOT__counter = 0;
     // Body
     __Vdly__generator__DOT__counter = vlSelf->generator__DOT__counter;
-    if ((0x8dfU == vlSelf->generator__DOT__counter)) {
-        vlSelf->audio_out = (1U & (~ (IData)(vlSelf->audio_out)));
-        __Vdly__generator__DOT__counter = 0U;
+    if (vlSelf->enable) {
+        __Vdly__generator__DOT__counter = (0xffffU 
+                                           & ((IData)(1U) 
+                                              + (IData)(vlSelf->generator__DOT__counter)));
+        if ((0x470U <= (IData)(vlSelf->generator__DOT__counter))) {
+            vlSelf->audio_out = (1U & (~ (IData)(vlSelf->audio_out)));
+            __Vdly__generator__DOT__counter = 0U;
+        }
     } else {
-        __Vdly__generator__DOT__counter = ((IData)(1U) 
-                                           + vlSelf->generator__DOT__counter);
+        vlSelf->audio_out = 0U;
     }
     vlSelf->generator__DOT__counter = __Vdly__generator__DOT__counter;
 }
@@ -131,5 +135,7 @@ void Vgenerator___024root___eval_debug_assertions(Vgenerator___024root* vlSelf) 
     // Body
     if (VL_UNLIKELY((vlSelf->clk & 0xfeU))) {
         Verilated::overWidthError("clk");}
+    if (VL_UNLIKELY((vlSelf->enable & 0xfeU))) {
+        Verilated::overWidthError("enable");}
 }
 #endif  // VL_DEBUG

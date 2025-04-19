@@ -1,20 +1,20 @@
-module generator #(
-    parameter CLK_FREQ = 1000000, // Тактовая частота входного сигнала (1 MHz)
-    parameter AUDIO_FREQ = 440   // Желаемая частота меандра (440 Hz)
-)(
-    input wire clk,               // Входной тактовый сигнал (1 MHz)
-    output reg audio_out          // Выходной сигнал (меандр)
+module generator (
+    input wire clk,
+    input wire enable, // Входной сигнал для управления
+    output reg audio_out
 );
 
-    localparam integer DIVIDER = CLK_FREQ / AUDIO_FREQ; // Делитель частоты
-    reg [31:0] counter = 0;                             // Счетчик
+    reg [15:0] counter = 0; // Счётчик для деления частоты
 
     always @(posedge clk) begin
-        if (counter == DIVIDER - 1) begin
-            counter <= 0;
-            audio_out <= ~audio_out; // Переключение меандра
-        end else begin
+        if (enable) begin
             counter <= counter + 1;
+            if (counter >= 1136) begin // Исправленный делитель для 440 Гц
+                counter <= 0;
+                audio_out <= ~audio_out; // Переключаем меандр
+            end
+        end else begin
+            audio_out <= 0; // Тишина, если enable = 0
         end
     end
 
