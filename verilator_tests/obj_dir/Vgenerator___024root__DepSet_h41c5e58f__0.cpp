@@ -30,6 +30,7 @@ VL_INLINE_OPT void Vgenerator___024root___nba_sequent__TOP__0(Vgenerator___024ro
         }
     } else {
         vlSelf->audio_out = 0U;
+        __Vdly__generator__DOT__counter = 0U;
     }
     vlSelf->generator__DOT__counter = __Vdly__generator__DOT__counter;
 }
