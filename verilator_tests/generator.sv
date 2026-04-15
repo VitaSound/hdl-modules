@@ -14,6 +14,7 @@ module generator (
                 audio_out <= ~audio_out; // Переключаем меандр
             end
         end else begin
+            counter <= 0;
             audio_out <= 0; // Тишина, если enable = 0
         end
     end

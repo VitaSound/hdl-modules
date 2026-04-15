@@ -1,55 +1,39 @@
 #include "Vgenerator.h"
 #include "verilated.h"
 #include <portaudio.h>
+#include <atomic>
 #include <cstdint>
+#include <csignal>
+#include <cerrno>
 #include <fstream>
-
 #include <iostream>
 #include <thread>
-#include <linux/input.h>
-#include <fcntl.h>
+#include <chrono>
+#include <termios.h>
 #include <unistd.h>
-#include <atomic>
-#include <iostream>
+#include <fcntl.h>
+#include <linux/input.h>
+#include <string>
+#include <vector>
+#include <cstring>
 
-// Глобальная переменная для управления enable
-std::atomic<bool> enable(false);
+namespace {
+constexpr uint32_t DEFAULT_SAMPLE_RATE = 48000;
+constexpr uint32_t VERILOG_CLK_HZ = 1000000;
+constexpr unsigned long FRAMES_PER_BUFFER = paFramesPerBufferUnspecified;
 
-// Функция для отслеживания нажатий клавиш
-void keyPressHandler() {
-    const char* device = "/dev/input/event2"; // Устройство клавиатуры
-    int fd = open(device, O_RDONLY);
-    if (fd == -1) {
-        perror("Failed to open input device");
-        return;
-    }
-
-    struct input_event ev;
-    while (true) {
-        read(fd, &ev, sizeof(struct input_event));
-        if (ev.type == EV_KEY && ev.code == KEY_1) { // Клавиша '1'
-            if (ev.value == 1) { // Нажата
-                enable = true;
-            } else if (ev.value == 0) { // Отпущена
-                enable = false;
-            }
-        }
-    }
-
-    close(fd);
-}
-
-// Параметры аудио
-#define SAMPLE_RATE 48000  // Частота дискретизации звука
-#define FRAMES_PER_BUFFER 64  // Размер буфера
-
-// Глобальные переменные для записи в WAV
-std::ofstream wavFile;
-bool isWavRecording = false;
-int numSamplesWritten = 0;
+std::atomic<bool> g_running(true);
+std::atomic<bool> g_toggle_enabled(true);
+std::atomic<bool> g_gate_evdev(false);
+std::atomic<bool> g_gate_terminal(false);
+std::atomic<bool> g_force_tone(false);
+std::atomic<int> g_note(-1);
+std::atomic<int> g_active_note_key(-1);
+std::atomic<bool> g_evdev_active(false);
+} // namespace
 
 // Запись заголовка WAV
-void writeWavHeader(std::ofstream& file, int sampleRate, int numSamples) {
+void writeWavHeader(std::ofstream& file, uint32_t sampleRate, uint32_t numSamples) {
     file.write("RIFF", 4);
     uint32_t fileSize = 36 + numSamples * 2;
     file.write((char*)&fileSize, 4);
@@ -72,170 +56,436 @@ void writeWavHeader(std::ofstream& file, int sampleRate, int numSamples) {
     file.write((char*)&dataSize, 4);
 }
 
-// Запись семпла в WAV
-void writeSample(int16_t sample) {
-    if (isWavRecording && wavFile.is_open()) {
-        // printf("Writing sample: %d\n", sample); // Отладочное сообщение
-        wavFile.write((char*)&sample, 2);
-        numSamplesWritten++;
+struct AudioContext {
+    Vgenerator* top = nullptr;
+    std::ofstream wavFile;
+    uint32_t samplesWritten = 0;
+    uint32_t fractional = 0;
+    uint32_t sampleRate = DEFAULT_SAMPLE_RATE;
+    int channels = 1;
+    bool recordWav = true;
+};
+
+void stepVerilogCycles(Vgenerator* top, uint32_t cycles) {
+    for (uint32_t i = 0; i < cycles; ++i) {
+        top->clk = 0;
+        top->eval();
+        top->clk = 1;
+        top->eval();
     }
 }
 
-// Функция обратного вызова PortAudio
-int audioCallback(const void* input, void* output,
-                  unsigned long frameCount,
-                  const PaStreamCallbackTimeInfo* timeInfo,
-                  PaStreamCallbackFlags statusFlags,
-                  void* userData) {
-    Vgenerator* top = (Vgenerator*)userData;
-    int16_t* out = (int16_t*)output;
+void onSignal(int) {
+    g_running = false;
+}
 
-    for (unsigned int i = 0; i < frameCount; i++) {
-        // Эмулируем работу Verilog-модуля на частоте 1 МГц
-        for (int j = 0; j < 21; j++) { // 21 такт на семпл
-            top->clk = 0; top->eval(); // Негативный фронт
-            top->clk = 1; top->eval(); // Позитивный фронт
+int audioCallback(const void*,
+                  void* output,
+                  unsigned long frameCount,
+                  const PaStreamCallbackTimeInfo*,
+                  PaStreamCallbackFlags,
+                  void* userData) {
+    auto* ctx = static_cast<AudioContext*>(userData);
+    int16_t* out = static_cast<int16_t*>(output);
+
+    const bool gate = g_gate_evdev.load(std::memory_order_relaxed) ||
+                      g_gate_terminal.load(std::memory_order_relaxed);
+    const bool enabled = g_force_tone.load(std::memory_order_relaxed) ||
+                         (g_toggle_enabled.load(std::memory_order_relaxed) && gate);
+    ctx->top->enable = enabled ? 1 : 0;
+
+    for (unsigned long i = 0; i < frameCount; ++i) {
+        // Точное целочисленное соотношение 1_000_000 -> 48_000:
+        // на каждый аудио-сэмпл идем на 20 или 21 такт Verilog.
+        ctx->fractional += VERILOG_CLK_HZ;
+        uint32_t cycles = ctx->fractional / ctx->sampleRate;
+        ctx->fractional %= ctx->sampleRate;
+        stepVerilogCycles(ctx->top, cycles);
+
+        int16_t sample = ctx->top->audio_out ? 12000 : -12000;
+        if (ctx->channels == 2) {
+            out[i * 2 + 0] = sample;
+            out[i * 2 + 1] = sample;
+        } else {
+            out[i] = sample;
         }
 
-        // Устанавливаем значение enable
-        top->enable = enable.load();
+        if (ctx->recordWav && ctx->wavFile.is_open()) {
+            ctx->wavFile.write((char*)&sample, 2);
+            ctx->samplesWritten++;
+        }
+    }
 
-        // Преобразуем меандр в аудиосигнал
-        int16_t sample = top->audio_out ? 32767 : -32768; // Меандр → PCM
-        out[i] = sample;
-
-        // Записываем семпл в WAV (если включено)
-        writeSample(sample);
+    if (!g_running.load()) {
+        return paComplete;
     }
     return paContinue;
 }
 
-int main() {
-    // Инициализация Verilator
-    const char* dummy_argv[] = { "program_name" };
-    Verilated::commandArgs(1, (char**)dummy_argv);
+class TerminalInput {
+public:
+    bool init() {
+        fd_ = STDIN_FILENO;
+        if (!isatty(fd_)) {
+            std::cerr << "STDIN is not a TTY, keyboard control disabled.\n";
+            return false;
+        }
 
-    Vgenerator* top = new Vgenerator;
+        if (tcgetattr(fd_, &oldTerm_) != 0) {
+            perror("tcgetattr");
+            return false;
+        }
+        termios raw = oldTerm_;
+        raw.c_lflag &= static_cast<unsigned>(~(ICANON | ECHO));
+        raw.c_cc[VMIN] = 0;
+        raw.c_cc[VTIME] = 0;
+        if (tcsetattr(fd_, TCSANOW, &raw) != 0) {
+            perror("tcsetattr");
+            return false;
+        }
 
-    // Запуск обработчика клавиш в отдельном потоке
-    std::thread keyThread(keyPressHandler);
+        oldFlags_ = fcntl(fd_, F_GETFL, 0);
+        if (oldFlags_ >= 0) {
+            (void)fcntl(fd_, F_SETFL, oldFlags_ | O_NONBLOCK);
+        }
 
-    // Инициализация PortAudio
+        active_ = true;
+        return true;
+    }
+
+    int readChar() const {
+        if (!active_) {
+            return -1;
+        }
+        unsigned char c = 0;
+        ssize_t n = ::read(fd_, &c, 1);
+        if (n == 1) {
+            return static_cast<int>(c);
+        }
+        return -1;
+    }
+
+    ~TerminalInput() {
+        if (!active_) {
+            return;
+        }
+        if (oldFlags_ >= 0) {
+            (void)fcntl(fd_, F_SETFL, oldFlags_);
+        }
+        (void)tcsetattr(fd_, TCSANOW, &oldTerm_);
+    }
+
+private:
+    int fd_ = -1;
+    int oldFlags_ = -1;
+    termios oldTerm_{};
+    bool active_ = false;
+};
+
+void keyboardEventLoop(const std::string& devicePath) {
+    int fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+    if (fd < 0) {
+        std::cerr << "Cannot open input device " << devicePath
+                  << " (need read permission): " << strerror(errno) << "\n";
+        std::cerr << "Fallback: terminal toggle key works, evdev note/gate is disabled.\n";
+        return;
+    }
+
+    g_evdev_active = true;
+    std::cout << "Keyboard gate device: " << devicePath
+              << " (notes: qwertyu, toggle: 1)\n";
+
+    const auto keyToNote = [](uint16_t code) -> int {
+        switch (code) {
+            case KEY_Q: return 0;
+            case KEY_W: return 1;
+            case KEY_E: return 2;
+            case KEY_R: return 3;
+            case KEY_T: return 4;
+            case KEY_Y: return 5;
+            case KEY_U: return 6;
+            default: return -1;
+        }
+    };
+
+    input_event ev{};
+    while (g_running.load()) {
+        ssize_t n = read(fd, &ev, sizeof(ev));
+        if (n == static_cast<ssize_t>(sizeof(ev))) {
+            if (ev.type == EV_KEY) {
+                if (ev.code == KEY_1 && ev.value == 1) {
+                    const bool next = !g_toggle_enabled.load(std::memory_order_relaxed);
+                    g_toggle_enabled.store(next, std::memory_order_relaxed);
+                    std::cerr << (next ? "toggle: on\n" : "toggle: off\n");
+                    std::cerr.flush();
+                }
+
+                const int note = keyToNote(ev.code);
+                if (note >= 0) {
+                    if (ev.value == 1 || ev.value == 2) {
+                        g_note.store(note, std::memory_order_relaxed);
+                        g_gate_evdev.store(true, std::memory_order_relaxed);
+                        g_active_note_key.store(static_cast<int>(ev.code), std::memory_order_relaxed);
+                    } else if (ev.value == 0) {
+                        const int activeKey = g_active_note_key.load(std::memory_order_relaxed);
+                        if (activeKey == static_cast<int>(ev.code)) {
+                            g_gate_evdev.store(false, std::memory_order_relaxed);
+                            g_note.store(-1, std::memory_order_relaxed);
+                            g_active_note_key.store(-1, std::memory_order_relaxed);
+                        }
+                    }
+                }
+            }
+            continue;
+        }
+
+        if (n < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
+            std::cerr << "Read error from " << devicePath << ": " << strerror(errno) << "\n";
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    }
+
+    close(fd);
+    g_evdev_active = false;
+}
+
+int termCharToNote(int c) {
+    switch (c) {
+        case 'q': case 'Q': return 0;
+        case 'w': case 'W': return 1;
+        case 'e': case 'E': return 2;
+        case 'r': case 'R': return 3;
+        case 't': case 'T': return 4;
+        case 'y': case 'Y': return 5;
+        case 'u': case 'U': return 6;
+        default: return -1;
+    }
+}
+
+int main(int argc, char** argv) {
+    Verilated::commandArgs(argc, argv);
+    std::signal(SIGINT, onSignal);
+    std::signal(SIGTERM, onSignal);
+
+    std::string inputDevice = "/dev/input/event2";
+    PaDeviceIndex requestedOutputDevice = paNoDevice;
+    uint32_t requestedSampleRate = DEFAULT_SAMPLE_RATE;
+    bool listDevicesOnly = false;
+    for (int i = 1; i < argc; ++i) {
+        const std::string arg = argv[i];
+        if (arg == "--input-device" && i + 1 < argc) {
+            inputDevice = argv[++i];
+        } else if (arg == "--device-index" && i + 1 < argc) {
+            requestedOutputDevice = static_cast<PaDeviceIndex>(std::stoi(argv[++i]));
+        } else if (arg == "--sample-rate" && i + 1 < argc) {
+            requestedSampleRate = static_cast<uint32_t>(std::stoul(argv[++i]));
+        } else if (arg == "--list-devices") {
+            listDevicesOnly = true;
+        }
+    }
+
+    AudioContext ctx;
+    ctx.top = new Vgenerator;
+    ctx.top->clk = 0;
+    ctx.top->enable = 0;
+    ctx.top->eval();
+
     PaError err = Pa_Initialize();
     if (err != paNoError) {
         fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
         return 1;
     }
 
-    // Поиск ALSA среди доступных хост-API
-    int alsaHostApiIndex = -1;
-    int numHostApis = Pa_GetHostApiCount();
-    for (int i = 0; i < numHostApis; i++) {
-        const PaHostApiInfo* hostApiInfo = Pa_GetHostApiInfo(i);
-        if (hostApiInfo && hostApiInfo->type == paALSA) {
-            alsaHostApiIndex = i;
-            break;
-        }
-    }
-
-    if (alsaHostApiIndex == -1) {
-        fprintf(stderr, "Error: ALSA host API not found.\n");
+    const int deviceCount = Pa_GetDeviceCount();
+    if (deviceCount < 0) {
+        fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(deviceCount));
+        Pa_Terminate();
         return 1;
     }
-
-    // Вывод списка доступных устройств ALSA
-    printf("Available ALSA devices:\n");
-    int numDevices = Pa_GetDeviceCount();
-    for (int i = 0; i < numDevices; i++) {
-        const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
-        if (deviceInfo && Pa_GetHostApiInfo(deviceInfo->hostApi)->type == paALSA) {
-            printf("Device %d: %s\n", i, deviceInfo->name);
+    std::vector<PaDeviceIndex> outputDevices;
+    std::cerr << "PortAudio output devices:\n";
+    for (PaDeviceIndex i = 0; i < deviceCount; ++i) {
+        const PaDeviceInfo* d = Pa_GetDeviceInfo(i);
+        if (!d || d->maxOutputChannels <= 0) {
+            continue;
         }
+        outputDevices.push_back(i);
+        const PaHostApiInfo* api = Pa_GetHostApiInfo(d->hostApi);
+        std::cerr << "  [" << i << "] " << d->name
+                  << " | api=" << (api ? api->name : "unknown")
+                  << " | out_ch=" << d->maxOutputChannels
+                  << " | default_sr=" << d->defaultSampleRate << "\n";
     }
-
-    // Выбор устройства (например, Card 1, Device 0)
-    int outputDevice = -1;
-    for (int i = 0; i < numDevices; i++) {
-        const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
-        if (deviceInfo && Pa_GetHostApiInfo(deviceInfo->hostApi)->type == paALSA &&
-            strstr(deviceInfo->name, "ALC294 Analog") != nullptr) {
-            outputDevice = i;
-            break;
-        }
-    }
-
-    if (outputDevice == -1) {
-        fprintf(stderr, "Error: Could not find ALC294 Analog device.\n");
+    if (outputDevices.empty()) {
+        std::cerr << "No output devices found.\n";
+        Pa_Terminate();
         return 1;
     }
+    if (listDevicesOnly) {
+        Pa_Terminate();
+        return 0;
+    }
 
-    // Настройка параметров вывода
+    if (requestedOutputDevice == paNoDevice) {
+        std::cerr << "Enter output device index: ";
+        std::cerr.flush();
+        int index = -1;
+        if (!(std::cin >> index)) {
+            std::cerr << "Invalid input.\n";
+            Pa_Terminate();
+            return 1;
+        }
+        requestedOutputDevice = static_cast<PaDeviceIndex>(index);
+    }
+
+    PaDeviceIndex outputDevice = (requestedOutputDevice != paNoDevice)
+                                     ? requestedOutputDevice
+                                     : Pa_GetDefaultOutputDevice();
+    if (outputDevice == paNoDevice) {
+        fprintf(stderr, "PortAudio error: default output device not found.\n");
+        Pa_Terminate();
+        return 1;
+    }
+    if (outputDevice < 0 || outputDevice >= deviceCount) {
+        fprintf(stderr, "PortAudio error: invalid output device index %d.\n", outputDevice);
+        Pa_Terminate();
+        return 1;
+    }
+    const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(outputDevice);
+    if (!deviceInfo || deviceInfo->maxOutputChannels <= 0) {
+        fprintf(stderr, "PortAudio error: selected device has no output channels.\n");
+        Pa_Terminate();
+        return 1;
+    }
+    const PaHostApiInfo* hostInfo = Pa_GetHostApiInfo(deviceInfo->hostApi);
+
     PaStreamParameters outputParameters;
     outputParameters.device = outputDevice;
-    outputParameters.channelCount = 1;                     // Моно
-    outputParameters.sampleFormat = paInt16;               // 16-bit PCM
-    outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
+    outputParameters.channelCount = deviceInfo->maxOutputChannels >= 2 ? 2 : 1;
+    outputParameters.sampleFormat = paInt16;
+    outputParameters.suggestedLatency = deviceInfo->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = nullptr;
 
-    // Открываем поток
+    double openSampleRate = requestedSampleRate;
+    err = Pa_IsFormatSupported(nullptr, &outputParameters, openSampleRate);
+    if (err != paFormatIsSupported) {
+        const double fallbackRate = deviceInfo->defaultSampleRate;
+        std::cerr << "Requested format unsupported (" << requestedSampleRate
+                  << " Hz, ch=" << outputParameters.channelCount
+                  << "). Trying device default " << fallbackRate << " Hz.\n";
+        err = Pa_IsFormatSupported(nullptr, &outputParameters, fallbackRate);
+        if (err != paFormatIsSupported) {
+            std::cerr << "PortAudio format error: " << Pa_GetErrorText(err) << "\n";
+            Pa_Terminate();
+            return 1;
+        }
+        openSampleRate = fallbackRate;
+    }
+
     PaStream* stream;
     err = Pa_OpenStream(&stream,
-                        nullptr, // Нет входного потока
+                        nullptr,
                         &outputParameters,
-                        SAMPLE_RATE,
+                        openSampleRate,
                         FRAMES_PER_BUFFER,
                         paClipOff,
                         audioCallback,
-                        top);
+                        &ctx);
     if (err != paNoError) {
         fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
+        Pa_Terminate();
         return 1;
     }
 
-    // Запись в WAV (опционально)
-    isWavRecording = true;
-    wavFile.open("output.wav", std::ios::binary);
-    if (!wavFile.is_open()) {
+    if (ctx.recordWav) {
+        ctx.wavFile.open("output.wav", std::ios::binary);
+    }
+    if (ctx.recordWav && !ctx.wavFile.is_open()) {
         fprintf(stderr, "Error: Could not open output.wav for writing.\n");
+        Pa_CloseStream(stream);
+        Pa_Terminate();
         return 1;
     }
-    printf("WAV file opened successfully.\n");
+    if (ctx.recordWav) {
+        writeWavHeader(ctx.wavFile, static_cast<uint32_t>(openSampleRate), 0);
+    }
 
-    // Запись начального заголовка WAV
-    writeWavHeader(wavFile, SAMPLE_RATE, 0); // Начальный заголовок (обновится позже)
+    ctx.sampleRate = static_cast<uint32_t>(openSampleRate);
+    ctx.channels = outputParameters.channelCount;
 
-    // Запуск потока
     err = Pa_StartStream(stream);
     if (err != paNoError) {
         fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
+        Pa_CloseStream(stream);
+        Pa_Terminate();
         return 1;
     }
 
-    printf("Playing sound... Press Ctrl+C to stop.\n");
+    TerminalInput termInput;
+    const bool keyboardOk = termInput.init();
+    std::thread keyThread(keyboardEventLoop, inputDevice);
+    std::cerr << "Realtime audio started: device=[" << outputDevice << "] "
+              << deviceInfo->name
+              << " api=" << (hostInfo ? hostInfo->name : "unknown")
+              << " sample_rate=" << ctx.sampleRate
+              << " channels=" << ctx.channels << "\n";
+    if (keyboardOk) {
+        std::cerr << "Keys: [x] quit, [1] toggle on/off, [t] force tone on/off, [space] gate off.\n";
+        std::cerr << "Notes: [qwertyu] set note+gate from terminal (fallback) and evdev.\n";
+    }
+    std::cerr.flush();
 
-    // Основной цикл программы
-    while (true) {
-        // Бесконечный цикл для воспроизведения звука
+    while (g_running.load() && Pa_IsStreamActive(stream) == 1) {
+        if (keyboardOk) {
+            const int c = termInput.readChar();
+            if (c == '1') {
+                const bool next = !g_toggle_enabled.load(std::memory_order_relaxed);
+                g_toggle_enabled.store(next, std::memory_order_relaxed);
+                std::cerr << (next ? "toggle: on\n" : "toggle: off\n");
+                std::cerr.flush();
+            } else if (c == 't' || c == 'T') {
+                const bool next = !g_force_tone.load(std::memory_order_relaxed);
+                g_force_tone.store(next, std::memory_order_relaxed);
+                std::cerr << (next ? "force tone: on\n" : "force tone: off\n");
+                std::cerr.flush();
+            } else if (c == ' ') {
+                g_gate_terminal.store(false, std::memory_order_relaxed);
+                g_note.store(-1, std::memory_order_relaxed);
+                g_active_note_key.store(-1, std::memory_order_relaxed);
+                std::cerr << "gate(term): off\n";
+                std::cerr.flush();
+            } else if (c == 'x' || c == 'X') {
+                g_running = false;
+            } else {
+                const int note = termCharToNote(c);
+                if (note >= 0) {
+                    g_note.store(note, std::memory_order_relaxed);
+                    g_gate_terminal.store(true, std::memory_order_relaxed);
+                    std::cerr << "note=" << note << " gate(term)=on\n";
+                    std::cerr.flush();
+                }
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
-    // Остановка потока
-    Pa_StopStream(stream);
-    Pa_CloseStream(stream);
-
-    // Обновление заголовка WAV перед закрытием файла
-    if (wavFile.is_open()) {
-        wavFile.seekp(0, std::ios::beg); // Вернуться в начало файла
-        writeWavHeader(wavFile, SAMPLE_RATE, numSamplesWritten); // Обновить заголовок
-        wavFile.close();
-        printf("WAV file closed and header updated.\n");
-    }
-
-    // Очистка ресурсов
-    Pa_Terminate();
-
-    // Ожидание завершения потока
+    g_running = false;
     keyThread.join();
 
-    delete top;
+    err = Pa_StopStream(stream);
+    if (err != paNoError) {
+        fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
+    }
+    Pa_CloseStream(stream);
+
+    if (ctx.recordWav && ctx.wavFile.is_open()) {
+        ctx.wavFile.seekp(0, std::ios::beg);
+        writeWavHeader(ctx.wavFile, ctx.sampleRate, ctx.samplesWritten);
+        ctx.wavFile.close();
+    }
+
+    Pa_Terminate();
+    delete ctx.top;
     return 0;
 }
