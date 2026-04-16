@@ -23,12 +23,8 @@ constexpr uint32_t VERILOG_CLK_HZ = 1000000;
 constexpr unsigned long FRAMES_PER_BUFFER = paFramesPerBufferUnspecified;
 
 std::atomic<bool> g_running(true);
-std::atomic<bool> g_toggle_enabled(true);
-std::atomic<bool> g_gate_evdev(false);
-std::atomic<bool> g_gate_terminal(false);
-std::atomic<bool> g_force_tone(false);
+std::atomic<bool> g_gate(false);
 std::atomic<int> g_note(-1);
-std::atomic<int> g_active_note_key(-1);
 std::atomic<bool> g_evdev_active(false);
 } // namespace
 
@@ -88,10 +84,7 @@ int audioCallback(const void*,
     auto* ctx = static_cast<AudioContext*>(userData);
     int16_t* out = static_cast<int16_t*>(output);
 
-    const bool gate = g_gate_evdev.load(std::memory_order_relaxed) ||
-                      g_gate_terminal.load(std::memory_order_relaxed);
-    const bool enabled = g_force_tone.load(std::memory_order_relaxed) ||
-                         (g_toggle_enabled.load(std::memory_order_relaxed) && gate);
+    const bool enabled = g_gate.load(std::memory_order_relaxed);
     ctx->top->enable = enabled ? 1 : 0;
 
     for (unsigned long i = 0; i < frameCount; ++i) {
@@ -187,13 +180,13 @@ void keyboardEventLoop(const std::string& devicePath) {
     if (fd < 0) {
         std::cerr << "Cannot open input device " << devicePath
                   << " (need read permission): " << strerror(errno) << "\n";
-        std::cerr << "Fallback: terminal toggle key works, evdev note/gate is disabled.\n";
+        std::cerr << "No evdev input -> GATE stays 0.\n";
         return;
     }
 
     g_evdev_active = true;
     std::cout << "Keyboard gate device: " << devicePath
-              << " (notes: qwertyu, toggle: 1)\n";
+              << " (notes: qwertyu)\n";
 
     const auto keyToNote = [](uint16_t code) -> int {
         switch (code) {
@@ -208,32 +201,63 @@ void keyboardEventLoop(const std::string& devicePath) {
         }
     };
 
+    const auto keyName = [](uint16_t code) -> const char* {
+        switch (code) {
+            case KEY_Q: return "Q";
+            case KEY_W: return "W";
+            case KEY_E: return "E";
+            case KEY_R: return "R";
+            case KEY_T: return "T";
+            case KEY_Y: return "Y";
+            case KEY_U: return "U";
+            default: return "?";
+        }
+    };
+
+    const auto evValueName = [](int v) -> const char* {
+        if (v == 0) return "up";
+        if (v == 1) return "down";
+        if (v == 2) return "repeat";
+        return "unknown";
+    };
+
+    const auto firstNoteFromMask = [](uint8_t mask) -> int {
+        for (int i = 0; i < 7; ++i) {
+            if (mask & (1u << i)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
     input_event ev{};
+    uint8_t pressedNotesMask = 0;
     while (g_running.load()) {
         ssize_t n = read(fd, &ev, sizeof(ev));
         if (n == static_cast<ssize_t>(sizeof(ev))) {
             if (ev.type == EV_KEY) {
-                if (ev.code == KEY_1 && ev.value == 1) {
-                    const bool next = !g_toggle_enabled.load(std::memory_order_relaxed);
-                    g_toggle_enabled.store(next, std::memory_order_relaxed);
-                    std::cerr << (next ? "toggle: on\n" : "toggle: off\n");
-                    std::cerr.flush();
-                }
-
                 const int note = keyToNote(ev.code);
                 if (note >= 0) {
-                    if (ev.value == 1 || ev.value == 2) {
+                    const uint8_t bit = static_cast<uint8_t>(1u << note);
+                    if (ev.value == 1) {
                         g_note.store(note, std::memory_order_relaxed);
-                        g_gate_evdev.store(true, std::memory_order_relaxed);
-                        g_active_note_key.store(static_cast<int>(ev.code), std::memory_order_relaxed);
+                        pressedNotesMask = static_cast<uint8_t>(pressedNotesMask | bit);
+                    } else if (ev.value == 2) {
+                        // autorepeat: состояние зажатия уже выставлено на key-down
                     } else if (ev.value == 0) {
-                        const int activeKey = g_active_note_key.load(std::memory_order_relaxed);
-                        if (activeKey == static_cast<int>(ev.code)) {
-                            g_gate_evdev.store(false, std::memory_order_relaxed);
-                            g_note.store(-1, std::memory_order_relaxed);
-                            g_active_note_key.store(-1, std::memory_order_relaxed);
-                        }
+                        pressedNotesMask = static_cast<uint8_t>(pressedNotesMask & ~bit);
+                        g_note.store(firstNoteFromMask(pressedNotesMask), std::memory_order_relaxed);
                     }
+                    g_gate.store(pressedNotesMask != 0, std::memory_order_relaxed);
+
+                    std::cerr << "[evdev] key=" << keyName(ev.code)
+                              << " note=" << note
+                              << " event=" << evValueName(ev.value)
+                              << " mask=0x" << std::hex << static_cast<int>(pressedNotesMask) << std::dec
+                              << " gate=" << (g_gate.load(std::memory_order_relaxed) ? 1 : 0)
+                              << " active_note=" << g_note.load(std::memory_order_relaxed)
+                              << "\n";
+                    std::cerr.flush();
                 }
             }
             continue;
@@ -248,19 +272,8 @@ void keyboardEventLoop(const std::string& devicePath) {
 
     close(fd);
     g_evdev_active = false;
-}
-
-int termCharToNote(int c) {
-    switch (c) {
-        case 'q': case 'Q': return 0;
-        case 'w': case 'W': return 1;
-        case 'e': case 'E': return 2;
-        case 'r': case 'R': return 3;
-        case 't': case 'T': return 4;
-        case 'y': case 'Y': return 5;
-        case 'u': case 'U': return 6;
-        default: return -1;
-    }
+    g_gate.store(false, std::memory_order_relaxed);
+    g_note.store(-1, std::memory_order_relaxed);
 }
 
 int main(int argc, char** argv) {
@@ -431,40 +444,16 @@ int main(int argc, char** argv) {
               << " sample_rate=" << ctx.sampleRate
               << " channels=" << ctx.channels << "\n";
     if (keyboardOk) {
-        std::cerr << "Keys: [x] quit, [1] toggle on/off, [t] force tone on/off, [space] gate off.\n";
-        std::cerr << "Notes: [qwertyu] set note+gate from terminal (fallback) and evdev.\n";
+        std::cerr << "Keys: [x] quit.\n";
+        std::cerr << "evdev notes: [qwertyu], gate=1 while key is held.\n";
     }
     std::cerr.flush();
 
     while (g_running.load() && Pa_IsStreamActive(stream) == 1) {
         if (keyboardOk) {
             const int c = termInput.readChar();
-            if (c == '1') {
-                const bool next = !g_toggle_enabled.load(std::memory_order_relaxed);
-                g_toggle_enabled.store(next, std::memory_order_relaxed);
-                std::cerr << (next ? "toggle: on\n" : "toggle: off\n");
-                std::cerr.flush();
-            } else if (c == 't' || c == 'T') {
-                const bool next = !g_force_tone.load(std::memory_order_relaxed);
-                g_force_tone.store(next, std::memory_order_relaxed);
-                std::cerr << (next ? "force tone: on\n" : "force tone: off\n");
-                std::cerr.flush();
-            } else if (c == ' ') {
-                g_gate_terminal.store(false, std::memory_order_relaxed);
-                g_note.store(-1, std::memory_order_relaxed);
-                g_active_note_key.store(-1, std::memory_order_relaxed);
-                std::cerr << "gate(term): off\n";
-                std::cerr.flush();
-            } else if (c == 'x' || c == 'X') {
+            if (c == 'x' || c == 'X') {
                 g_running = false;
-            } else {
-                const int note = termCharToNote(c);
-                if (note >= 0) {
-                    g_note.store(note, std::memory_order_relaxed);
-                    g_gate_terminal.store(true, std::memory_order_relaxed);
-                    std::cerr << "note=" << note << " gate(term)=on\n";
-                    std::cerr.flush();
-                }
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));

@@ -2,22 +2,19 @@
 TARGET = obj_dir/Vgenerator
 
 # Verilator и PortAudio
-VERILATOR_FLAGS = --cc
-PORTAUDIO_LIBS = -lportaudio
+VERILATOR_FLAGS = --cc --exe
+PORTAUDIO_LIBS = -lportaudio -lpthread
 
 # Исходные файлы
-SRCS = generator.sv main.cpp
+RTL_SRCS = generator.sv
+CPP_SRCS = main.cpp
 
 # Правила сборки
 all: $(TARGET)
 
-$(TARGET): $(SRCS)
-	# Генерация C++-кода с помощью Verilator
-	verilator $(VERILATOR_FLAGS) $(SRCS) --Mdir obj_dir --top-module generator
-	cd obj_dir && make -f Vgenerator.mk
-
-	# Компиляция и линковка
-	g++ -Iobj_dir -o $(TARGET) obj_dir/main.o obj_dir/verilated.o obj_dir/verilated_threads.o obj_dir/Vgenerator__ALL.a $(PORTAUDIO_LIBS) -lpthread
+$(TARGET): $(RTL_SRCS) $(CPP_SRCS)
+	# Генерация C++ и makefile через Verilator.
+	verilator $(VERILATOR_FLAGS) $(RTL_SRCS) $(CPP_SRCS) --Mdir obj_dir --top-module generator --build -o Vgenerator -LDFLAGS "$(PORTAUDIO_LIBS)"
 
 clean:
 	rm -rf obj_dir
