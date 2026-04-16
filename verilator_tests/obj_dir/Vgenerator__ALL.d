@@ -7,5 +7,6 @@ Vgenerator__ALL.o: Vgenerator__ALL.cpp Vgenerator.cpp Vgenerator__pch.h \
  Vgenerator.h Vgenerator___024root.h \
  Vgenerator___024root__DepSet_h2eaf9ffd__0.cpp \
  Vgenerator___024root__DepSet_h41c5e58f__0.cpp \
- Vgenerator___024root__Slow.cpp \
+ Vgenerator__ConstPool_0.cpp Vgenerator___024root__Slow.cpp \
+ Vgenerator___024root__DepSet_h2eaf9ffd__0__Slow.cpp \
  Vgenerator___024root__DepSet_h41c5e58f__0__Slow.cpp Vgenerator__Syms.cpp
