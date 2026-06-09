@@ -1,0 +1,15 @@
+# Cursor / tooling
+.codex
+
+# Verilator build output
+verilator_tests/obj_dir/
+
+# Verilator WAV recordings
+verilator_tests/*.wav
+
+# Icarus Verilog simulation
+testbench
+out.vcd
+
+# Sandbox scratch builds
+sandbox/sine/qqq
