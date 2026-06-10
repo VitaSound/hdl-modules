@@ -16,7 +16,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 EXPORT_TCL = ROOT / "tools" / "export_wave.tcl"
 GTKWAVERC = ROOT / "tools" / "gtkwaverc.render"
-XVFB_SCREEN = "1600x900x24"
+XVFB_SCREEN = "1920x1080x24"
 
 
 def load_modules() -> list[dict]:
@@ -37,7 +37,10 @@ def require_tool(name: str) -> None:
         raise RuntimeError(f"Required tool not found: {name}")
 
 
-def postprocess_png(path: Path) -> None:
+def postprocess_png(path: Path, *, crop_margins: bool) -> None:
+    if not crop_margins:
+        return
+
     try:
         from PIL import Image, ImageChops
     except ImportError:
@@ -96,7 +99,8 @@ def render_module(module: dict, root: Path) -> None:
             raise FileNotFoundError(f"{module_id}: PNG grab was not created")
 
         image.parent.mkdir(parents=True, exist_ok=True)
-        postprocess_png(tmp_png)
+        has_gtkw = gtkw is not None and gtkw.is_file()
+        postprocess_png(tmp_png, crop_margins=not has_gtkw)
         tmp_png.replace(image)
         print(f"[image] {module_id}: saved {image.relative_to(root)}")
 

@@ -1,7 +1,7 @@
-initial_window_x 1600
-initial_window_y 900
+initial_window_x 1920
+initial_window_y 1080
 ignore_savefile_size yes
-ignore_savefile_pos yes
+ignore_savefile_pos no
 hide_sst off
 force_toolbars 0
 splash_disable on

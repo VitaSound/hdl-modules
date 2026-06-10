@@ -31,9 +31,14 @@ if {$use_fallback} {
     }
 }
 
-catch { gtkwave::/Edit/Set_Trace_Max_Hier 0 }
 catch { gtkwave::/Edit/Color_Format/Use_Color 1 }
-catch { gtkwave::/Time/Zoom/Zoom_Full }
+
+if {$use_fallback} {
+    catch { gtkwave::/Edit/Set_Trace_Max_Hier 0 }
+    catch { gtkwave::/Time/Zoom/Zoom_Full }
+}
+
+# Let test.gtkw restore zoom, trace formats (analog/digital), and signal list.
 after 800
 catch { gtkwave::/File/Grab_To_File $png_file }
 catch { gtkwave::/File/Quit }
