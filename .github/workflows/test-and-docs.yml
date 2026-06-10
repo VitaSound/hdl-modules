@@ -2,7 +2,9 @@ name: test-and-docs
 
 on:
   push:
+    branches: [master, main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test-and-docs:
@@ -22,11 +24,17 @@ jobs:
             python3-jinja2 \
             python3-pil
 
-      - name: Run tests, render images, generate docs
-        run: make all
+      - name: Run simulations
+        run: make test
 
-      - name: Check generated artifacts are committed
+      - name: Render waveform images
+        run: make images
+
+      - name: Generate README from modules.yaml
+        run: make docs
+
+      - name: Verify committed artifacts are up to date
         run: |
+          git diff --stat
           git diff --exit-code
-          git status --porcelain
           test -z "$(git status --porcelain)"
