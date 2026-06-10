@@ -164,7 +164,7 @@ make docs                # обновить README
 
 ### `make images` падает — нет X / gtkwave
 
-Нужны `xvfb`, `gtkwave`, `ghostscript`. Рендер идёт через `xvfb-run` и конвертацию PS→PNG через `gs`.
+Нужны `xvfb`, `gtkwave`. Рендер идёт через `xvfb-run` и цветной PNG grab из окна GTKWave.
 
 ### Картинка пустая или без сигналов
 

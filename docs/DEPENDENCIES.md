@@ -10,9 +10,9 @@ sudo apt install -y \
   iverilog \
   gtkwave \
   xvfb \
-  ghostscript \
   python3-yaml \
-  python3-jinja2
+  python3-jinja2 \
+  python3-pil
 ```
 
 Или через pip в виртуальном окружении:

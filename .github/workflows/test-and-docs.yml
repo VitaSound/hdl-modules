@@ -18,9 +18,9 @@ jobs:
             iverilog \
             gtkwave \
             xvfb \
-            ghostscript \
             python3-yaml \
-            python3-jinja2
+            python3-jinja2 \
+            python3-pil
 
       - name: Run tests, render images, generate docs
         run: make all

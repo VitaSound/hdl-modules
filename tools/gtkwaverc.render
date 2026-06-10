@@ -1,0 +1,10 @@
+initial_window_x 1600
+initial_window_y 900
+ignore_savefile_size yes
+ignore_savefile_pos yes
+hide_sst off
+force_toolbars 0
+splash_disable on
+use_toolbutton_interface off
+dynamic_resizing 0
+use_color yes

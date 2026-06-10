@@ -1,13 +1,14 @@
-# Export GTKWave view to PostScript for PNG conversion.
+# Export GTKWave main window to PNG (color, correct orientation).
 # Environment:
-#   WAVE_PS_FILE - output .ps path (required)
+#   WAVE_PNG_FILE - output .png path (required)
+#   GTKW_FILE     - if set, signals are loaded from save file (optional)
 
-if {![info exists ::env(WAVE_PS_FILE)] || $::env(WAVE_PS_FILE) eq ""} {
-    puts stderr "WAVE_PS_FILE is not set"
+if {![info exists ::env(WAVE_PNG_FILE)] || $::env(WAVE_PNG_FILE) eq ""} {
+    puts stderr "WAVE_PNG_FILE is not set"
     exit 1
 }
 
-set ps_file $::env(WAVE_PS_FILE)
+set png_file $::env(WAVE_PNG_FILE)
 set use_fallback 1
 
 if {[info exists ::env(GTKW_FILE)] && $::env(GTKW_FILE) ne ""} {
@@ -31,7 +32,9 @@ if {$use_fallback} {
 }
 
 catch { gtkwave::/Edit/Set_Trace_Max_Hier 0 }
+catch { gtkwave::/Edit/Color_Format/Use_Color 1 }
 catch { gtkwave::/Time/Zoom/Zoom_Full }
-catch { gtkwave::/File/Print_To_File PS {A4} Full $ps_file }
+after 800
+catch { gtkwave::/File/Grab_To_File $png_file }
 catch { gtkwave::/File/Quit }
 exit

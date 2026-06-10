@@ -16,4 +16,6 @@ verilator_tests/*.wav
 testbench
 out.vcd
 wave.ps
+*.png.tmp
+
 qqq
