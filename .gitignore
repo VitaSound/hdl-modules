@@ -1,6 +1,11 @@
 # Cursor / tooling
 .codex
 
+# Editor / OS
+*~
+*.swp
+.DS_Store
+
 # Verilator build output
 verilator_tests/obj_dir/
 
@@ -10,6 +15,4 @@ verilator_tests/*.wav
 # Icarus Verilog simulation
 testbench
 out.vcd
-
-# Sandbox scratch builds
-sandbox/sine/qqq
+qqq
