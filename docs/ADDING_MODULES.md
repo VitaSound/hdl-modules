@@ -177,4 +177,6 @@ make docs                # обновить README
 
 ### CI ругается на `git diff`
 
-Локально выполните `make all` и закоммитьте обновлённые README и PNG.
+Для README: `make docs` и закоммитьте `modules.yaml` + сгенерированные `README.md`.
+
+PNG в CI не сравниваются с git (рендер GTKWave зависит от окружения). Картинки обновляйте локально: `make images` и коммитьте `test.png` вручную.

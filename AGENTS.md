@@ -119,7 +119,7 @@ make docs          # обновляет все README репозитория
 make all           # перед коммитом — полный прогон всех модулей
 ```
 
-GitHub Actions падает, если после `make all` есть `git diff`.
+GitHub Actions проверяет `git diff` только для `README.md` и `modules.yaml`. PNG могут отличаться по байтам между локальной машиной и CI (разный GTKWave/шрифты) — их коммитят после локального `make images`.
 
 ### 7. Коммит
 
@@ -138,7 +138,8 @@ GitHub Actions падает, если после `make all` есть `git diff`.
 | Сплошные блоки на PNG | Уменьшить zoom в GTKWave, сохранить test.gtkw |
 | Артефакты / дубли UI | Не менять логику ignore_* в gtkwaverc без причины |
 | README не обновился | `make docs`, не править README руками |
-| CI red на git diff | Локально `make all`, закоммитить PNG и README |
+| CI red на git diff README | `make docs`, закоммитить README и `modules.yaml` |
+| CI red только на PNG | Нормально: PNG не сравниваются в CI; обновить локально `make images` |
 | Новый id не находится | Добавить в modules.yaml, проверить `make list` |
 
 ## Ссылки

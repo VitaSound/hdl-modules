@@ -27,14 +27,14 @@ jobs:
       - name: Run simulations
         run: make test
 
-      - name: Render waveform images
+      - name: Render waveform images (smoke test)
         run: make images
 
       - name: Generate README from modules.yaml
         run: make docs
 
-      - name: Verify committed artifacts are up to date
+      - name: Verify README and modules.yaml are up to date
         run: |
-          git diff --stat
-          git diff --exit-code
-          test -z "$(git status --porcelain)"
+          git diff --stat -- README.md modules.yaml '**/README.md'
+          git diff --exit-code -- README.md modules.yaml '**/README.md'
+          test -z "$(git status --porcelain -- README.md modules.yaml '**/README.md')"
