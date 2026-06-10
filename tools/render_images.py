@@ -37,20 +37,39 @@ def require_tool(name: str) -> None:
         raise RuntimeError(f"Required tool not found: {name}")
 
 
-def postprocess_png(path: Path, *, crop_margins: bool) -> None:
-    if not crop_margins:
-        return
+def _is_dark_row(img, y: int, width: int, step: int = 8) -> bool:
+    for x in range(0, width, step):
+        r, g, b = img.getpixel((x, y))
+        if r + g + b > 40:
+            return False
+    return True
 
+
+def postprocess_png(path: Path, *, crop_margins: bool) -> None:
     try:
         from PIL import Image, ImageChops
     except ImportError:
         return
 
     img = Image.open(path).convert("RGB")
-    bg = Image.new("RGB", img.size, img.getpixel((0, 0)))
-    bbox = ImageChops.difference(img, bg).getbbox()
-    if bbox:
-        img = img.crop(bbox)
+    width, height = img.size
+
+    # Remove empty black area below waveforms (artifact of large render window).
+    bottom = height
+    for y in range(height - 1, -1, -1):
+        if not _is_dark_row(img, y, width):
+            bottom = min(height, y + 48)
+            break
+
+    if bottom < height - 80:
+        img = img.crop((0, 0, width, bottom))
+
+    if crop_margins:
+        bg = Image.new("RGB", img.size, img.getpixel((0, 0)))
+        bbox = ImageChops.difference(img, bg).getbbox()
+        if bbox:
+            img = img.crop(bbox)
+
     img.save(path, optimize=True)
 
 
