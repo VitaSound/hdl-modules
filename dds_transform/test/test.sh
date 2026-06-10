@@ -1,3 +1,4 @@
-iverilog -o testbench testbench.v ../../dds/dds.v ../dds2tria.v ../dds2saw.v ../dds2revsaw.v ../dds2square.v ../dds2pwm.v
-vvp testbench
-gtkwave out.vcd
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec python3 "$ROOT/tools/run_tests.py" --id dds_transform

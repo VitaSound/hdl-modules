@@ -15,4 +15,5 @@ verilator_tests/*.wav
 # Icarus Verilog simulation
 testbench
 out.vcd
+wave.ps
 qqq

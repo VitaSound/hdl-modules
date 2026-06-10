@@ -1,3 +1,4 @@
-iverilog -o testbench testbench.v ../dds.v
-vvp testbench
-gtkwave out.vcd
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec python3 "$ROOT/tools/run_tests.py" --id dds

@@ -1,4 +1,4 @@
-iverilog -o testbench testbench.v ../rnd1.v ../rnd8.v ../rndx.v
-vvp testbench
-# gtkwave out.vcd
-gtkwave test.gtkw
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec python3 "$ROOT/tools/run_tests.py" --id rnd

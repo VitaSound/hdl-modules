@@ -1,0 +1,32 @@
+name: test-and-docs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            iverilog \
+            gtkwave \
+            xvfb \
+            ghostscript \
+            python3-yaml \
+            python3-jinja2
+
+      - name: Run tests, render images, generate docs
+        run: make all
+
+      - name: Check generated artifacts are committed
+        run: |
+          git diff --exit-code
+          git status --porcelain
+          test -z "$(git status --porcelain)"

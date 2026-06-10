@@ -1,0 +1,138 @@
+repo:
+  name: hdl-modules
+  description_ru: Репозиторий, в котором будут собраны все модули
+  legacy_source: https://github.com/UA3MQJ/fpga-synth
+  github: VitaSound/hdl-modules
+  branch: master
+  iverilog_guide: https://iverilog.fandom.com/wiki/Installation_Guide#Ubuntu_Linux
+  sandbox_link: https://sites.google.com/site/analogsynthdiy/sobstvennye-razrabotki/sintezator-na-baze-plis/z---ssylki
+
+categories:
+  - id: common
+    title_ru: Common
+    subtitle_ru: Модули общего назначения и вспомогательные
+    readme: common/README.md
+    modules:
+      - id: powerup_reset
+        description_ru: Генератор автоматического сигнала сброса и сброса по кнопке
+        source: common/powerup_reset.v
+        test_dir: common/powerup_reset_test
+        sources:
+          - common/powerup_reset.v
+        gtkw: common/powerup_reset_test/test.gtkw
+        image: common/powerup_reset_test/test.png
+
+      - id: frqdivmod
+        description_ru: Целочисленный делитель частоты на 2, 3, 4 итд
+        source: common/frqdivmod.v
+        test_dir: common/frqdivmod_test
+        sources:
+          - common/frqdivmod.v
+        gtkw: common/frqdivmod_test/test.gtkw
+        image: common/frqdivmod_test/test.png
+
+      - id: strobe_gen
+        description_ru: Формирователь строба шириной 1 clk от нч сигнала (например, от целочисленного делителя)
+        source: common/strobe_gen.v
+        test_dir: common/strobe_gen_test
+        sources:
+          - common/frqdivmod.v
+          - common/strobe_gen.v
+        gtkw: common/strobe_gen_test/test.gtkw
+        image: common/strobe_gen_test/test.png
+
+  - id: generation
+    title_ru: Генерация
+    packages:
+      - id: dds
+        title: DDS
+        description_en: DDS generator module
+        description_ru: Генератор базовой цифровой пилы
+        readme: dds/README.md
+        source: dds/dds.v
+        test_dir: dds/test
+        sources:
+          - dds/dds.v
+        gtkw: dds/test/test.gtkw
+        image: dds/test/test.png
+
+      - id: dds_transform
+        title: DDS transform
+        description_ru: Преобразователи формы базовой цифровой пилы
+        readme: dds_transform/README.md
+        test_dir: dds_transform/test
+        sources:
+          - dds/dds.v
+          - dds_transform/dds2tria.v
+          - dds_transform/dds2saw.v
+          - dds_transform/dds2revsaw.v
+          - dds_transform/dds2square.v
+          - dds_transform/dds2pwm.v
+        gtkw: dds_transform/test/test.gtkw
+        image: dds_transform/test/test.png
+        variants:
+          - file: dds_transform/dds2saw.v
+            label_ru: пила
+          - file: dds_transform/dds2revsaw.v
+            label_ru: обратная пила
+          - file: dds_transform/dds2tria.v
+            label_ru: треугольник
+          - file: dds_transform/dds2square.v
+            label_ru: меандр
+          - file: dds_transform/dds2pwm.v
+            label_ru: PWM c 7-битной регулировкой %
+
+      - id: vca
+        title: VCA
+        description_ru: "Модули VCA. 8 и 32 битные. Формат данных целочисленный без знака. То есть от 0 до N с центром в N/2."
+        readme: vca/README.md
+        test_dir: vca/test
+        sources:
+          - vca/svca.v
+          - vca/svca32.v
+          - vca/svca_wide.v
+          - dds/dds.v
+          - dds_transform/dds2square.v
+          - dds_transform/dds2tria.v
+        gtkw: vca/test/test.gtkw
+        image: vca/test/test.png
+        variants:
+          - file: vca/svca.v
+            label: vca 8bit cv, in, out
+          - file: vca/svca_wide.v
+            label: vca 8bit cv, in, 16bit out
+          - file: vca/svca32.v
+            label: vca 32 bit cv, in, out
+
+      - id: rnd
+        title: RND
+        description_ru: Модули генерации псевдослучайных чисел 1, 8, n бит.
+        readme: rnd/README.md
+        test_dir: rnd/test
+        sources:
+          - rnd/rnd1.v
+          - rnd/rnd8.v
+          - rnd/rndx.v
+        gtkw: rnd/test/test.gtkw
+        image: rnd/test/test.png
+        variants:
+          - file: rnd/rnd1.v
+            label: rnd 1bit
+          - file: rnd/rnd8.v
+            label: rnd 8 bit
+          - file: rnd/rndx.v
+            label: rnd x bit (1..32)
+
+      - id: adsr
+        title: ADSR
+        description_ru: Генератор огибающей ADSR
+        readme: adsr/README.md
+        source: adsr/adsr.v
+        test_dir: adsr/test
+        sources:
+          - adsr/adsr.v
+          - common/frqdivmod.v
+          - common/powerup_reset.v
+          - common/strobe_gen.v
+        gtkw: adsr/test/test.gtkw
+        image: adsr/test/test.png

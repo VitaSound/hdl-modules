@@ -1,4 +1,4 @@
-iverilog -o testbench testbench.v ../adsr.v ../../common/frqdivmod.v ../../common/powerup_reset.v ../../common/strobe_gen.v
-vvp testbench
-# gtkwave out.vcd
-gtkwave test.gtkw
+#!/bin/bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec python3 "$ROOT/tools/run_tests.py" --id adsr
