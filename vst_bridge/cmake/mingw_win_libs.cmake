@@ -1,0 +1,27 @@
+# Windows system libraries for JUCE + UDP sockets (MinGW/clang does not honor #pragma comment(lib)).
+set(HDL_WIN32_LIBS
+    ws2_32
+    winmm
+    shlwapi
+    version
+    imm32
+    wininet
+    dbghelp
+    dwmapi
+    d2d1
+    dwrite
+    d3d11
+    dxgi
+    dcomp
+    ole32
+    oleaut32
+    uuid
+    shell32
+    user32
+    gdi32
+    advapi32
+    comctl32
+    comdlg32
+    sapi
+    dxguid
+)
