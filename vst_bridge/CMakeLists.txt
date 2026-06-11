@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(HdlVerilator VERSION 0.1.0 LANGUAGES C CXX)
+project(HdlVerilator VERSION 0.2.4 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -56,12 +56,21 @@ target_sources(HdlVerilator
 
 target_include_directories(HdlVerilator PRIVATE protocol Source)
 
+string(TIMESTAMP HDL_BUILD_TIMESTAMP UTC)
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/Source/BuildInfo.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/generated/BuildInfo.h"
+    @ONLY
+)
+
 target_compile_definitions(HdlVerilator
     PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
 )
+
+target_include_directories(HdlVerilator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 target_link_libraries(HdlVerilator
     PRIVATE

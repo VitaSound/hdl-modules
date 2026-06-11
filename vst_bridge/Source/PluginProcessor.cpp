@@ -24,6 +24,41 @@ void HdlVerilatorAudioProcessor::setEngineHost(const juce::String& host) {
     netBridge_.setEngineHost(host);
 }
 
+void HdlVerilatorAudioProcessor::reconnectEngine() {
+    netBridge_.reconnect();
+}
+
+void HdlVerilatorAudioProcessor::resetBridgeStats() {
+    netBridge_.resetStats();
+}
+
+void HdlVerilatorAudioProcessor::setBridgeMuted(bool muted) {
+    netBridge_.setMuted(muted);
+}
+
+void HdlVerilatorAudioProcessor::stopAllNotes() {
+    testNoteOn_ = false;
+    netBridge_.sendAllNotesOff();
+    netBridge_.setMuted(true);
+}
+
+void HdlVerilatorAudioProcessor::setTestNote(bool on) {
+    if (on == testNoteOn_) {
+        return;
+    }
+    testNoteOn_ = on;
+
+    PendingMidiEvent event{};
+    event.note = 60;
+    event.velocity = on ? 100 : 0;
+    event.type = on ? hdlnet::PacketType::NoteOn : hdlnet::PacketType::NoteOff;
+    netBridge_.queueMidi(event);
+
+    if (on) {
+        netBridge_.setMuted(false);
+    }
+}
+
 void HdlVerilatorAudioProcessor::releaseResources() {
     netBridge_.shutdown();
 }

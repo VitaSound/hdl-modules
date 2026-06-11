@@ -8,6 +8,7 @@
 
 # Verilator build output
 verilator_tests/obj_dir/
+verilator_tests/obj_dir_win/
 verilator_tests/test_hdl_net
 
 # VST bridge

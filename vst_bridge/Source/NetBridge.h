@@ -33,10 +33,17 @@ public:
     void readAudio(float* left, float* right, int numSamples);
 
     bool isConnected() const { return connected_.load(); }
+    bool isPrimed() const { return primed_; }
+    bool isMuted() const { return muted_.load(); }
     int getUnderruns() const { return underruns_.load(); }
     int getBufferedSamples() const;
     int getTargetBufferSamples() const;
     int getWarmupBufferSamples() const;
+
+    void reconnect();
+    void resetStats();
+    void setMuted(bool muted);
+    void sendAllNotesOff();
 
 private:
     void run() override;
@@ -50,13 +57,14 @@ private:
     juce::String engineHost_{"127.0.0.1"};
     uint16_t controlPort_ = hdlnet::kDefaultControlPort;
     uint16_t audioPort_ = hdlnet::kDefaultAudioPort;
-    int jitterMs_ = 40;
+    int jitterMs_ = 80;
 
     double sampleRate_ = 48000.0;
     int blockSize_ = 512;
 
     std::atomic<bool> connected_{false};
     std::atomic<bool> running_{false};
+    std::atomic<bool> muted_{false};
     std::atomic<int> underruns_{0};
     std::atomic<uint32_t> seq_{0};
 
@@ -66,7 +74,7 @@ private:
     juce::AbstractFifo midiFifo_{kMaxMidiQueue};
     std::vector<PendingMidiEvent> midiBuffer_;
 
-    static constexpr int kMaxAudioSamples = 48000 * 2;
+    static constexpr int kMaxAudioSamples = 48000 * 4;
     juce::AbstractFifo audioFifo_{kMaxAudioSamples};
     std::vector<float> audioLeft_;
     std::vector<float> audioRight_;

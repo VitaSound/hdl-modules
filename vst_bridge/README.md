@@ -63,6 +63,8 @@ rm -rf build
 
 ## E2E: Windows DAW + engine на Ubuntu/WSL2
 
+**Рекомендуется:** native Windows engine (`verilator_tests/scripts/build_windows_mingw.sh` → `Vgenerator.exe`, host `127.0.0.1`). См. [docs/WSL_NETWORKING.md](../docs/WSL_NETWORKING.md).
+
 1. **Engine** (Ubuntu или WSL2):
 
 ```bash

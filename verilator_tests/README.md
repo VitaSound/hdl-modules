@@ -188,6 +188,35 @@ python3 scripts/udp_smoke_test.py --duration 2.0 --wav /tmp/udp_test.wav
 
 **Протокол:** `protocol/hdl_net.h` — HELLO/ACK, NOTE ON/OFF, PCM int16 stereo. Альтернативы: RTP-MIDI (RFC 6295), Network MIDI 2.0 UDP (MA 2024).
 
+### 7) Windows native engine (без WSL NAT)
+
+Cross-compile из WSL (тот же llvm-mingw, что и VST):
+
+```bash
+cd verilator_tests
+./scripts/build_windows_mingw.sh          # obj_dir_win/Vgenerator.exe
+./scripts/build_windows_mingw.sh --clean
+```
+
+На Windows (cmd/PowerShell), скопировать `obj_dir_win/Vgenerator.exe`:
+
+```bat
+Vgenerator.exe --udp-bind 0.0.0.0:5004 --sample-rate 48000
+```
+
+Или `scripts/run_udp_engine_win.bat` из каталога `verilator_tests`.
+
+В VST **Engine host: `127.0.0.1`** — engine и Reaper на одном PC, UDP без WSL.
+
+Сборка через CMake (Linux UDP-only или cross):
+
+```bash
+cmake -B build-udp -DHDL_ENGINE_UDP_ONLY=ON
+cmake --build build-udp
+```
+
+Windows: `-DCMAKE_TOOLCHAIN_FILE=../vst_bridge/cmake/llvm-mingw.cmake -DHDL_ENGINE_UDP_ONLY=ON`
+
 ## Управление клавишами
 
 В терминале:

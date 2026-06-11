@@ -17,14 +17,14 @@ NetBridge::~NetBridge() {
     shutdown();
 }
 
-int NetBridge::warmupBufferSamples() const {
-    // Start playback after one DAW block; jitter slider caps max latency, not startup silence.
-    return blockSize_;
+int NetBridge::targetBufferSamples() const {
+    // DAW block + jitter headroom so one callback cannot drain below the next block.
+    const int jitterSamples = static_cast<int>(sampleRate_ * jitterMs_ / 1000.0);
+    return blockSize_ + jitterSamples;
 }
 
-int NetBridge::targetBufferSamples() const {
-    return juce::jmax(warmupBufferSamples(),
-                      static_cast<int>(sampleRate_ * jitterMs_ / 1000.0));
+int NetBridge::warmupBufferSamples() const {
+    return targetBufferSamples();
 }
 
 int NetBridge::getTargetBufferSamples() const {
@@ -56,7 +56,7 @@ void NetBridge::prepare(double sampleRate, int blockSize, int jitterMs) {
     lastRight_ = 0.0f;
     seq_.store(0);
     running_.store(true);
-    startThread();
+    startThread(juce::Thread::Priority::high);
 }
 
 void NetBridge::shutdown() {
@@ -112,6 +112,31 @@ void NetBridge::setJitterMs(int ms) {
     primed_ = false;
 }
 
+void NetBridge::reconnect() {
+    audioFifo_.reset();
+    midiFifo_.reset();
+    connected_.store(false);
+    primed_ = false;
+    lastLeft_ = 0.0f;
+    lastRight_ = 0.0f;
+    seq_.store(0);
+    settingsChanged_.signal();
+}
+
+void NetBridge::resetStats() {
+    underruns_.store(0);
+}
+
+void NetBridge::setMuted(bool muted) {
+    muted_.store(muted);
+}
+
+void NetBridge::sendAllNotesOff() {
+    PendingMidiEvent event{};
+    event.type = hdlnet::PacketType::AllNotesOff;
+    queueMidi(event);
+}
+
 void NetBridge::queueMidi(const PendingMidiEvent& event) {
     int start1 = 0;
     int size1 = 0;
@@ -126,22 +151,38 @@ void NetBridge::queueMidi(const PendingMidiEvent& event) {
 }
 
 void NetBridge::readAudio(float* left, float* right, int numSamples) {
+    if (muted_.load()) {
+        juce::FloatVectorOperations::clear(left, numSamples);
+        if (right != left) {
+            juce::FloatVectorOperations::clear(right, numSamples);
+        }
+        return;
+    }
+
     const int available = audioFifo_.getNumReady();
     const int warmup = warmupBufferSamples();
 
     if (!primed_) {
         if (available < warmup) {
-            for (int i = 0; i < numSamples; ++i) {
-                left[i] = lastLeft_;
-                right[i] = lastRight_;
+            juce::FloatVectorOperations::clear(left, numSamples);
+            if (right != left) {
+                juce::FloatVectorOperations::clear(right, numSamples);
             }
-            underruns_.fetch_add(numSamples);
             return;
         }
         primed_ = true;
     }
 
     const int toRead = juce::jmin(numSamples, available);
+    if (toRead <= 0) {
+        juce::FloatVectorOperations::clear(left, numSamples);
+        if (right != left) {
+            juce::FloatVectorOperations::clear(right, numSamples);
+        }
+        underruns_.fetch_add(numSamples);
+        return;
+    }
+
     if (toRead < numSamples) {
         underruns_.fetch_add(numSamples - toRead);
     }
@@ -167,11 +208,23 @@ void NetBridge::readAudio(float* left, float* right, int numSamples) {
         right[outIdx] = lastRight_;
         ++outIdx;
     }
-    for (int i = toRead; i < numSamples; ++i) {
-        left[i] = lastLeft_;
-        right[i] = lastRight_;
-    }
     audioFifo_.finishedRead(toRead);
+
+    if (toRead < numSamples) {
+        const int missing = numSamples - toRead;
+        const int fadeLen = juce::jmin(missing, 64);
+        for (int i = 0; i < fadeLen; ++i) {
+            const float gain = 1.0f - (static_cast<float>(i + 1) / static_cast<float>(fadeLen));
+            left[toRead + i] = lastLeft_ * gain;
+            right[toRead + i] = lastRight_ * gain;
+        }
+        if (missing > fadeLen) {
+            juce::FloatVectorOperations::clear(left + toRead + fadeLen, missing - fadeLen);
+            if (right != left) {
+                juce::FloatVectorOperations::clear(right + toRead + fadeLen, missing - fadeLen);
+            }
+        }
+    }
 }
 
 int NetBridge::getBufferedSamples() const {
@@ -233,33 +286,46 @@ void NetBridge::pushAudioSamples(const int16_t* interleaved, int frames, int cha
     connected_.store(true);
     constexpr float kScale = 1.0f / 32768.0f;
 
-    for (int frame = 0; frame < frames; ++frame) {
-        const int16_t l = interleaved[frame * channels];
-        const int16_t r = channels > 1 ? interleaved[frame * channels + 1] : l;
-
+    int frameOffset = 0;
+    int remaining = frames;
+    while (remaining > 0) {
         int start1 = 0;
         int size1 = 0;
         int start2 = 0;
         int size2 = 0;
-        audioFifo_.prepareToWrite(1, start1, size1, start2, size2);
-        if (size1 <= 0) {
+        audioFifo_.prepareToWrite(remaining, start1, size1, start2, size2);
+        const int canWrite = size1 + size2;
+        if (canWrite <= 0) {
             int dropStart1 = 0;
             int dropSize1 = 0;
             int dropStart2 = 0;
             int dropSize2 = 0;
             audioFifo_.prepareToRead(1, dropStart1, dropSize1, dropStart2, dropSize2);
-            if (dropSize1 + dropSize2 > 0) {
-                audioFifo_.finishedRead(1);
+            if (dropSize1 + dropSize2 <= 0) {
+                break;
             }
-            audioFifo_.prepareToWrite(1, start1, size1, start2, size2);
-            if (size1 <= 0) {
-                continue;
-            }
+            audioFifo_.finishedRead(1);
+            continue;
         }
 
-        audioLeft_[static_cast<size_t>(start1)] = static_cast<float>(l) * kScale;
-        audioRight_[static_cast<size_t>(start1)] = static_cast<float>(r) * kScale;
-        audioFifo_.finishedWrite(1);
+        for (int i = 0; i < size1; ++i) {
+            const int frame = frameOffset + i;
+            const int16_t l = interleaved[frame * channels];
+            const int16_t r = channels > 1 ? interleaved[frame * channels + 1] : l;
+            audioLeft_[static_cast<size_t>(start1 + i)] = static_cast<float>(l) * kScale;
+            audioRight_[static_cast<size_t>(start1 + i)] = static_cast<float>(r) * kScale;
+        }
+        for (int i = 0; i < size2; ++i) {
+            const int frame = frameOffset + size1 + i;
+            const int16_t l = interleaved[frame * channels];
+            const int16_t r = channels > 1 ? interleaved[frame * channels + 1] : l;
+            audioLeft_[static_cast<size_t>(start2 + i)] = static_cast<float>(l) * kScale;
+            audioRight_[static_cast<size_t>(start2 + i)] = static_cast<float>(r) * kScale;
+        }
+
+        audioFifo_.finishedWrite(canWrite);
+        frameOffset += canWrite;
+        remaining -= canWrite;
     }
     trimExcessBuffer();
 }
@@ -286,11 +352,11 @@ void NetBridge::run() {
     int helloCounter = 0;
 
     while (running_.load() && !threadShouldExit()) {
-        if (settingsChanged_.wait(10)) {
+        if (settingsChanged_.wait(1)) {
             sendHello(controlSocket);
         }
 
-        if (++helloCounter > 200) {
+        if (++helloCounter > 1000) {
             helloCounter = 0;
             if (!connected_.load()) {
                 sendHello(controlSocket);
@@ -330,15 +396,21 @@ void NetBridge::run() {
 
         juce::String sender;
         int senderPort = 0;
-        const int ctrlBytes =
-            controlSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
-        if (ctrlBytes > 0) {
+        while (true) {
+            const int ctrlBytes =
+                controlSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
+            if (ctrlBytes <= 0) {
+                break;
+            }
             handleControlPacket(buffer.data(), ctrlBytes);
         }
 
-        const int audioBytes =
-            audioSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
-        if (audioBytes > 0) {
+        while (true) {
+            const int audioBytes =
+                audioSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
+            if (audioBytes <= 0) {
+                break;
+            }
             hdlnet::AudioHeader hdr{};
             size_t payloadBytes = 0;
             if (hdlnet::decodeAudioHeader(buffer.data(), static_cast<size_t>(audioBytes), hdr, payloadBytes)) {

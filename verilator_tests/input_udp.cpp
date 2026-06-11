@@ -84,9 +84,8 @@ std::thread startUdpInput(const UdpInputConfig& cfg, SharedState& state, UdpSess
                 session.setPlugin(src.host, hello.audio_port);
                 session.connected.store(true, std::memory_order_relaxed);
 
-                // Audition tone so the UDP path is audible before MIDI from the DAW.
-                state.gate.store(true, std::memory_order_relaxed);
-                state.note.store(60, std::memory_order_relaxed);
+                state.gate.store(false, std::memory_order_relaxed);
+                state.note.store(-1, std::memory_order_relaxed);
 
                 hdlnet::AckPayload ack{};
                 ack.sample_rate = hello.sample_rate;

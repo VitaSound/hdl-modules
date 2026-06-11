@@ -15,15 +15,25 @@ public:
 private:
     void timerCallback() override;
     void applySettings();
+    void updateStatusText();
+    juce::Colour linkColour() const;
 
     HdlVerilatorAudioProcessor& processor_;
 
     juce::Label titleLabel_;
+    juce::Label versionLabel_;
+    juce::Label hostLabel_;
+    juce::TextEditor hostEditor_;
+    juce::Label jitterLabel_;
+    juce::Slider jitterSlider_;
+    juce::TextButton reconnectButton_{"Reconnect"};
+    juce::TextButton playButton_{"Play"};
+    juce::TextButton stopButton_{"Stop"};
+    juce::TextButton resetStatsButton_{"Reset stats"};
+    juce::TextButton testNoteButton_{"Test note OFF"};
     juce::Label statusLabel_;
     juce::Label statsLabel_;
-    juce::TextEditor hostEditor_;
-    juce::Slider jitterSlider_;
-    juce::Label jitterLabel_;
+    juce::Label portsLabel_;
 
     juce::String lastHost_;
     int lastJitterMs_ = -1;
