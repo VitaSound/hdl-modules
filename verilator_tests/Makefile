@@ -13,15 +13,22 @@ CPP_SRCS = \
 	terminal_input.cpp \
 	input_keyboard.cpp \
 	input_midi.cpp \
+	input_udp.cpp \
 	output_soundcard.cpp \
-	output_wav.cpp
+	output_udp.cpp \
+	output_wav.cpp \
+	net_socket.cpp
 
 # Правила сборки
-all: $(TARGET)
+all: $(TARGET) test_hdl_net
+
+test_hdl_net: protocol/test_hdl_net.cpp protocol/hdl_net.h
+	g++ -std=c++17 -Wall -Wextra -I. -o test_hdl_net protocol/test_hdl_net.cpp
+	./test_hdl_net
 
 $(TARGET): $(RTL_SRCS) $(CPP_SRCS)
 	# Генерация C++ и makefile через Verilator.
 	verilator $(VERILATOR_FLAGS) $(RTL_SRCS) $(CPP_SRCS) --Mdir obj_dir --top-module generator --build -o Vgenerator -LDFLAGS "$(PORTAUDIO_LIBS)"
 
 clean:
-	rm -rf obj_dir
+	rm -rf obj_dir test_hdl_net

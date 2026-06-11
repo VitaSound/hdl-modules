@@ -2,11 +2,14 @@
 
 #include "input_keyboard.h"
 #include "input_midi.h"
+#include "input_udp.h"
 #include "output_soundcard.h"
+#include "output_udp.h"
 #include "output_wav.h"
 #include "shared_state.h"
 #include "synth_core.h"
 #include "terminal_input.h"
+#include "net_socket.h"
 
 #include <atomic>
 #include <csignal>
@@ -24,12 +27,14 @@ constexpr uint32_t DEFAULT_WAV_SECONDS = 10;
 
 enum class InputSource {
     Keyboard,
-    Midi
+    Midi,
+    Udp
 };
 
 enum class OutputMode {
     Soundcard,
-    Wav
+    Wav,
+    Udp
 };
 
 void onSignal(int) {
@@ -41,14 +46,16 @@ void onSignal(int) {
 void printUsage() {
     std::cerr
         << "Options:\n"
-        << "  --input-source keyboard|midi\n"
+        << "  --input-source keyboard|midi|udp\n"
         << "  --input-device /dev/input/eventX\n"
         << "  --list-midi\n"
         << "  --midi-port C:P\n"
-        << "  --output-mode soundcard|wav\n"
+        << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
+        << "  --output-mode soundcard|wav|udp\n"
         << "  --list-devices\n"
         << "  --device-index N\n"
         << "  --sample-rate R\n"
+        << "  --udp-block-frames N (default 256)\n"
         << "  --wav-path FILE\n"
         << "  --wav-seconds N\n";
 }
@@ -76,6 +83,9 @@ int main(int argc, char** argv) {
     std::string wavPath = "output.wav";
     uint32_t wavSeconds = DEFAULT_WAV_SECONDS;
 
+    std::string udpBind = "0.0.0.0:5004";
+    uint16_t udpBlockFrames = 256;
+
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--input-source" && i + 1 < argc) {
@@ -84,6 +94,8 @@ int main(int argc, char** argv) {
                 inputSource = InputSource::Keyboard;
             } else if (src == "midi") {
                 inputSource = InputSource::Midi;
+            } else if (src == "udp") {
+                inputSource = InputSource::Udp;
             } else {
                 std::cerr << "Unknown --input-source: " << src << "\n";
                 printUsage();
@@ -95,12 +107,18 @@ int main(int argc, char** argv) {
             listMidiOnly = true;
         } else if (arg == "--midi-port" && i + 1 < argc) {
             midiPortArg = argv[++i];
+        } else if (arg == "--udp-bind" && i + 1 < argc) {
+            udpBind = argv[++i];
+        } else if (arg == "--udp-block-frames" && i + 1 < argc) {
+            udpBlockFrames = static_cast<uint16_t>(std::stoul(argv[++i]));
         } else if (arg == "--output-mode" && i + 1 < argc) {
             const std::string mode = argv[++i];
             if (mode == "soundcard") {
                 outputMode = OutputMode::Soundcard;
             } else if (mode == "wav") {
                 outputMode = OutputMode::Wav;
+            } else if (mode == "udp") {
+                outputMode = OutputMode::Udp;
             } else {
                 std::cerr << "Unknown --output-mode: " << mode << "\n";
                 printUsage();
@@ -200,16 +218,30 @@ int main(int argc, char** argv) {
     }
 
     SynthCore synth;
-    if (!synthInit(synth, sampleRate, 1)) {
+    const int synthChannels =
+        (outputMode == OutputMode::Udp || outputMode == OutputMode::Soundcard) ? 2 : 1;
+    if (!synthInit(synth, sampleRate, synthChannels)) {
         if (outputMode == OutputMode::Soundcard || listDevicesOnly) {
             Pa_Terminate();
         }
         return 1;
     }
 
+    UdpSessionState udpSession;
     std::thread inputThread;
     if (inputSource == InputSource::Midi) {
         inputThread = startMidiInput(midiClient, midiPort, state);
+    } else if (inputSource == InputSource::Udp) {
+        UdpInputConfig cfg;
+        UdpEndpoint bindEp;
+        if (!parseHostPort(udpBind, bindEp)) {
+            std::cerr << "Invalid --udp-bind: " << udpBind << "\n";
+            synthDestroy(synth);
+            return 1;
+        }
+        cfg.bindHost = bindEp.host;
+        cfg.controlPort = bindEp.port;
+        inputThread = startUdpInput(cfg, state, udpSession);
     } else {
         KeyboardInputConfig cfg;
         cfg.devicePath = inputDevice;
@@ -219,18 +251,37 @@ int main(int argc, char** argv) {
     TerminalInput termInput;
     const bool termOk = termInput.init();
 
+    UdpOutputConfig udpOutCfg;
+    udpOutCfg.blockFrames = udpBlockFrames;
+    udpOutCfg.channels = 2;
+
     int outputResult = 0;
     std::thread outputThread([&]() {
         if (outputMode == OutputMode::Soundcard) {
             outputResult = runSoundcardOutput(synth, state, requestedOutputDevice, sampleRate);
+        } else if (outputMode == OutputMode::Udp) {
+            outputResult = runUdpOutput(synth, state, udpSession, udpOutCfg);
         } else {
             outputResult = runWavOutput(synth, state, wavPath, sampleRate, wavSeconds, 1);
         }
         state.running.store(false, std::memory_order_relaxed);
     });
 
-    std::cerr << "Input: " << (inputSource == InputSource::Midi ? "midi" : "keyboard")
-              << " | Output: " << (outputMode == OutputMode::Soundcard ? "soundcard" : "wav")
+    const char* inputLabel = "keyboard";
+    if (inputSource == InputSource::Midi) {
+        inputLabel = "midi";
+    } else if (inputSource == InputSource::Udp) {
+        inputLabel = "udp";
+    }
+    const char* outputLabel = "wav";
+    if (outputMode == OutputMode::Soundcard) {
+        outputLabel = "soundcard";
+    } else if (outputMode == OutputMode::Udp) {
+        outputLabel = "udp";
+    }
+
+    std::cerr << "Input: " << inputLabel
+              << " | Output: " << outputLabel
               << " | Press [x] to quit\n";
 
     while (state.running.load(std::memory_order_relaxed)) {

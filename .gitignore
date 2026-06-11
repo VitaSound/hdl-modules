@@ -8,6 +8,13 @@
 
 # Verilator build output
 verilator_tests/obj_dir/
+verilator_tests/test_hdl_net
+
+# VST bridge
+vst_bridge/build/
+vst_bridge/build-win/
+vst_bridge/.toolchains/
+vst_bridge/_deps/
 
 # Verilator WAV recordings
 verilator_tests/*.wav
@@ -17,5 +24,3 @@ testbench
 out.vcd
 wave.ps
 *.png.tmp
-
-qqq

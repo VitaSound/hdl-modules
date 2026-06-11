@@ -44,7 +44,10 @@ void synthGenerate(SynthCore& core, const SharedState& state, int16_t* out, unsi
         core.fractional %= core.sampleRate;
         stepVerilogCycles(core.top, cycles);
 
-        const int16_t sample = core.top->audio_out ? 12000 : -12000;
+        int16_t sample = 0;
+        if (core.top->enable) {
+            sample = core.top->audio_out ? 12000 : -12000;
+        }
         if (core.channels == 2) {
             out[i * 2 + 0] = sample;
             out[i * 2 + 1] = sample;

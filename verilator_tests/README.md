@@ -2,8 +2,10 @@
 
 Реалтайм-тест Verilog-модуля генерации звука через Verilator c модульной архитектурой:
 
-- выбираемый модуль ввода: `keyboard` (evdev) или `midi` (ALSA sequencer)
-- выбираемый модуль вывода: `soundcard` (PortAudio) или `wav` (запись в файл)
+- выбираемый модуль ввода: `keyboard` (evdev), `midi` (ALSA sequencer) или `udp` (сеть)
+- выбираемый модуль вывода: `soundcard` (PortAudio), `wav` (запись в файл) или `udp` (PCM в VST)
+
+Связка с DAW: [`../vst_bridge/README.md`](../vst_bridge/README.md) — VST3 шлёт MIDI, engine отдаёт PCM.
 
 ## Зависимости
 
@@ -36,7 +38,10 @@ make
 - `synth_core.*` - шаги Verilator и генерация PCM-сэмплов
 - `input_keyboard.*` - чтение `q2w3er5t6y7u` из `/dev/input/event*`
 - `input_midi.*` - чтение NOTE ON/OFF из ALSA MIDI
+- `input_udp.*` - MIDI по UDP (протокол `protocol/hdl_net.h`)
 - `output_soundcard.*` - вывод на звуковую карту через PortAudio
+- `output_udp.*` - PCM по UDP обратно в VST
+- `net_socket.*` - POSIX UDP сокеты
 - `output_wav.*` - запись в WAV
 - `terminal_input.*` - неблокирующее чтение `x` для выхода
 - `main.cpp` - выбор модулей и оркестрация
@@ -66,7 +71,10 @@ make
 - `--list-devices` - показать доступные output-устройства и выйти
 - `--device-index N` - выбрать устройство вывода по индексу
 - `--sample-rate R` - запросить частоту дискретизации (например, `48000`)
-- `--input-source keyboard|midi` - источник входа (`keyboard` по умолчанию)
+- `--input-source keyboard|midi|udp`
+- `--udp-bind HOST:PORT` (default `0.0.0.0:5004`)
+- `--output-mode soundcard|wav|udp`
+- `--udp-block-frames N` (default `256`) - источник входа (`keyboard` по умолчанию)
 - `--input-device /dev/input/eventX` - устройство клавиатуры для `evdev`-чтения
 - `--list-midi` - показать доступные MIDI-порты ALSA и выйти
 - `--midi-port C:P` - MIDI-порт ALSA в формате `client:port`
@@ -156,6 +164,29 @@ ls -l /dev/input/by-id/*-event-kbd
 ls -l /dev/input/event3
 id
 ```
+
+### 6) UDP -> UDP (VST bridge / smoke test)
+
+Engine для связки с [`vst_bridge`](../vst_bridge/README.md):
+
+```bash
+./obj_dir/Vgenerator --input-source udp --output-mode udp --sample-rate 48000
+```
+
+Smoke-тест без DAW (Python-клиент вместо VST):
+
+```bash
+make test_hdl_net
+python3 scripts/udp_smoke_test.py --duration 2.0 --wav /tmp/udp_test.wav
+```
+
+Или из корня репо: `./scripts/e2e_ubuntu.sh`
+
+**WSL2 + Windows DAW:** engine в WSL, VST на Windows. IP engine — `hostname -I` в WSL (или `127.0.0.1` при mirrored networking Win11). Открыть UDP 5004/5005 в firewall Windows/Linux.
+
+**Latency (MVP, не исправлено):** при Reaper + DirectSound + block 1024 + WSL2 UDP слышны ноты, но с большими underruns и задержкой. См. [vst_bridge/README.md — Known issues](../vst_bridge/README.md#известные-проблемы-2026-06-mvp).
+
+**Протокол:** `protocol/hdl_net.h` — HELLO/ACK, NOTE ON/OFF, PCM int16 stereo. Альтернативы: RTP-MIDI (RFC 6295), Network MIDI 2.0 UDP (MA 2024).
 
 ## Управление клавишами
 
