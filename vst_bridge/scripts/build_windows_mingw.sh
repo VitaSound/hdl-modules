@@ -22,7 +22,7 @@ ensure_llvm_mingw() {
   mkdir -p "$ROOT/.toolchains"
   cd "$ROOT/.toolchains"
   for attempt in 1 2 3; do
-    if curl -fsSL -o "$LLVM_TAR" "$LLVM_URL"; then
+    if curl --connect-timeout 30 --max-time 600 -fsSL -o "$LLVM_TAR" "$LLVM_URL"; then
       break
     fi
     echo "llvm-mingw download failed (attempt $attempt), retrying..." >&2
@@ -34,10 +34,15 @@ ensure_llvm_mingw() {
   mkdir llvm-mingw
   tar xf "$LLVM_TAR" -C llvm-mingw --strip-components=1
   rm -f "$LLVM_TAR"
+  test -x "$TOOLCHAIN_DIR/bin/x86_64-w64-mingw32-clang++"
   cd "$ROOT"
 }
 
-if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+if [[ -n "${SKIP_LLVM_DOWNLOAD:-}" && -x "$TOOLCHAIN_DIR/bin/x86_64-w64-mingw32-clang++" ]]; then
+  TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
+  export LLVM_MINGW="$TOOLCHAIN_DIR"
+  echo "Using existing llvm-mingw at $TOOLCHAIN_DIR"
+elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
   ensure_llvm_mingw
   TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
   export LLVM_MINGW="$TOOLCHAIN_DIR"

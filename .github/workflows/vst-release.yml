@@ -53,11 +53,36 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake g++ git pkg-config zip curl
 
+      - name: Cache llvm-mingw
+        uses: actions/cache@v4
+        id: llvm-cache
+        with:
+          path: vst_bridge/.toolchains/llvm-mingw
+          key: llvm-mingw-20251216-ubuntu-22.04
+
+      - name: Download llvm-mingw toolchain
+        if: steps.llvm-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 15
+        working-directory: vst_bridge
+        run: |
+          mkdir -p .toolchains
+          curl --connect-timeout 30 --max-time 600 --retry 5 --retry-delay 10 \
+            -fsSL -o ".toolchains/$LLVM_TAR" \
+            "https://github.com/mstorsje/llvm-mingw/releases/download/20251216/$LLVM_TAR"
+          rm -rf .toolchains/llvm-mingw
+          mkdir -p .toolchains/llvm-mingw
+          tar xf ".toolchains/$LLVM_TAR" -C .toolchains/llvm-mingw --strip-components=1
+          rm -f ".toolchains/$LLVM_TAR"
+          test -x .toolchains/llvm-mingw/bin/x86_64-w64-mingw32-clang++
+        env:
+          LLVM_TAR: llvm-mingw-20251216-ucrt-ubuntu-22.04-x86_64.tar.xz
+
       - name: Build and package Windows VST3
         working-directory: vst_bridge
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: "2"
           GITHUB_ACTIONS: "true"
+          SKIP_LLVM_DOWNLOAD: "1"
         run: |
           ./scripts/build_windows_mingw.sh --clean
           ./scripts/build_release.sh --windows-only --skip-build
