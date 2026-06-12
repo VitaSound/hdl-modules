@@ -56,41 +56,12 @@ jobs:
             libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
             libcurl4-openssl-dev libfreetype6-dev \
             libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
-            libxrandr-dev libglu1-mesa-dev
+            libxrandr-dev libglu1-mesa-dev zlib1g
 
       - name: Download llvm-mingw toolchain
-        timeout-minutes: 15
+        timeout-minutes: 20
         working-directory: vst_bridge
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p .toolchains
-          TC=".toolchains/llvm-mingw/bin/x86_64-w64-mingw32-clang++"
-          if [[ -x "$TC" ]]; then exit 0; fi
-          if ! command -v gh >/dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y gh
-          fi
-          for TAG in 20260602 20251216 20251202; do
-            echo "Trying llvm-mingw release $TAG via gh..."
-            rm -rf .toolchains/llvm-mingw .toolchains/*.tar.xz
-            if gh release download "$TAG" \
-                --repo mstorsje/llvm-mingw \
-                --pattern "llvm-mingw-${TAG}-ucrt-ubuntu-22.04-x86_64.tar.xz" \
-                --dir .toolchains; then
-              LLVM_TAR=".toolchains/llvm-mingw-${TAG}-ucrt-ubuntu-22.04-x86_64.tar.xz"
-              mkdir -p .toolchains/llvm-mingw
-              tar xf "$LLVM_TAR" -C .toolchains/llvm-mingw --strip-components=1
-              rm -f "$LLVM_TAR"
-              if [[ -x "$TC" ]]; then
-                echo "Installed llvm-mingw from release $TAG"
-                exit 0
-              fi
-            fi
-          done
-          echo "gh download failed, trying curl..."
-          ./scripts/download_llvm_mingw.sh
+        run: ./scripts/download_llvm_mingw.sh
 
       - name: Build and package Windows VST3
         working-directory: vst_bridge

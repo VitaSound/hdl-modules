@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TOOLCHAIN_DIR="$ROOT/.toolchains/llvm-mingw"
 TC="$TOOLCHAIN_DIR/bin/x86_64-w64-mingw32-clang++"
-IMAGE="${LLVM_MINGW_DOCKER_IMAGE:-mstorsjo/llvm-mingw:latest}"
+IMAGE="${LLVM_MINGW_DOCKER_IMAGE:-mstorsjo/llvm-mingw:20251216}"
 
 if [[ -x "$TC" ]]; then
   echo "llvm-mingw already installed at $TOOLCHAIN_DIR"
