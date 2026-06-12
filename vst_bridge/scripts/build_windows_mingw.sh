@@ -34,9 +34,15 @@ ensure_llvm_mingw() {
   mkdir llvm-mingw
   tar xf "$LLVM_TAR" -C llvm-mingw --strip-components=1
   rm -f "$LLVM_TAR"
+  cd "$ROOT"
 }
 
-if [[ "${USE_APT_MINGW:-}" == "1" ]] && command -v x86_64-w64-mingw32-g++-posix >/dev/null; then
+if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+  ensure_llvm_mingw
+  TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
+  export LLVM_MINGW="$TOOLCHAIN_DIR"
+  echo "CI: using llvm-mingw at $TOOLCHAIN_DIR"
+elif [[ "${USE_APT_MINGW:-}" == "1" ]] && command -v x86_64-w64-mingw32-g++-posix >/dev/null; then
   TOOLCHAIN_FILE="$ROOT/cmake/mingw-w64.cmake"
   echo "Using apt MinGW-w64 POSIX (USE_APT_MINGW=1)"
   ensure_llvm_mingw
