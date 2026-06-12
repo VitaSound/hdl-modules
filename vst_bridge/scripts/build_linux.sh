@@ -63,7 +63,8 @@ if ((${#missing[@]} > 0)); then
 fi
 
 "$CMAKE" -B build -DCMAKE_BUILD_TYPE=Release
-"$CMAKE" --build build --parallel "$(nproc)"
+BUILD_JOBS="${CMAKE_BUILD_PARALLEL_LEVEL:-$(nproc)}"
+"$CMAKE" --build build --parallel "$BUILD_JOBS"
 VST3_DIR="$ROOT/build/HdlVerilator_artefacts/Release/VST3"
 VST3="$(find "$VST3_DIR" -maxdepth 1 -type d -name '*.vst3' | sort | tail -1)"
 echo "VST3 bundle: ${VST3:-$VST3_DIR/*.vst3 (not found)}"

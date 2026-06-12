@@ -72,7 +72,8 @@ fi
 
 SECONDS=0
 "$CMAKE" "${CMAKE_ARGS[@]}"
-"$CMAKE" --build "$BUILD_DIR" --parallel "$(nproc)"
+BUILD_JOBS="${CMAKE_BUILD_PARALLEL_LEVEL:-$(nproc)}"
+"$CMAKE" --build "$BUILD_DIR" --parallel "$BUILD_JOBS"
 echo "Build finished in ${SECONDS}s"
 
 VST3_DIR="$BUILD_DIR/HdlVerilator_artefacts/Release/VST3"

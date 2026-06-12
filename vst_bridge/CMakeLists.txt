@@ -82,7 +82,7 @@ target_link_libraries(HdlVerilator
         juce::juce_recommended_warning_flags
 )
 
-if(NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING AND NOT DEFINED ENV{GITHUB_ACTIONS})
     target_link_libraries(HdlVerilator PUBLIC juce::juce_recommended_lto_flags)
 endif()
 

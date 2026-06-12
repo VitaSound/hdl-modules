@@ -51,13 +51,15 @@ jobs:
 
       - name: Build and package Linux + Windows VST3
         working-directory: vst_bridge
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: "2"
         run: ./scripts/build_release.sh --clean
 
       - name: Upload release zips
         uses: actions/upload-artifact@v4
         with:
           name: VitaSound-Remote-Synth-v${{ steps.version.outputs.version }}
-          path: vst_bridge/dist/*.zip
+          path: vst_bridge/dist/
           if-no-files-found: error
           retention-days: 90
 
