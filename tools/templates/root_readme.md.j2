@@ -45,6 +45,17 @@ make all       # test → images → docs
 
 Зависимости: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
 
+{% if repo.daw %}
+## {{ repo.daw.title_ru }}
+
+{{ repo.daw.intro_ru }}:
+
+{% for link in repo.daw.links %}
+- {{ link.name }}: [{{ link.path }}]({{ link.path }}){% if link.hint %} — {{ link.hint }}{% endif %}
+
+{% endfor %}
+{% endif %}
+
 # sandbox
 
 песочница со всем подряд

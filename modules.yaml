@@ -6,6 +6,19 @@ repo:
   branch: master
   iverilog_guide: https://iverilog.fandom.com/wiki/Installation_Guide#Ubuntu_Linux
   sandbox_link: https://sites.google.com/site/analogsynthdiy/sobstvennye-razrabotki/sintezator-na-baze-plis/z---ssylki
+  daw:
+    title_ru: VitaSound Remote Synth (DAW ↔ Verilator)
+    intro_ru: Плагин VST3 и UDP-engine для Reaper / других DAW
+    links:
+      - name: VST
+        path: vst_bridge/README.md
+        hint: сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
+      - name: Engine
+        path: verilator_tests/README.md
+        hint: "`make` или `verilator_tests/scripts/build_windows_mingw.sh`"
+      - name: Сеть WSL
+        path: docs/WSL_NETWORKING.md
+        hint: null
 
 categories:
   - id: common
