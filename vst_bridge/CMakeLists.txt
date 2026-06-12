@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(HdlVerilator VERSION 0.2.4 LANGUAGES C CXX)
+project(HdlVerilator VERSION 0.2.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,6 +32,7 @@ endif()
 
 juce_add_plugin(HdlVerilator
     COMPANY_NAME "VitaSound"
+    PRODUCT_NAME "VitaSound Remote Synth"
     BUNDLE_ID com.vitasound.hdlverilator
     PLUGIN_MANUFACTURER_CODE Vtsn
     PLUGIN_CODE Hvst

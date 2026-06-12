@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+if [[ "${1:-}" == "--clean" || "${CLEAN:-}" == "1" ]]; then
+  echo "Clean rebuild: removing build/"
+  rm -rf build
+fi
+
 if ! command -v cmake >/dev/null; then
   echo "cmake not found. Install: sudo apt install cmake  OR  pip install --user cmake"
   exit 1
@@ -59,4 +64,6 @@ fi
 
 "$CMAKE" -B build -DCMAKE_BUILD_TYPE=Release
 "$CMAKE" --build build --parallel "$(nproc)"
-echo "VST3 bundle: $ROOT/build/HdlVerilator_artefacts/Release/VST3/HdlVerilator.vst3"
+VST3_DIR="$ROOT/build/HdlVerilator_artefacts/Release/VST3"
+VST3="$(find "$VST3_DIR" -maxdepth 1 -type d -name '*.vst3' | sort | tail -1)"
+echo "VST3 bundle: ${VST3:-$VST3_DIR/*.vst3 (not found)}"

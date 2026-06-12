@@ -1,0 +1,95 @@
+name: vst-release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "vst-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read VST version from CMakeLists.txt
+        id: version
+        working-directory: vst_bridge
+        run: |
+          VERSION="$(grep -E '^project\(HdlVerilator VERSION ' CMakeLists.txt | sed -E 's/.*VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VST version: $VERSION"
+
+      - name: Verify tag matches CMake version
+        if: startsWith(github.ref, 'refs/tags/vst-v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/vst-v}"
+          test "$TAG" = "${{ steps.version.outputs.version }}"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake g++ git pkg-config zip curl \
+            libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
+            libcurl4-openssl-dev libasound2-dev libfreetype6-dev \
+            libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
+            libxrandr-dev libglu1-mesa-dev
+
+      - name: Cache llvm-mingw toolchain
+        uses: actions/cache@v4
+        with:
+          path: vst_bridge/.toolchains/llvm-mingw
+          key: llvm-mingw-20251216-ubuntu-22.04
+
+      - name: Build and package Linux + Windows VST3
+        working-directory: vst_bridge
+        run: ./scripts/build_release.sh --clean
+
+      - name: Upload release zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: VitaSound-Remote-Synth-v${{ steps.version.outputs.version }}
+          path: vst_bridge/dist/*.zip
+          if-no-files-found: error
+          retention-days: 90
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/vst-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release zips
+        uses: actions/download-artifact@v4
+        with:
+          name: VitaSound-Remote-Synth-v${{ needs.build.outputs.version }}
+          path: dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: VitaSound Remote Synth v${{ needs.build.outputs.version }}
+          files: dist/*.zip
+          generate_release_notes: true
+          body: |
+            VST3 **VitaSound Remote Synth** for Linux and Windows (x86_64).
+
+            | Platform | Archive |
+            |----------|---------|
+            | Linux | `VitaSound-Remote-Synth-*-linux-x86_64.zip` |
+            | Windows | `VitaSound-Remote-Synth-*-windows-x86_64.zip` |
+
+            Unzip and copy `VitaSound Remote Synth.vst3` into your DAW VST3 folder.
+            See [vst_bridge/README.md](https://github.com/${{ github.repository }}/blob/master/vst_bridge/README.md) for install and UDP engine setup.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

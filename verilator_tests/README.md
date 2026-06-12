@@ -5,7 +5,17 @@
 - выбираемый модуль ввода: `keyboard` (evdev), `midi` (ALSA sequencer) или `udp` (сеть)
 - выбираемый модуль вывода: `soundcard` (PortAudio), `wav` (запись в файл) или `udp` (PCM в VST)
 
-Связка с DAW: [`../vst_bridge/README.md`](../vst_bridge/README.md) — VST3 шлёт MIDI, engine отдаёт PCM.
+Связка с DAW: [`../vst_bridge/README.md`](../vst_bridge/README.md) — **VitaSound Remote Synth** (VST3), engine `Vgenerator`.
+
+## Скрипты
+
+| Скрипт | Результат |
+|--------|-----------|
+| `make` / `make obj_dir/Vgenerator` | Linux engine: `obj_dir/Vgenerator` |
+| [`scripts/build_windows_mingw.sh`](scripts/build_windows_mingw.sh) | Windows engine: `obj_dir_win/Vgenerator.exe` |
+| [`scripts/run_udp_engine_win.bat`](scripts/run_udp_engine_win.bat) | Запуск `.exe` на Windows |
+| [`../scripts/run_udp_engine.sh`](../scripts/run_udp_engine.sh) | Engine UDP из корня репо (Linux/WSL) |
+| [`../vst_bridge/scripts/build_windows_mingw.sh`](../vst_bridge/scripts/build_windows_mingw.sh) | VST для Windows (VitaSound Remote Synth) |
 
 ## Зависимости
 
@@ -19,7 +29,7 @@ sudo apt install -y verilator g++ make portaudio19-dev libasound2-dev
 ## Сборка
 
 ```bash
-cd /home/sea/hdl-modules/verilator_tests
+cd verilator_tests
 make clean
 make
 ```
@@ -41,7 +51,7 @@ make
 - `input_udp.*` - MIDI по UDP (протокол `protocol/hdl_net.h`)
 - `output_soundcard.*` - вывод на звуковую карту через PortAudio
 - `output_udp.*` - PCM по UDP обратно в VST
-- `net_socket.*` - POSIX UDP сокеты
+- `net_socket.*` - UDP (POSIX / Winsock)
 - `output_wav.*` - запись в WAV
 - `terminal_input.*` - неблокирующее чтение `x` для выхода
 - `main.cpp` - выбор модулей и оркестрация
@@ -165,30 +175,36 @@ ls -l /dev/input/event3
 id
 ```
 
-### 6) UDP -> UDP (VST bridge / smoke test)
+### 6) UDP → VST (VitaSound Remote Synth)
 
-Engine для связки с [`vst_bridge`](../vst_bridge/README.md):
+Engine:
 
 ```bash
 ./obj_dir/Vgenerator --input-source udp --output-mode udp --sample-rate 48000
 ```
 
-Smoke-тест без DAW (Python-клиент вместо VST):
+Из корня репо:
+
+```bash
+./scripts/run_udp_engine.sh
+```
+
+Smoke-тест без DAW:
 
 ```bash
 make test_hdl_net
 python3 scripts/udp_smoke_test.py --duration 2.0 --wav /tmp/udp_test.wav
+# или
+cd .. && ./scripts/e2e_ubuntu.sh
 ```
 
-Или из корня репо: `./scripts/e2e_ubuntu.sh`
+**Reaper на Windows (рекомендуется):** native `obj_dir_win/Vgenerator.exe` + VST host `127.0.0.1`. Сборка и настройка: [vst_bridge/README.md](../vst_bridge/README.md), сеть: [docs/WSL_NETWORKING.md](../docs/WSL_NETWORKING.md).
 
-**WSL2 + Windows DAW:** engine в WSL, VST на Windows. IP engine — `hostname -I` в WSL (или `127.0.0.1` при mirrored networking Win11). Открыть UDP 5004/5005 в firewall Windows/Linux.
+**WSL2 engine + Windows VST:** возможно, но UDP через NAT нестабилен; лучше mirrored mode или отдельный PC в LAN.
 
-**Latency (MVP, не исправлено):** при Reaper + DirectSound + block 1024 + WSL2 UDP слышны ноты, но с большими underruns и задержкой. См. [vst_bridge/README.md — Known issues](../vst_bridge/README.md#известные-проблемы-2026-06-mvp).
+**Протокол:** `protocol/hdl_net.h` — HELLO/ACK, NOTE ON/OFF, PCM int16 stereo.
 
-**Протокол:** `protocol/hdl_net.h` — HELLO/ACK, NOTE ON/OFF, PCM int16 stereo. Альтернативы: RTP-MIDI (RFC 6295), Network MIDI 2.0 UDP (MA 2024).
-
-### 7) Windows native engine (без WSL NAT)
+### 7) Windows native engine
 
 Cross-compile из WSL (тот же llvm-mingw, что и VST):
 

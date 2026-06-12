@@ -14,6 +14,7 @@ verilator_tests/test_hdl_net
 # VST bridge
 vst_bridge/build/
 vst_bridge/build-win/
+vst_bridge/dist/
 vst_bridge/.toolchains/
 vst_bridge/_deps/
 

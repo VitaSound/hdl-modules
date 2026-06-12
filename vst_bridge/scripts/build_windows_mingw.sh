@@ -75,7 +75,13 @@ SECONDS=0
 "$CMAKE" --build "$BUILD_DIR" --parallel "$(nproc)"
 echo "Build finished in ${SECONDS}s"
 
-VST3="$BUILD_DIR/HdlVerilator_artefacts/Release/VST3/HdlVerilator.vst3"
+VST3_DIR="$BUILD_DIR/HdlVerilator_artefacts/Release/VST3"
+VST3="$(find "$VST3_DIR" -maxdepth 1 -type d -name '*.vst3' | sort | tail -1)"
+if [[ -z "$VST3" ]]; then
+  echo "ERROR: no .vst3 bundle under $VST3_DIR" >&2
+  exit 1
+fi
+VST3_NAME="$(basename "$VST3")"
 DLL="$(find "$VST3" -name '*.dll' -print -quit 2>/dev/null || true)"
 
 echo
@@ -84,6 +90,8 @@ if [[ -n "$DLL" ]]; then
   echo "Windows DLL: $DLL"
 fi
 echo
-echo "Copy to Windows FL Studio / Reaper:"
-echo "  cp -r \"$VST3\" /mnt/c/Program\\ Files/Common\\ Files/VST3/"
-echo "Then rescan plugins in the DAW."
+echo "Install on Windows (remove OLD HdlVerilator.vst3 if present):"
+echo "  rm -rf \"/mnt/c/Program Files/Common Files/VST3/HdlVerilator.vst3\""
+echo "  rm -rf \"/mnt/c/Program Files/Common Files/VST3/$VST3_NAME\""
+echo "  cp -r \"$VST3\" \"/mnt/c/Program Files/Common Files/VST3/\""
+echo "Then rescan plugins in the DAW (Reaper: Clear cache / rescan)."

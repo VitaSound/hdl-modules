@@ -15,7 +15,7 @@ HdlVerilatorAudioProcessorEditor::HdlVerilatorAudioProcessorEditor(HdlVerilatorA
     : juce::AudioProcessorEditor(&p), processor_(p) {
     setSize(kEditorWidth, kEditorHeight);
 
-    titleLabel_.setText("HDL Verilator Bridge", juce::dontSendNotification);
+    titleLabel_.setText("VitaSound Remote Synth", juce::dontSendNotification);
     titleLabel_.setFont(juce::FontOptions(18.0f, juce::Font::bold));
     titleLabel_.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(titleLabel_);
