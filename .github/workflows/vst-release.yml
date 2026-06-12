@@ -10,86 +10,106 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    outputs:
-      version: ${{ steps.version.outputs.version }}
+    timeout-minutes: 45
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Read VST version from CMakeLists.txt
-        id: version
-        working-directory: vst_bridge
-        run: |
-          VERSION="$(grep -E '^project\(HdlVerilator VERSION ' CMakeLists.txt | sed -E 's/.*VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
-          test -n "$VERSION"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "VST version: $VERSION"
-
-      - name: Verify tag matches CMake version
-        if: startsWith(github.ref, 'refs/tags/vst-v')
-        run: |
-          TAG="${GITHUB_REF#refs/tags/vst-v}"
-          test "$TAG" = "${{ steps.version.outputs.version }}"
-
-      - name: Install build dependencies
+      - name: Install Linux build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            cmake g++ git pkg-config zip curl \
+            cmake g++ git pkg-config zip \
             libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
             libcurl4-openssl-dev libasound2-dev libfreetype6-dev \
             libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
             libxrandr-dev libglu1-mesa-dev
 
-      - name: Build Linux VST3
-        working-directory: vst_bridge
-        env:
-          CMAKE_BUILD_PARALLEL_LEVEL: "2"
-          GITHUB_ACTIONS: "true"
-        run: ./scripts/build_linux.sh --clean
-
-      - name: Build Windows VST3
+      - name: Build and package Linux VST3
         working-directory: vst_bridge
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: "2"
           GITHUB_ACTIONS: "true"
         run: |
-          rm -rf .toolchains/llvm-mingw
-          ./scripts/build_windows_mingw.sh --clean
+          ./scripts/build_linux.sh --clean
+          ./scripts/build_release.sh --linux-only --skip-build
 
-      - name: Package release zips
-        working-directory: vst_bridge
-        run: ./scripts/build_release.sh --skip-build
-
-      - name: Upload release zips
+      - name: Upload Linux zip
         uses: actions/upload-artifact@v4
         with:
-          name: VitaSound-Remote-Synth-v${{ steps.version.outputs.version }}
-          path: vst_bridge/dist/*.zip
+          name: linux-zip
+          path: vst_bridge/dist/*-linux-x86_64.zip
           if-no-files-found: error
-          retention-days: 90
+
+  build-windows:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Windows cross-build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ git pkg-config zip curl
+
+      - name: Build and package Windows VST3
+        working-directory: vst_bridge
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: "2"
+          GITHUB_ACTIONS: "true"
+        run: |
+          ./scripts/build_windows_mingw.sh --clean
+          ./scripts/build_release.sh --windows-only --skip-build
+
+      - name: Upload Windows zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: vst_bridge/dist/*-windows-x86_64.zip
+          if-no-files-found: error
 
   release:
-    needs: build
+    needs: [build-linux, build-windows]
     if: startsWith(github.ref, 'refs/tags/vst-v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download release zips
+      - uses: actions/checkout@v4
+
+      - name: Read VST version
+        id: version
+        working-directory: vst_bridge
+        run: |
+          VERSION="$(grep -E '^project\(HdlVerilator VERSION ' CMakeLists.txt | sed -E 's/.*VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches CMake version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/vst-v}"
+          test "$TAG" = "${{ steps.version.outputs.version }}"
+
+      - name: Download Linux zip
         uses: actions/download-artifact@v4
         with:
-          name: VitaSound-Remote-Synth-v${{ needs.build.outputs.version }}
+          name: linux-zip
           path: dist
+
+      - name: Download Windows zip
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-zip
+          path: dist
+
+      - name: List artifacts
+        run: ls -la dist/
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: VitaSound Remote Synth v${{ needs.build.outputs.version }}
+          name: VitaSound Remote Synth v${{ steps.version.outputs.version }}
           files: dist/*.zip
           generate_release_notes: true
           body: |
