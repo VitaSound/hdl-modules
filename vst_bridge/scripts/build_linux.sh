@@ -62,7 +62,7 @@ if ((${#missing[@]} > 0)); then
   exit 1
 fi
 
-"$CMAKE" -B build -DCMAKE_BUILD_TYPE=Release
+"$CMAKE" -B build -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE
 BUILD_JOBS="${CMAKE_BUILD_PARALLEL_LEVEL:-$(nproc)}"
 "$CMAKE" --build build --parallel "$BUILD_JOBS"
 VST3_DIR="$ROOT/build/HdlVerilator_artefacts/Release/VST3"

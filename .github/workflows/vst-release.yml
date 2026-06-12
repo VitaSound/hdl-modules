@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -47,19 +48,39 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vst_bridge/.toolchains/llvm-mingw
-          key: llvm-mingw-20251216-ubuntu-22.04
+          key: llvm-mingw-20251216-ubuntu-22.04-v2
 
-      - name: Build and package Linux + Windows VST3
+      - name: Validate llvm-mingw cache
+        run: |
+          TC="vst_bridge/.toolchains/llvm-mingw/bin/x86_64-w64-mingw32-clang++"
+          if [[ ! -x "$TC" ]]; then
+            echo "Invalid or missing llvm-mingw cache, removing"
+            rm -rf vst_bridge/.toolchains/llvm-mingw
+          fi
+
+      - name: Build Linux VST3
         working-directory: vst_bridge
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: "2"
-        run: ./scripts/build_release.sh --clean
+          GITHUB_ACTIONS: "true"
+        run: ./scripts/build_linux.sh --clean
+
+      - name: Build Windows VST3
+        working-directory: vst_bridge
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: "2"
+          GITHUB_ACTIONS: "true"
+        run: ./scripts/build_windows_mingw.sh --clean
+
+      - name: Package release zips
+        working-directory: vst_bridge
+        run: ./scripts/build_release.sh --skip-build
 
       - name: Upload release zips
         uses: actions/upload-artifact@v4
         with:
           name: VitaSound-Remote-Synth-v${{ steps.version.outputs.version }}
-          path: vst_bridge/dist/
+          path: vst_bridge/dist/*.zip
           if-no-files-found: error
           retention-days: 90
 
