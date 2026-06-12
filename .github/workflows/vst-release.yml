@@ -44,20 +44,6 @@ jobs:
             libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
             libxrandr-dev libglu1-mesa-dev
 
-      - name: Cache llvm-mingw toolchain
-        uses: actions/cache@v4
-        with:
-          path: vst_bridge/.toolchains/llvm-mingw
-          key: llvm-mingw-20251216-ubuntu-22.04-v2
-
-      - name: Validate llvm-mingw cache
-        run: |
-          TC="vst_bridge/.toolchains/llvm-mingw/bin/x86_64-w64-mingw32-clang++"
-          if [[ ! -x "$TC" ]]; then
-            echo "Invalid or missing llvm-mingw cache, removing"
-            rm -rf vst_bridge/.toolchains/llvm-mingw
-          fi
-
       - name: Build Linux VST3
         working-directory: vst_bridge
         env:
@@ -70,7 +56,9 @@ jobs:
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: "2"
           GITHUB_ACTIONS: "true"
-        run: ./scripts/build_windows_mingw.sh --clean
+        run: |
+          rm -rf .toolchains/llvm-mingw
+          ./scripts/build_windows_mingw.sh --clean
 
       - name: Package release zips
         working-directory: vst_bridge

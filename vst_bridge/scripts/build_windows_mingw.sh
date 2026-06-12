@@ -21,7 +21,15 @@ ensure_llvm_mingw() {
   echo "Downloading llvm-mingw (~78 MB, one-time)..."
   mkdir -p "$ROOT/.toolchains"
   cd "$ROOT/.toolchains"
-  curl -fsSL -o "$LLVM_TAR" "$LLVM_URL"
+  for attempt in 1 2 3; do
+    if curl -fsSL -o "$LLVM_TAR" "$LLVM_URL"; then
+      break
+    fi
+    echo "llvm-mingw download failed (attempt $attempt), retrying..." >&2
+    rm -f "$LLVM_TAR"
+    sleep 5
+  done
+  test -s "$LLVM_TAR"
   rm -rf llvm-mingw
   mkdir llvm-mingw
   tar xf "$LLVM_TAR" -C llvm-mingw --strip-components=1
