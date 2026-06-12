@@ -44,38 +44,24 @@ jobs:
 
   build-windows:
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Windows cross-build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ git pkg-config zip curl
-
-      - name: Cache llvm-mingw
-        uses: actions/cache@v4
-        id: llvm-cache
-        with:
-          path: vst_bridge/.toolchains/llvm-mingw
-          key: llvm-mingw-20251216-ubuntu-22.04
+          sudo apt-get install -y \
+            cmake g++ git pkg-config zip curl \
+            libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
+            libcurl4-openssl-dev libfreetype6-dev \
+            libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
+            libxrandr-dev libglu1-mesa-dev
 
       - name: Download llvm-mingw toolchain
-        if: steps.llvm-cache.outputs.cache-hit != 'true'
         timeout-minutes: 15
         working-directory: vst_bridge
-        run: |
-          mkdir -p .toolchains
-          curl --connect-timeout 30 --max-time 600 --retry 5 --retry-delay 10 \
-            -fsSL -o ".toolchains/$LLVM_TAR" \
-            "https://github.com/mstorsje/llvm-mingw/releases/download/20251216/$LLVM_TAR"
-          rm -rf .toolchains/llvm-mingw
-          mkdir -p .toolchains/llvm-mingw
-          tar xf ".toolchains/$LLVM_TAR" -C .toolchains/llvm-mingw --strip-components=1
-          rm -f ".toolchains/$LLVM_TAR"
-          test -x .toolchains/llvm-mingw/bin/x86_64-w64-mingw32-clang++
-        env:
-          LLVM_TAR: llvm-mingw-20251216-ucrt-ubuntu-22.04-x86_64.tar.xz
+        run: ./scripts/download_llvm_mingw.sh
 
       - name: Build and package Windows VST3
         working-directory: vst_bridge

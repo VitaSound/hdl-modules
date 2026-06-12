@@ -42,15 +42,14 @@ if [[ -n "${SKIP_LLVM_DOWNLOAD:-}" && -x "$TOOLCHAIN_DIR/bin/x86_64-w64-mingw32-
   TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
   export LLVM_MINGW="$TOOLCHAIN_DIR"
   echo "Using existing llvm-mingw at $TOOLCHAIN_DIR"
+elif [[ "${USE_APT_MINGW:-}" == "1" ]] && command -v x86_64-w64-mingw32-g++-posix >/dev/null; then
+  TOOLCHAIN_FILE="$ROOT/cmake/mingw-w64.cmake"
+  echo "Using apt MinGW-w64 POSIX (USE_APT_MINGW=1)"
 elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
   ensure_llvm_mingw
   TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
   export LLVM_MINGW="$TOOLCHAIN_DIR"
   echo "CI: using llvm-mingw at $TOOLCHAIN_DIR"
-elif [[ "${USE_APT_MINGW:-}" == "1" ]] && command -v x86_64-w64-mingw32-g++-posix >/dev/null; then
-  TOOLCHAIN_FILE="$ROOT/cmake/mingw-w64.cmake"
-  echo "Using apt MinGW-w64 POSIX (USE_APT_MINGW=1)"
-  ensure_llvm_mingw
 elif [[ -x "$TOOLCHAIN_DIR/bin/x86_64-w64-mingw32-clang++" ]] || ensure_llvm_mingw; then
   TOOLCHAIN_FILE="$ROOT/cmake/llvm-mingw.cmake"
   export LLVM_MINGW="$TOOLCHAIN_DIR"
