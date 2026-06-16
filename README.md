@@ -4,6 +4,8 @@
 
 Наработки постепенно переосмысливаются и переносятся из [fpga-synth](https://github.com/UA3MQJ/fpga-synth)
 
+**Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-модули, Icarus-тесты, Verilator (клавиатура/MIDI/звук) и UDP-режим (VST + DAW).
+
 # назначение модулей
 
 ## Common
