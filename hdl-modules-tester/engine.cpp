@@ -2,6 +2,7 @@
 
 #include "net_socket.h"
 #include "protocol/hdl_net.h"
+#include "synth_core.h"
 
 #include <array>
 #include <chrono>

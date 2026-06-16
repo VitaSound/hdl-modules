@@ -111,6 +111,7 @@ sequenceDiagram
 | `verilator_tests/generator.sv` | Топ синтезатора для Verilator |
 | `verilator_tests/` | Legacy: keyboard/MIDI → soundcard/wav |
 | `hdl-modules-tester/` | UDP engine для VST (pull-only) |
+| `synths/noise_box/` | Шумовой синт (`rndx` 16-bit) + NoiseBox UDP |
 | `vst_bridge/` | VST3-плагин (хост в DAW) |
 | `hdl-modules-tester/protocol/hdl_net.h` | Протокол UDP (копия в `vst_bridge/protocol/`) |
 

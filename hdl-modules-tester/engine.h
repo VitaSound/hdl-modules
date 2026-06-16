@@ -6,8 +6,9 @@
 
 #include "protocol/hdl_net.h"
 #include "shared_state.h"
-#include "synth_core.h"
 #include "udp_session.h"
+
+struct SynthCore;
 
 struct EngineConfig {
     std::string bindHost = "0.0.0.0";
