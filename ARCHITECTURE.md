@@ -4,57 +4,49 @@
 
 ```mermaid
 flowchart TB
-  subgraph hdl_lib [HDL-модули библиотеки]
-    direction TB
-    common["common/<br/>powerup_reset, frqdivmod, strobe_gen"]
-    gen["generation/<br/>dds, dds_transform, vca, rnd, adsr"]
-  end
-
-  subgraph icarus_pipe [Пайплайн Icarus — make test / images / docs]
+  subgraph lib [hdl-modules — библиотека RTL]
     direction LR
-    tb["testbench.v<br/>+ RTL .v"]
-    sim["iverilog → out.vcd"]
-    gtkw["test.gtkw + PNG"]
-    readme["README таблица<br/>modules.yaml"]
-    tb --> sim --> gtkw --> readme
+    common["common/<br/>reset, dividers"]
+    gen["generation/<br/>dds, vca, adsr, rnd"]
   end
 
-  subgraph verilator_rt [Verilator — Vgenerator realtime]
+  subgraph icarus [1. Icarus — make test / images / docs]
+    direction LR
+    tb["testbench.v + .v"]
+    vcd["iverilog → VCD"]
+    art["GTKWave → test.png"]
+    yaml["modules.yaml → README"]
+    tb --> vcd --> art --> yaml
+  end
+
+  subgraph legacy [2. verilator_tests — legacy local]
     direction TB
-    synth["synth_core.cpp<br/>+ generator.sv"]
-    veri["Verilator C++ model"]
-    synth --> veri
+    kb["keyboard<br/>evdev"]
+    midi["MIDI<br/>ALSA"]
+    leg_eng["Vgenerator<br/>generator.sv"]
+    local_out["PortAudio / WAV"]
+    kb --> leg_eng
+    midi --> leg_eng
+    leg_eng --> local_out
   end
 
-  subgraph legacy_mode [Legacy — verilator_tests]
-    direction TB
-    kb["input_keyboard<br/>evdev q2w3er…"]
-    midi_in["input_midi<br/>ALSA sequencer"]
-    pa["output_soundcard<br/>PortAudio"]
-    wav_out["output_wav<br/>файл .wav"]
-  end
-
-  subgraph udp_mode [UDP — hdl-modules-tester + VST3]
+  subgraph network [3. hdl-modules-tester + vst_bridge — DAW]
     direction TB
     daw["DAW<br/>Reaper / Bitwig"]
-    vst["VitaSound Remote Synth<br/>vst_bridge VST3i"]
-    udp_eng["Vgenerator pull-only<br/>engine.cpp + synth_core"]
-    proto["hdl_net v2<br/>UDP :5004 control :5005 audio<br/>Hello / MIDI / AudioPull"]
+    vst["VitaSound Remote Synth<br/>VST3"]
+    net_eng["Vgenerator<br/>pull-only UDP"]
+    proto["hdl_net v2<br/>:5004 ctrl :5005 PCM"]
+    daw -->|"MIDI"| vst
+    vst <-->|proto| net_eng
+    vst -->|"audio"| daw
   end
 
-  hdl_lib -.->|"RTL в testbench<br/>и будущий синтез"| tb
-  hdl_lib -.->|"пока generator.sv<br/>отдельно"| synth
+  gen_rtl["generator.sv<br/>общий RTL-топ"]
 
-  kb -->|"gate, note"| synth
-  midi_in -->|"gate, note"| synth
-  synth -->|"PCM"| pa
-  synth -->|"PCM"| wav_out
-
-  daw -->|"MIDI трек"| vst
-  vst <-->|proto| udp_eng
-  udp_eng -->|"AudioPull only"| synth
-
-  readme -.-> hdl_lib
+  lib -.-> icarus
+  lib -.->|"модули в testbench"| tb
+  gen_rtl --> leg_eng
+  gen_rtl --> net_eng
 ```
 
 ## Три уровня тестирования

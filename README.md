@@ -1,12 +1,10 @@
-![Архитектура hdl-modules / VitaSound](docs/architecture.png)
-
 # hdl-modules
 
 Репозиторий, в котором будут собраны все модули
 
 Наработки постепенно переосмысливаются и переносятся из [fpga-synth](https://github.com/UA3MQJ/fpga-synth)
 
-**Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-модули, Icarus-тесты, Verilator (клавиатура/MIDI/звук) и UDP-режим (VST + DAW).
+**Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-библиотека, Icarus-тесты, legacy `verilator_tests` (клавиатура/MIDI/звук) и `hdl-modules-tester` + VST (UDP/DAW).
 
 # назначение модулей
 
