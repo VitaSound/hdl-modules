@@ -1,7 +1,6 @@
 #include "main_udp.h"
 
 #include "input_udp.h"
-#include "output_udp.h"
 #include "shared_state.h"
 #include "synth_core.h"
 #include "net_socket.h"
@@ -29,7 +28,7 @@ void onSignal(int) {
 
 void printUsage() {
     std::cerr
-        << "Vgenerator UDP engine (MIDI in / PCM out for VST bridge)\n"
+        << "Vgenerator UDP engine (MIDI in / PCM out for VST bridge, pull mode)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
         << "  --sample-rate R (default 48000)\n"
@@ -85,35 +84,23 @@ int runUdpEngineMain(int argc, char** argv) {
     }
     cfg.bindHost = bindEp.host;
     cfg.controlPort = bindEp.port;
+    cfg.packetFrames = udpBlockFrames;
 
-    std::thread inputThread = startUdpInput(cfg, state, udpSession);
-
-    UdpOutputConfig udpOutCfg;
-    udpOutCfg.blockFrames = udpBlockFrames;
-    udpOutCfg.channels = 2;
-
-    int outputResult = 0;
-    std::thread outputThread([&]() {
-        outputResult = runUdpOutput(synth, state, udpSession, udpOutCfg);
-        state.running.store(false, std::memory_order_relaxed);
-    });
+    std::thread inputThread = startUdpInput(cfg, state, udpSession, synth);
 
     std::cerr << "UDP engine | control " << cfg.bindHost << ":" << cfg.controlPort
-              << " | Ctrl+C to quit\n";
+              << " | pull mode | Ctrl+C to quit\n";
 
     while (state.running.load(std::memory_order_relaxed)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 
-    if (outputThread.joinable()) {
-        outputThread.join();
-    }
     if (inputThread.joinable()) {
         inputThread.join();
     }
 
     synthDestroy(synth);
-    return outputResult;
+    return 0;
 }
 
 #ifdef HDL_ENGINE_UDP_MAIN

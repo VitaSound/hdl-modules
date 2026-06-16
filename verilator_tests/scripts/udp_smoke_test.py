@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Send HELLO + NOTE_ON over UDP and receive PCM audio packets from the engine."""
+"""Send HELLO + pull loop + NOTE_ON; receive PCM from pull-mode engine."""
 
 from __future__ import annotations
 
@@ -13,12 +13,19 @@ from pathlib import Path
 
 HDLM = 0x48444C4D
 HDLA = 0x48444C41
-VER = 1
+VER = 2
 
 PT_HELLO = 1
 PT_ACK = 2
 PT_NOTE_ON = 5
 PT_NOTE_OFF = 6
+PT_AUDIO_PULL = 8
+
+SESSION_MODE_PULL = 1
+PACKET_FRAMES = 256
+WARMUP_PACKETS = 16
+MIN_RESERVE = 6
+TARGET_RESERVE = 12
 
 
 def be32(v: int) -> bytes:
@@ -57,6 +64,26 @@ def parse_audio(data: bytes):
     return seq, ts, frames, ch, samples
 
 
+def encode_hello(seq: int, audio_port: int) -> bytes:
+    payload = (
+        be32(48000)
+        + be16(256)
+        + be32(0x50595448)
+        + be16(audio_port)
+        + struct.pack(">BB", SESSION_MODE_PULL, 0)
+        + be16(PACKET_FRAMES)
+        + be16(WARMUP_PACKETS)
+        + be16(MIN_RESERVE)
+        + be16(TARGET_RESERVE)
+    )
+    return be32(HDLM) + struct.pack(">BB", VER, PT_HELLO) + be16(len(payload)) + be32(seq) + payload
+
+
+def encode_pull(seq: int, request_id: int, frame_count: int, host_fill: int, host_target: int) -> bytes:
+    payload = be32(request_id) + be32(frame_count) + be32(host_fill) + be32(host_target)
+    return be32(HDLM) + struct.pack(">BB", VER, PT_AUDIO_PULL) + be16(len(payload)) + be32(seq) + payload
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine-host", default="127.0.0.1")
@@ -73,11 +100,9 @@ def main() -> int:
 
     audio = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     audio.bind(("0.0.0.0", args.audio_port))
-    audio.settimeout(0.2)
+    audio.settimeout(0.05)
 
-    hello_payload = be32(48000) + be16(256) + be32(0x50595448) + be16(args.audio_port)
-    hello = be32(HDLM) + struct.pack(">BB", VER, PT_HELLO) + be16(len(hello_payload)) + be32(1) + hello_payload
-    ctrl.sendto(hello, (args.engine_host, args.control_port))
+    ctrl.sendto(encode_hello(1, args.audio_port), (args.engine_host, args.control_port))
 
     ack = None
     deadline = time.time() + 3.0
@@ -93,15 +118,28 @@ def main() -> int:
     if ack is None:
         print("No ACK from engine", file=sys.stderr)
         return 1
-    print("ACK received")
+    print("ACK received (protocol v2 pull)")
 
     note_payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", args.note, 100)
     note_on = be32(HDLM) + struct.pack(">BB", VER, PT_NOTE_ON) + be16(len(note_payload)) + be32(2) + note_payload
     ctrl.sendto(note_on, (args.engine_host, args.control_port))
 
     pcm: list[int] = []
+    request_id = 0
+    seq = 3
+    target_fill = TARGET_RESERVE * PACKET_FRAMES
+    warmup = WARMUP_PACKETS * PACKET_FRAMES
+
     end = time.time() + args.duration
     while time.time() < end:
+        fill = len(pcm)
+        if fill < warmup or fill < MIN_RESERVE * PACKET_FRAMES:
+            need = min(target_fill, max(PACKET_FRAMES, target_fill - fill))
+            request_id += 1
+            seq += 1
+            pull = encode_pull(seq, request_id, need, fill, target_fill)
+            ctrl.sendto(pull, (args.engine_host, args.control_port))
+
         try:
             data, _ = audio.recvfrom(4096)
         except socket.timeout:

@@ -48,9 +48,9 @@ make
 - `synth_core.*` - шаги Verilator и генерация PCM-сэмплов
 - `input_keyboard.*` - чтение `q2w3er5t6y7u` из `/dev/input/event*`
 - `input_midi.*` - чтение NOTE ON/OFF из ALSA MIDI
-- `input_udp.*` - MIDI по UDP (протокол `protocol/hdl_net.h`)
+- `input_udp.*` - MIDI + **AudioPull** по UDP (протокол v2 `protocol/hdl_net.h`)
 - `output_soundcard.*` - вывод на звуковую карту через PortAudio
-- `output_udp.*` - PCM по UDP обратно в VST
+- `output_udp.*` - legacy stub (PCM только по AudioPull в `input_udp`)
 - `net_socket.*` - UDP (POSIX / Winsock)
 - `output_wav.*` - запись в WAV
 - `terminal_input.*` - неблокирующее чтение `x` для выхода

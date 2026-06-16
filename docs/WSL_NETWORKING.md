@@ -2,14 +2,16 @@
 
 UDP-мост **VitaSound Remote Synth** (Windows) ↔ engine (WSL) **не использует звуковой драйвер Windows** для PCM между машинами. Reaper/WASAPI влияют только на последний шаг (вывод на колонки). Рваный звук чаще всего даёт **виртуальная сеть WSL2**, а не драйвер Realtek/USB.
 
-## Как идёт поток
+## Как идёт поток (протокол v2, pull)
 
 ```
-Reaper (WASAPI) ← VST FIFO ← UDP :5005 ← engine (WSL)
-Reaper MIDI     → VST      → UDP :5004 → engine (WSL)
+Reaper (WASAPI) ← VST FIFO ← UDP :5005 ← engine (WSL)  [PCM по AudioPull]
+Reaper MIDI     → VST      → UDP :5004 → engine (WSL)  [MIDI + AudioPull]
 ```
 
-PCM ~48 000 int16/s ≈ **94 UDP-пакета/с** (256 samples каждые ~5.3 ms). WSL2 NAT может **копить пакеты и отдавать пачками** — отсюда периодические провалы (~2 раза/с), даже при большом jitter buffer.
+VST **запрашивает** PCM (`AudioPull`), engine генерирует только по запросу. Запас буфера — в пакетах (256 samples/pkt), не в ms jitter slider.
+
+WSL2 NAT может **копить UDP-пакеты и отдавать пачками** — VST измеряет inter-arrival jitter и помечает доставку как **Bursty**. В этом режиме auto-tune **не уменьшает** reserve packets (приоритет — без разрывов звука).
 
 ## 1. WSL2 mirrored networking (рекомендуется, Win11)
 
@@ -61,16 +63,19 @@ New-NetFirewallRule -DisplayName "HDL UDP 5005" -Direction Inbound -Protocol UDP
 | Sample rate | **48000** |
 | Thread priority | Time critical |
 
-## 4. VST UI
+## 4. VST UI (v0.3.1 pull)
 
 | Параметр | Рекомендация |
 |----------|--------------|
-| Engine host | `127.0.0.1` (mirrored) или `hostname -I` (legacy NAT) |
-| Jitter | **100–150 ms** для WSL2 NAT; **80 ms** для mirrored/localhost |
-| Stop / Play | **Stop = mute** (звука нет). После Stop нажмите **Play** |
-| Reset stats | Обнуляет Underruns перед проверкой |
+| Engine host | `127.0.0.1` (mirrored) или `hostname -I` (legacy NAT); ● красный/оранжевый/зелёный |
+| Network profile | **WSL** для `172.x.x.x`; **Local** для native `Vgenerator.exe` |
+| Reserve packets | Auto-tune или профиль WSL/Local/LAN; слайдеры read-only в Auto |
+| Play / Stop | Лампочки на кнопках; **Stop** — mute, **Play** — unmute + reconnect |
+| Test note | Toggle C4; при смене profile нота переотправляется |
+| Reconnect | Сброс буфера + HELLO; при успехе — auto-play |
+| Reset stats | Ссылка внизу справа |
 
-Underruns **не обнуляются сами** — старые 50000+ не значат, что сейчас всё плохо.
+Underruns **не обнуляются сами** — старые значения не значат, что сейчас всё плохо.
 
 ## 5. Быстрая диагностика
 
@@ -79,14 +84,14 @@ Underruns **не обнуляются сами** — старые 50000+ не з
 В терминале WSL после запуска `./scripts/run_udp_engine.sh` при открытии VST должно быть:
 
 ```
-[udp] HELLO from ...
+[udp] HELLO from ... pull mode
 ```
 
 ### B. Изолировать WSL
 
-Если с **mirrored + 127.0.0.1** и jitter 100 ms Underruns **не растут** во время ноты — проблема была в NAT.
+Если с **mirrored + 127.0.0.1** и профилем WSL Underruns **не растут** во время ноты — проблема была в NAT.
 
-Если **всё равно растут** — возможна нагрузка CPU на Verilator (редко при одном голосе).
+Если **Delivery: Bursty** и Underruns растут — увеличьте target reserve или перейдите на native Windows engine.
 
 ### C. Сравнить с Linux-only
 
@@ -107,13 +112,13 @@ Underruns **не обнуляются сами** — старые 50000+ не з
 ## 7. Если mirrored недоступен
 
 - Win10 / старый Win11: только `172.x.x.x` из `hostname -I`
-- Jitter **150–200 ms**
+- Профиль **WSL**, target reserve **16+** пакетов
 - Закрыть VPN
 - Не использовать Wi‑Fi для критичных тестов (если DAW на другой машине)
 
 ## 8. Долгосрочно
 
-Стабильнее всего: engine **native Windows** (`verilator_tests/scripts/build_windows_mingw.sh` → `Vgenerator.exe`, VST host `127.0.0.1`) или engine на **другом PC в LAN**. Текущий MVP через WSL2 NAT требует mirrored mode или большой jitter.
+Стабильнее всего: engine **native Windows** (`verilator_tests/scripts/build_windows_mingw.sh` → `Vgenerator.exe`, VST host `127.0.0.1`, профиль **Local**). Текущий MVP через WSL2 NAT требует mirrored mode или консервативные reserve packets.
 
 ## 9. Native Windows engine (рекомендуется для Reaper на том же PC)
 
@@ -128,4 +133,4 @@ cd verilator_tests && ./scripts/build_windows_mingw.sh
 Vgenerator.exe --udp-bind 0.0.0.0:5004 --sample-rate 48000
 ```
 
-VST: Engine host **`127.0.0.1`**, jitter **80 ms**, Reaper block **512–1024**.
+VST: Engine host **`127.0.0.1`**, profile **Local**, Reaper block **512–1024**.

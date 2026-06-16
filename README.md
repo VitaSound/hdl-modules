@@ -51,6 +51,8 @@ make all       # test → images → docs
 
 Плагин VST3 и UDP-engine для Reaper / других DAW:
 
+![VitaSound Remote Synth UI](vst_bridge/docs/ui.png)
+
 - VST: [vst_bridge/README.md](vst_bridge/README.md) — сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
 - Engine: [verilator_tests/README.md](verilator_tests/README.md) — `make` или `verilator_tests/scripts/build_windows_mingw.sh`
 - Сеть WSL: [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md)

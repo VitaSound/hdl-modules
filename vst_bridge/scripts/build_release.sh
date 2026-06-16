@@ -85,7 +85,8 @@ Runtime
 -------
   Engine host: 127.0.0.1 (native Windows engine)
   UDP ports: 5004 (control), 5005 (audio)
-  Jitter buffer: 60-120 ms
+  Network profile: Local (native engine) or WSL for engine in WSL2
+  Reserve packets: auto-tuned; pull protocol v2
 
 Docs: https://github.com/UA3MQJ/hdl-modules/tree/master/vst_bridge
 EOF

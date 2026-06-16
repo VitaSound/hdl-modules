@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(HdlVerilator VERSION 0.2.5 LANGUAGES C CXX)
+project(HdlVerilator VERSION 0.3.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -58,6 +58,16 @@ target_sources(HdlVerilator
 target_include_directories(HdlVerilator PRIVATE protocol Source)
 
 string(TIMESTAMP HDL_BUILD_TIMESTAMP UTC)
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+    OUTPUT_VARIABLE HDL_GIT_REV
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT HDL_GIT_REV)
+    set(HDL_GIT_REV "nogit")
+endif()
 configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/Source/BuildInfo.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/generated/BuildInfo.h"

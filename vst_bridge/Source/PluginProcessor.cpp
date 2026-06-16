@@ -15,8 +15,7 @@ void HdlVerilatorAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     }
     netBridge_.setControlPort(controlPort_);
     netBridge_.setAudioPort(audioPort_);
-    netBridge_.setJitterMs(jitterMs_);
-    netBridge_.prepare(sampleRate, samplesPerBlock, jitterMs_);
+    netBridge_.prepare(sampleRate, samplesPerBlock);
 }
 
 void HdlVerilatorAudioProcessor::setEngineHost(const juce::String& host) {
@@ -24,8 +23,33 @@ void HdlVerilatorAudioProcessor::setEngineHost(const juce::String& host) {
     netBridge_.setEngineHost(host);
 }
 
-void HdlVerilatorAudioProcessor::reconnectEngine() {
+void HdlVerilatorAudioProcessor::fullReconnect(bool enterStopMode) {
+    if (testNoteOn_) {
+        setTestNote(false);
+    }
+    resetBridgeStats();
     netBridge_.reconnect();
+    setBridgeMuted(enterStopMode);
+}
+
+void HdlVerilatorAudioProcessor::reconnectEngine() {
+    fullReconnect(true);
+}
+
+void HdlVerilatorAudioProcessor::startPlayback() {
+    suppressDisconnectStop_ = true;
+    fullReconnect(true);
+    setBridgeMuted(false);
+}
+
+void HdlVerilatorAudioProcessor::resumePlaybackOnConnect() {
+    setBridgeMuted(false);
+}
+
+bool HdlVerilatorAudioProcessor::takeSuppressDisconnectStop() {
+    const bool v = suppressDisconnectStop_;
+    suppressDisconnectStop_ = false;
+    return v;
 }
 
 void HdlVerilatorAudioProcessor::resetBridgeStats() {
@@ -53,10 +77,17 @@ void HdlVerilatorAudioProcessor::setTestNote(bool on) {
     event.velocity = on ? 100 : 0;
     event.type = on ? hdlnet::PacketType::NoteOn : hdlnet::PacketType::NoteOff;
     netBridge_.queueMidi(event);
+}
 
-    if (on) {
-        netBridge_.setMuted(false);
+void HdlVerilatorAudioProcessor::reassertTestNote() {
+    if (!testNoteOn_) {
+        return;
     }
+    PendingMidiEvent event{};
+    event.note = 60;
+    event.velocity = 100;
+    event.type = hdlnet::PacketType::NoteOn;
+    netBridge_.queueMidi(event);
 }
 
 void HdlVerilatorAudioProcessor::releaseResources() {
@@ -102,7 +133,11 @@ void HdlVerilatorAudioProcessor::getStateInformation(juce::MemoryBlock& destData
     state.setProperty("engineHost", netBridge_.getEngineHost(), nullptr);
     state.setProperty("controlPort", static_cast<int>(controlPort_), nullptr);
     state.setProperty("audioPort", static_cast<int>(audioPort_), nullptr);
-    state.setProperty("jitterMs", jitterMs_, nullptr);
+    state.setProperty("minReservePackets", netBridge_.getMinReservePackets(), nullptr);
+    state.setProperty("targetReservePackets", netBridge_.getTargetReservePackets(), nullptr);
+    state.setProperty("initialWarmupPackets", netBridge_.getInitialWarmupPackets(), nullptr);
+    state.setProperty("autoTune", netBridge_.getAutoTune(), nullptr);
+    state.setProperty("networkProfile", static_cast<int>(netBridge_.getNetworkProfile()), nullptr);
 
     if (auto xml = state.createXml()) {
         copyXmlToBinary(*xml, destData);
@@ -115,9 +150,12 @@ void HdlVerilatorAudioProcessor::setStateInformation(const void* data, int sizeI
         engineHost_ = state.getProperty("engineHost", engineHost_).toString();
         controlPort_ = static_cast<uint16_t>(static_cast<int>(state.getProperty("controlPort", static_cast<int>(controlPort_))));
         audioPort_ = static_cast<uint16_t>(static_cast<int>(state.getProperty("audioPort", static_cast<int>(audioPort_))));
-        jitterMs_ = static_cast<int>(state.getProperty("jitterMs", jitterMs_));
         netBridge_.setEngineHost(engineHost_);
-        netBridge_.setJitterMs(jitterMs_);
+        netBridge_.setMinReservePackets(static_cast<int>(state.getProperty("minReservePackets", netBridge_.getMinReservePackets())));
+        netBridge_.setTargetReservePackets(static_cast<int>(state.getProperty("targetReservePackets", netBridge_.getTargetReservePackets())));
+        netBridge_.setInitialWarmupPackets(static_cast<int>(state.getProperty("initialWarmupPackets", netBridge_.getInitialWarmupPackets())));
+        netBridge_.setAutoTune(static_cast<bool>(state.getProperty("autoTune", netBridge_.getAutoTune())));
+        netBridge_.setNetworkProfile(static_cast<NetworkProfile>(static_cast<int>(state.getProperty("networkProfile", static_cast<int>(netBridge_.getNetworkProfile())))));
     }
 }
 

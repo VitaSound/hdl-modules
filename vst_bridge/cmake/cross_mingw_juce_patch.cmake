@@ -38,4 +38,30 @@ function(hdl_patch_juce_for_mingw_cross)
         file(WRITE "${d2d_resources}" "${_d2d}")
         message(STATUS "Patched JUCE Direct2D __uuidof for MinGW/clang")
     endif()
+
+    set(audio_processor_h "${juce_SOURCE_DIR}/modules/juce_audio_processors/processors/juce_AudioProcessor.h")
+    if(EXISTS "${audio_processor_h}")
+        file(READ "${audio_processor_h}" _ap)
+        if(NOT _ap MATCHES "patched: clang/MinGW channel layout ctor")
+            string(REPLACE
+                "    AudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList)\n        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))\n    {\n    }"
+                "    AudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList)\n        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))\n    {\n    }\n\n    /* patched: clang/MinGW channel layout ctor */\n    template <size_t numLayouts>\n    AudioProcessor (const short (&channelLayoutList)[numLayouts][2])\n        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))\n    {\n    }"
+                _ap "${_ap}")
+            file(WRITE "${audio_processor_h}" "${_ap}")
+            message(STATUS "Patched JUCE AudioProcessor channel layout ctor for MinGW/clang")
+        endif()
+    endif()
+
+    set(plugin_instance_h "${juce_SOURCE_DIR}/modules/juce_audio_processors/processors/juce_AudioPluginInstance.h")
+    if(EXISTS "${plugin_instance_h}")
+        file(READ "${plugin_instance_h}" _pi)
+        if(NOT _pi MATCHES "patched: clang/MinGW channel layout ctor")
+            string(REPLACE
+                "    template <size_t numLayouts>\n    AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}"
+                "    template <size_t numLayouts>\n    AudioPluginInstance (const short (&channelLayoutList)[numLayouts][2]) : AudioProcessor (channelLayoutList) {}"
+                _pi "${_pi}")
+            file(WRITE "${plugin_instance_h}" "${_pi}")
+            message(STATUS "Patched JUCE AudioPluginInstance channel layout ctor for MinGW/clang")
+        endif()
+    endif()
 endfunction()

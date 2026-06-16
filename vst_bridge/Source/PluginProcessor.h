@@ -34,23 +34,27 @@ public:
 
     void setEngineHost(const juce::String& host);
     void reconnectEngine();
+    void startPlayback();
+    void resumePlaybackOnConnect();
     void resetBridgeStats();
+    bool takeSuppressDisconnectStop();
     void setBridgeMuted(bool muted);
     void stopAllNotes();
     void setTestNote(bool on);
+    void reassertTestNote();
     bool isTestNoteOn() const { return testNoteOn_; }
-
-    int getJitterMs() const { return jitterMs_; }
 
     NetBridge& getNetBridge() { return netBridge_; }
 
 private:
+    void fullReconnect(bool enterStopMode);
+
     NetBridge netBridge_;
     juce::String engineHost_{"127.0.0.1"};
     uint16_t controlPort_ = hdlnet::kDefaultControlPort;
     uint16_t audioPort_ = hdlnet::kDefaultAudioPort;
-    int jitterMs_ = 80;
     bool testNoteOn_ = false;
+    bool suppressDisconnectStop_ = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HdlVerilatorAudioProcessor)
 };

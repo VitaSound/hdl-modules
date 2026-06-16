@@ -241,7 +241,8 @@ int main(int argc, char** argv) {
         }
         cfg.bindHost = bindEp.host;
         cfg.controlPort = bindEp.port;
-        inputThread = startUdpInput(cfg, state, udpSession);
+        cfg.packetFrames = udpBlockFrames;
+        inputThread = startUdpInput(cfg, state, udpSession, synth);
     } else {
         KeyboardInputConfig cfg;
         cfg.devicePath = inputDevice;

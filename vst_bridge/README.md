@@ -2,6 +2,8 @@
 
 VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
 
+**Версия:** 0.3.1 — см. [CHANGELOG.md](CHANGELOG.md).
+
 В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
 
@@ -11,12 +13,14 @@ VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine
 
 ```
 DAW (Reaper / Bitwig / FL Studio)
-  │ MIDI
+  │ MIDI + AudioPull
   ▼
 VitaSound Remote Synth  ──UDP :5004──►  Vgenerator (engine)
   ▲                                        Verilator RTL
-  └──UDP :5005 PCM─────────────────────────┘
+  └──UDP :5005 PCM (on pull)───────────────┘
 ```
+
+Протокол **v2 (pull)**: хост запрашивает PCM через `AudioPull`; engine не шлёт audio по таймеру.
 
 ## Скрипты сборки
 
@@ -66,7 +70,9 @@ vst_bridge/build-win/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.
   → C:\Program Files\Common Files\VST3\
 ```
 
-Reaper: Clear cache / rescan plugins. В UI должно быть `v0.2.5` и заголовок **VitaSound Remote Synth**.
+Reaper: Clear cache / rescan plugins. В UI должно быть `v0.3.1` и строка build с git hash (например `0.3.1+abc1234+...`).
+
+**После каждой пересборки** (`cmake --build build-win`) нужно **заново скопировать** `VitaSound Remote Synth.vst3` в `C:\Program Files\Common Files\VST3\` (или `./scripts/install_windows_vst.sh`) и сделать rescan — иначе Reaper оставит старый bundle.
 
 Первый запуск скачивает **llvm-mingw** в `vst_bridge/.toolchains/`.
 
@@ -109,8 +115,8 @@ cd vst_bridge
 Артефакты:
 
 ```
-vst_bridge/dist/VitaSound-Remote-Synth-0.2.5-linux-x86_64.zip
-vst_bridge/dist/VitaSound-Remote-Synth-0.2.5-windows-x86_64.zip
+vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-linux-x86_64.zip
+vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-windows-x86_64.zip
 ```
 
 В каждом zip: `VitaSound Remote Synth.vst3` + `INSTALL.txt`.
@@ -124,15 +130,15 @@ Workflow [`.github/workflows/vst-release.yml`](../.github/workflows/vst-release.
 | Триггер | Результат |
 |---------|-----------|
 | **Actions → vst-release → Run workflow** | Артефакты zip (90 дней) |
-| Тег `vst-v0.2.5` (версия = `CMakeLists.txt`) | GitHub Release + zip |
+| Тег `vst-v0.3.1` (версия = `CMakeLists.txt`) | GitHub Release + zip |
 
 Опубликовать релиз:
 
 ```bash
 # 1. Поднять VERSION в vst_bridge/CMakeLists.txt
 # 2. Закоммитить и запушить
-git tag vst-v0.2.5
-git push origin vst-v0.2.5
+git tag vst-v0.3.1
+git push origin vst-v0.3.1
 ```
 
 Без тега — ручной запуск workflow: zip появятся в **Artifacts** на странице run.
@@ -169,9 +175,10 @@ cd vst_bridge
 
 - MIDI-трек → **VitaSound Remote Synth**
 - **Engine host:** `127.0.0.1`
-- **Jitter buffer:** 60–120 ms (UDP); начать с 80 ms
-- **Play** — снять mute после Stop
-- **Test note OFF/ON** — длительный тон для проверки буфера
+- **Network profile:** WSL для engine в WSL2; Local для native `Vgenerator.exe`
+- **Reserve packets:** auto-tune подстраивает min/target; при Bursty delivery буфер не уменьшается
+- **Play** / **Stop** — режим воспроизведения (лампочки на кнопках)
+- **Test note** — длительный тон C4 (toggle, зелёная лампа)
 - Audio: WASAPI exclusive, **48000 Hz**, block **512–1024**
 
 Firewall: разрешить UDP **5004** (control) и **5005** (audio) на Windows.
@@ -196,22 +203,26 @@ Firewall: разрешить UDP **5004** (control) и **5005** (audio) на Win
 
 ## UI плагина
 
+![VitaSound Remote Synth UI](docs/ui.png)
+
 | Элемент | Описание |
 |---------|----------|
-| Engine host | IP engine (`127.0.0.1` для native Windows engine) |
-| Jitter buffer | Задержка PCM (10–200 ms); подсказка: recommended 60–120 for UDP |
-| Reconnect | Сброс буфера, новый HELLO |
-| Play / Stop | Unmute / mute + All Notes Off |
-| Test note | Note On/Off (C4) для проверки длительного тона |
-| Reset stats | Обнулить Underruns |
-| Buffered / Underruns | Диагностика; при стабильном звуке Underruns не растут |
+| ● у Engine host | Соединение: красный / оранжевый (Ack) / зелёный (стрим) |
+| Engine host + Reconnect | IP engine; Reconnect — сброс буфера и новый HELLO |
+| Min / target / warmup reserve | Запас PCM в пакетах (256 samples/pkt); pull v2 |
+| Network profile | Auto / WSL / Local / LAN — стартовые буферы и auto-tune |
+| Auto-tune | Быстро растёт при underrun/Bursty; медленно снижает при Smooth |
+| Test note / Play / Stop | Панельные кнопки с лампочкой: test note (toggle), Play (зелёная), Stop (красная) |
+| Buffer bar | Fill / target пакетов |
+| Reset stats | Ссылка справа внизу — обнулить Underruns / Pulls |
+| Status / stats | Fill, latency, p95 jitter, Smooth/Bursty, pulls |
 
 ## Файлы
 
 | Путь | Назначение |
 |------|------------|
 | `Source/PluginProcessor.cpp` | MIDI → NetBridge, PCM → DAW |
-| `Source/NetBridge.cpp` | UDP, jitter FIFO |
+| `Source/NetBridge.cpp` | UDP pull scheduler, delivery quality monitor |
 | `Source/PluginEditor.cpp` | UI |
 | `protocol/hdl_net.h` | Протокол с engine |
 

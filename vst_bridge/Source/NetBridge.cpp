@@ -5,56 +5,106 @@ uint64_t nowUs() {
     return static_cast<uint64_t>(juce::Time::getHighResolutionTicks() *
                                  (1'000'000.0 / juce::Time::getHighResolutionTicksPerSecond()));
 }
+
+uint32_t roundUpFrames(uint32_t frames, uint32_t packetFrames) {
+    if (packetFrames == 0) {
+        return frames;
+    }
+    return ((frames + packetFrames - 1) / packetFrames) * packetFrames;
+}
 } // namespace
 
 NetBridge::NetBridge() : juce::Thread("HdlNetBridge") {
     midiBuffer_.resize(static_cast<size_t>(kMaxMidiQueue));
     audioLeft_.resize(static_cast<size_t>(kMaxAudioSamples));
     audioRight_.resize(static_cast<size_t>(kMaxAudioSamples));
+    applyProfileDefaults();
 }
 
 NetBridge::~NetBridge() {
     shutdown();
 }
 
-int NetBridge::targetBufferSamples() const {
-    // DAW block + jitter headroom so one callback cannot drain below the next block.
-    const int jitterSamples = static_cast<int>(sampleRate_ * jitterMs_ / 1000.0);
-    return blockSize_ + jitterSamples;
+void NetBridge::applyProfileDefaults() {
+    NetworkProfile profile = networkProfile_;
+    if (profile == NetworkProfile::Auto) {
+        profile = inferNetworkProfile(getEngineHost().toStdString());
+    }
+    ::applyProfileDefaults(profile, initialWarmupPackets_, minReservePackets_, targetReservePackets_);
+    targetReservePackets_ = juce::jmax(targetReservePackets_, minReservePackets_ + 2);
+    initialWarmupPackets_ = juce::jmax(initialWarmupPackets_, targetReservePackets_);
 }
 
-int NetBridge::warmupBufferSamples() const {
-    return targetBufferSamples();
+int NetBridge::getEffectiveMinReservePackets() const {
+    return effectiveMinReservePackets();
+}
+
+NetworkProfile NetBridge::getActiveProfile() const {
+    if (networkProfile_ != NetworkProfile::Auto) {
+        return networkProfile_;
+    }
+    return inferNetworkProfile(getEngineHost().toStdString());
+}
+
+int NetBridge::effectiveMinReservePackets() const {
+    int minPkt = minReservePackets_;
+    if (deliveryMonitor_.getQuality() == DeliveryQuality::Bursty) {
+        minPkt += 2;
+    }
+    return minPkt;
 }
 
 int NetBridge::getTargetBufferSamples() const {
-    return targetBufferSamples();
+    return targetFillSamples();
 }
 
 int NetBridge::getWarmupBufferSamples() const {
-    return warmupBufferSamples();
+    return warmupFillSamples();
 }
 
-void NetBridge::prepare(double sampleRate, int blockSize, int jitterMs) {
-    const bool sameRuntime = isThreadRunning() && running_.load() && sampleRate_ == sampleRate &&
-                             blockSize_ == blockSize && jitterMs_ == jitterMs;
+double NetBridge::getEstimatedLatencyMs() const {
+    if (sampleRate_ <= 0.0) {
+        return 0.0;
+    }
+    return static_cast<double>(audioFifo_.getNumReady()) * 1000.0 / sampleRate_;
+}
+
+DeliveryQuality NetBridge::getDeliveryQuality() const {
+    return deliveryMonitor_.getQuality();
+}
+
+double NetBridge::getP95JitterMs() const {
+    return deliveryMonitor_.getP95JitterMs();
+}
+
+void NetBridge::prepare(double sampleRate, int blockSize) {
+    const bool sameRuntime =
+        isThreadRunning() && running_.load() && sampleRate_ == sampleRate && blockSize_ == blockSize;
     sampleRate_ = sampleRate;
     blockSize_ = blockSize;
-    jitterMs_ = jitterMs;
 
     if (sameRuntime) {
         return;
     }
 
     shutdown();
+    applyProfileDefaults();
     midiFifo_.reset();
     audioFifo_.reset();
     underruns_.store(0);
+    pulls_.store(0);
     connected_.store(false);
     primed_ = false;
+    pullInFlight_ = false;
     lastLeft_ = 0.0f;
     lastRight_ = 0.0f;
     seq_.store(0);
+    pullRequestId_.store(0);
+    deliveryMonitor_.reset();
+    connectTimeUs_ = 0;
+    lastAutoTuneUs_ = 0;
+    lastDecreaseUs_ = 0;
+    underrunsAtLastTune_ = 0;
     running_.store(true);
     startThread(juce::Thread::Priority::high);
 }
@@ -75,6 +125,7 @@ void NetBridge::setEngineHost(const juce::String& host) {
     engineHost_ = host;
     connected_.store(false);
     primed_ = false;
+    applyProfileDefaults();
     settingsChanged_.signal();
 }
 
@@ -103,32 +154,112 @@ void NetBridge::setAudioPort(uint16_t port) {
     settingsChanged_.signal();
 }
 
-void NetBridge::setJitterMs(int ms) {
-    ms = juce::jlimit(10, 200, ms);
-    if (ms == jitterMs_) {
+void NetBridge::setMinReservePackets(int packets) {
+    packets = juce::jlimit(2, kMaxReservePackets, packets);
+    if (packets == minReservePackets_) {
         return;
     }
-    jitterMs_ = ms;
+    minReservePackets_ = packets;
+    if (targetReservePackets_ < minReservePackets_ + 2) {
+        targetReservePackets_ = minReservePackets_ + 2;
+    }
     primed_ = false;
+}
+
+void NetBridge::setTargetReservePackets(int packets) {
+    packets = juce::jlimit(4, kMaxReservePackets, packets);
+    if (packets == targetReservePackets_) {
+        return;
+    }
+    targetReservePackets_ = juce::jmax(packets, minReservePackets_ + 2);
+    primed_ = false;
+}
+
+void NetBridge::setInitialWarmupPackets(int packets) {
+    packets = juce::jlimit(4, kMaxReservePackets, packets);
+    if (packets == initialWarmupPackets_) {
+        return;
+    }
+    initialWarmupPackets_ = packets;
+    primed_ = false;
+}
+
+void NetBridge::setMaxPacketsPerPull(int packets) {
+    packets = juce::jlimit(1, 16, packets);
+    maxPacketsPerPull_ = packets;
+}
+
+void NetBridge::setAutoTune(bool on) {
+    autoTune_ = on;
+}
+
+void NetBridge::setNetworkProfile(NetworkProfile profile) {
+    if (profile == networkProfile_) {
+        return;
+    }
+    networkProfile_ = profile;
+    applyProfileDefaults();
+    primed_ = false;
+    settingsChanged_.signal();
+}
+
+void NetBridge::resetReservesToProfile() {
+    applyProfileDefaults();
+    primed_ = false;
+    settingsChanged_.signal();
 }
 
 void NetBridge::reconnect() {
     audioFifo_.reset();
     midiFifo_.reset();
-    connected_.store(false);
-    primed_ = false;
+    markDisconnected();
     lastLeft_ = 0.0f;
     lastRight_ = 0.0f;
     seq_.store(0);
+    pullRequestId_.store(0);
+    deliveryMonitor_.reset();
+    connectTimeUs_ = 0;
+    lastHelloUs_ = 0;
     settingsChanged_.signal();
+}
+
+void NetBridge::markDisconnected() {
+    connected_.store(false);
+    primed_ = false;
+    pullInFlight_ = false;
+    lastActivityUs_ = 0;
+}
+
+void NetBridge::noteActivity(uint64_t nowUs) {
+    lastActivityUs_ = nowUs;
+}
+
+void NetBridge::checkConnectionTimeout(uint64_t nowUs) {
+    if (!connected_.load()) {
+        return;
+    }
+    if (lastActivityUs_ == 0) {
+        return;
+    }
+    if (nowUs - lastActivityUs_ > kActivityTimeoutUs) {
+        markDisconnected();
+        lastHelloUs_ = 0;
+    }
 }
 
 void NetBridge::resetStats() {
     underruns_.store(0);
+    pulls_.store(0);
+    underrunsAtLastTune_ = 0;
+    deliveryMonitor_.reset();
 }
 
 void NetBridge::setMuted(bool muted) {
     muted_.store(muted);
+    if (muted) {
+        // Freeze auto-tune baseline so a burst of stale underruns is not applied on resume.
+        underrunsAtLastTune_ = underruns_.load();
+    }
 }
 
 void NetBridge::sendAllNotesOff() {
@@ -160,7 +291,7 @@ void NetBridge::readAudio(float* left, float* right, int numSamples) {
     }
 
     const int available = audioFifo_.getNumReady();
-    const int warmup = warmupBufferSamples();
+    const int warmup = warmupFillSamples();
 
     if (!primed_) {
         if (available < warmup) {
@@ -225,6 +356,11 @@ void NetBridge::readAudio(float* left, float* right, int numSamples) {
             }
         }
     }
+
+    const int fillAfter = audioFifo_.getNumReady();
+    if (fillAfter < minReserveSamples()) {
+        deliveryMonitor_.recordFillBelowMin();
+    }
 }
 
 int NetBridge::getBufferedSamples() const {
@@ -248,11 +384,126 @@ void NetBridge::sendHello(juce::DatagramSocket& socket) {
     hello.block_size = static_cast<uint16_t>(blockSize_);
     hello.plugin_ssrc = 0x56535431u; // "VST1"
     hello.audio_port = audioPort_;
+    hello.session_mode = hdlnet::kSessionModePull;
+    hello.packet_frames = kPacketFrames;
+    hello.initial_warmup_packets = static_cast<uint16_t>(initialWarmupPackets_);
+    hello.min_reserve_packets = static_cast<uint16_t>(minReservePackets_);
+    hello.target_reserve_packets = static_cast<uint16_t>(targetReservePackets_);
 
     std::array<uint8_t, 128> out{};
     const uint32_t seq = seq_.fetch_add(1) + 1;
     const size_t len = hdlnet::encodeHello(out.data(), seq, hello);
     socket.write(host, static_cast<int>(ctrlPort), out.data(), static_cast<int>(len));
+}
+
+void NetBridge::sendPull(juce::DatagramSocket& socket, uint32_t frameCount) {
+    juce::String host;
+    uint16_t ctrlPort = controlPort_;
+    {
+        juce::ScopedLock lock(settingsLock_);
+        host = engineHost_;
+    }
+    if (host.isEmpty() || frameCount == 0) {
+        return;
+    }
+
+    frameCount = roundUpFrames(frameCount, kPacketFrames);
+    const uint32_t maxFrames =
+        static_cast<uint32_t>(maxPacketsPerPull_ * kPacketFrames);
+    frameCount = juce::jmin(frameCount, maxFrames);
+
+    hdlnet::AudioPullPayload pull{};
+    pull.request_id = pullRequestId_.fetch_add(1) + 1;
+    pull.frame_count = frameCount;
+    pull.host_fill = static_cast<uint32_t>(audioFifo_.getNumReady());
+    pull.host_target = static_cast<uint32_t>(targetFillSamples());
+
+    std::array<uint8_t, 64> out{};
+    const uint32_t seq = seq_.fetch_add(1) + 1;
+    const size_t len = hdlnet::encodeAudioPull(out.data(), seq, pull);
+    socket.write(host, static_cast<int>(ctrlPort), out.data(), static_cast<int>(len));
+    pulls_.fetch_add(1);
+    pullInFlight_ = true;
+    lastPullUs_ = nowUs();
+}
+
+void NetBridge::maybeRequestAudio(juce::DatagramSocket& socket) {
+    if (!connected_.load() || muted_.load()) {
+        return;
+    }
+    const uint64_t t = nowUs();
+    if (pullInFlight_ && t - lastPullUs_ > 80'000) {
+        pullInFlight_ = false;
+    }
+    if (pullInFlight_) {
+        return;
+    }
+
+    const int fill = audioFifo_.getNumReady();
+    const int minReserve = effectiveMinReservePackets() * kPacketFrames;
+    const int targetFill = targetFillSamples();
+    const int warmup = warmupFillSamples();
+
+    if (!primed_) {
+        if (fill < warmup) {
+            const uint32_t need = static_cast<uint32_t>(juce::jmax(warmup - fill, kPacketFrames));
+            sendPull(socket, need);
+        }
+        return;
+    }
+
+    if (fill < minReserve) {
+        int need = targetFill - fill;
+        need = juce::jmax(need, blockSize_);
+        need = juce::jmin(need, maxPacketsPerPull_ * kPacketFrames);
+        need = juce::jmax(need, kPacketFrames);
+        sendPull(socket, static_cast<uint32_t>(need));
+    }
+}
+
+void NetBridge::runAutoTune(uint64_t nowUs) {
+    if (!autoTune_ || muted_.load()) {
+        return;
+    }
+    if (nowUs - lastAutoTuneUs_ < 2'000'000) {
+        return;
+    }
+    lastAutoTuneUs_ = nowUs;
+
+    const int underruns = underruns_.load();
+    const int deltaUnderruns = underruns - underrunsAtLastTune_;
+    underrunsAtLastTune_ = underruns;
+
+    if (deltaUnderruns > 0) {
+        targetReservePackets_ = juce::jmin(kMaxReservePackets, targetReservePackets_ + 1);
+        minReservePackets_ = juce::jmin(kMaxReservePackets - 2, minReservePackets_ + 1);
+        return;
+    }
+
+    const auto quality = deliveryMonitor_.getQuality();
+    if (quality == DeliveryQuality::Bursty) {
+        if (targetReservePackets_ < kMaxReservePackets) {
+            targetReservePackets_ = juce::jmin(kMaxReservePackets, targetReservePackets_ + 1);
+        }
+        return;
+    }
+
+    if (quality != DeliveryQuality::Smooth) {
+        return;
+    }
+    if (!deliveryMonitor_.canDecreaseReserve(nowUs)) {
+        return;
+    }
+    if (nowUs - lastDecreaseUs_ < 10'000'000) {
+        return;
+    }
+
+    const int fill = audioFifo_.getNumReady();
+    if (fill > targetFillSamples() + 2 * kPacketFrames &&
+        targetReservePackets_ > minReservePackets_ + 2) {
+        targetReservePackets_ = juce::jmax(minReservePackets_ + 2, targetReservePackets_ - 1);
+        lastDecreaseUs_ = nowUs;
+    }
 }
 
 void NetBridge::handleControlPacket(const uint8_t* data, int size) {
@@ -263,27 +514,24 @@ void NetBridge::handleControlPacket(const uint8_t* data, int size) {
     }
 
     if (type == hdlnet::PacketType::Ack || type == hdlnet::PacketType::Pong) {
-        connected_.store(true);
-    }
-}
-
-void NetBridge::trimExcessBuffer() {
-    const int maxKeep = targetBufferSamples() + blockSize_;
-    while (audioFifo_.getNumReady() > maxKeep) {
-        int dropStart1 = 0;
-        int dropSize1 = 0;
-        int dropStart2 = 0;
-        int dropSize2 = 0;
-        audioFifo_.prepareToRead(1, dropStart1, dropSize1, dropStart2, dropSize2);
-        if (dropSize1 + dropSize2 <= 0) {
-            break;
+        const uint64_t t = nowUs();
+        noteActivity(t);
+        if (!connected_.load()) {
+            connectTimeUs_ = t;
         }
-        audioFifo_.finishedRead(1);
+        connected_.store(true);
+        pullInFlight_ = false;
     }
 }
 
 void NetBridge::pushAudioSamples(const int16_t* interleaved, int frames, int channels) {
+    const uint64_t t = nowUs();
     connected_.store(true);
+    noteActivity(t);
+    pullInFlight_ = false;
+    if (!muted_.load()) {
+        deliveryMonitor_.recordArrival(t);
+    }
     constexpr float kScale = 1.0f / 32768.0f;
 
     int frameOffset = 0;
@@ -296,16 +544,7 @@ void NetBridge::pushAudioSamples(const int16_t* interleaved, int frames, int cha
         audioFifo_.prepareToWrite(remaining, start1, size1, start2, size2);
         const int canWrite = size1 + size2;
         if (canWrite <= 0) {
-            int dropStart1 = 0;
-            int dropSize1 = 0;
-            int dropStart2 = 0;
-            int dropSize2 = 0;
-            audioFifo_.prepareToRead(1, dropStart1, dropSize1, dropStart2, dropSize2);
-            if (dropSize1 + dropSize2 <= 0) {
-                break;
-            }
-            audioFifo_.finishedRead(1);
-            continue;
+            break;
         }
 
         for (int i = 0; i < size1; ++i) {
@@ -327,7 +566,6 @@ void NetBridge::pushAudioSamples(const int16_t* interleaved, int frames, int cha
         frameOffset += canWrite;
         remaining -= canWrite;
     }
-    trimExcessBuffer();
 }
 
 void NetBridge::run() {
@@ -347,21 +585,32 @@ void NetBridge::run() {
     }
 
     sendHello(controlSocket);
+    lastHelloUs_ = nowUs();
 
     std::array<uint8_t, hdlnet::kMaxAudioPacketBytes> buffer{};
-    int helloCounter = 0;
+    uint64_t lastQualityTickUs = nowUs();
 
     while (running_.load() && !threadShouldExit()) {
         if (settingsChanged_.wait(1)) {
             sendHello(controlSocket);
+            lastHelloUs_ = nowUs();
         }
 
-        if (++helloCounter > 1000) {
-            helloCounter = 0;
-            if (!connected_.load()) {
-                sendHello(controlSocket);
-            }
+        const uint64_t t = nowUs();
+        checkConnectionTimeout(t);
+
+        if (!connected_.load() && t - lastHelloUs_ >= kHelloIntervalUs) {
+            sendHello(controlSocket);
+            lastHelloUs_ = t;
         }
+
+        if (!muted_.load() && t - lastQualityTickUs >= 1'000'000) {
+            deliveryMonitor_.tickWindow(t);
+            runAutoTune(t);
+            lastQualityTickUs = t;
+        }
+
+        maybeRequestAudio(controlSocket);
 
         while (midiFifo_.getNumReady() > 0) {
             int start1 = 0;
@@ -398,7 +647,8 @@ void NetBridge::run() {
         int senderPort = 0;
         while (true) {
             const int ctrlBytes =
-                controlSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
+                controlSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender,
+                                   senderPort);
             if (ctrlBytes <= 0) {
                 break;
             }
@@ -407,17 +657,21 @@ void NetBridge::run() {
 
         while (true) {
             const int audioBytes =
-                audioSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender, senderPort);
+                audioSocket.read(buffer.data(), static_cast<int>(buffer.size()), false, sender,
+                                 senderPort);
             if (audioBytes <= 0) {
                 break;
             }
             hdlnet::AudioHeader hdr{};
             size_t payloadBytes = 0;
-            if (hdlnet::decodeAudioHeader(buffer.data(), static_cast<size_t>(audioBytes), hdr, payloadBytes)) {
+            if (hdlnet::decodeAudioHeader(buffer.data(), static_cast<size_t>(audioBytes), hdr,
+                                          payloadBytes)) {
                 const auto* samples =
                     reinterpret_cast<const int16_t*>(buffer.data() + sizeof(hdlnet::AudioHeader));
                 pushAudioSamples(samples, hdr.frame_count, hdr.channels);
             }
         }
+
+        maybeRequestAudio(controlSocket);
     }
 }

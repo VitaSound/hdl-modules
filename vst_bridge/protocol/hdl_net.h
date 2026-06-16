@@ -8,7 +8,7 @@ namespace hdlnet {
 
 constexpr uint32_t kMagicControl = 0x48444C4Du; // "HDLM"
 constexpr uint32_t kMagicAudio = 0x48444C41u;   // "HDLA"
-constexpr uint8_t kVersion = 1;
+constexpr uint8_t kVersion = 2;
 
 constexpr uint16_t kDefaultControlPort = 5004;
 constexpr uint16_t kDefaultAudioPort = 5005;
@@ -19,6 +19,9 @@ constexpr size_t kAudioHeaderSize = 22;
 constexpr size_t kMaxAudioPacketBytes =
     kAudioHeaderSize + kMaxAudioFrames * kMaxAudioChannels * sizeof(int16_t);
 
+constexpr uint8_t kSessionModePull = 1;
+constexpr uint16_t kDefaultMaxFramesPerPull = 2048;
+
 enum class PacketType : uint8_t {
     Hello = 1,
     Ack = 2,
@@ -27,6 +30,7 @@ enum class PacketType : uint8_t {
     NoteOn = 5,
     NoteOff = 6,
     AllNotesOff = 7,
+    AudioPull = 8,
 };
 
 #pragma pack(push, 1)
@@ -43,11 +47,26 @@ struct HelloPayload {
     uint16_t block_size;
     uint32_t plugin_ssrc;
     uint16_t audio_port;
+    uint8_t session_mode;
+    uint8_t reserved;
+    uint16_t packet_frames;
+    uint16_t initial_warmup_packets;
+    uint16_t min_reserve_packets;
+    uint16_t target_reserve_packets;
 };
 
 struct AckPayload {
     uint32_t sample_rate;
     uint32_t engine_ssrc;
+    uint16_t packet_frames;
+    uint16_t max_frames_per_pull;
+};
+
+struct AudioPullPayload {
+    uint32_t request_id;
+    uint32_t frame_count;
+    uint32_t host_fill;
+    uint32_t host_target;
 };
 
 struct TimestampPayload {
@@ -120,6 +139,12 @@ inline size_t encodeHello(uint8_t* out, uint32_t seq, const HelloPayload& payloa
     p->block_size = hostToBe16(payload.block_size);
     p->plugin_ssrc = hostToBe32(payload.plugin_ssrc);
     p->audio_port = hostToBe16(payload.audio_port);
+    p->session_mode = payload.session_mode;
+    p->reserved = 0;
+    p->packet_frames = hostToBe16(payload.packet_frames);
+    p->initial_warmup_packets = hostToBe16(payload.initial_warmup_packets);
+    p->min_reserve_packets = hostToBe16(payload.min_reserve_packets);
+    p->target_reserve_packets = hostToBe16(payload.target_reserve_packets);
     return sizeof(ControlHeader) + sizeof(HelloPayload);
 }
 
@@ -128,7 +153,19 @@ inline size_t encodeAck(uint8_t* out, uint32_t seq, const AckPayload& payload) {
     auto* p = reinterpret_cast<AckPayload*>(out + sizeof(ControlHeader));
     p->sample_rate = hostToBe32(payload.sample_rate);
     p->engine_ssrc = hostToBe32(payload.engine_ssrc);
+    p->packet_frames = hostToBe16(payload.packet_frames);
+    p->max_frames_per_pull = hostToBe16(payload.max_frames_per_pull);
     return sizeof(ControlHeader) + sizeof(AckPayload);
+}
+
+inline size_t encodeAudioPull(uint8_t* out, uint32_t seq, const AudioPullPayload& payload) {
+    writeControlHeader(out, PacketType::AudioPull, seq, sizeof(AudioPullPayload));
+    auto* p = reinterpret_cast<AudioPullPayload*>(out + sizeof(ControlHeader));
+    p->request_id = hostToBe32(payload.request_id);
+    p->frame_count = hostToBe32(payload.frame_count);
+    p->host_fill = hostToBe32(payload.host_fill);
+    p->host_target = hostToBe32(payload.host_target);
+    return sizeof(ControlHeader) + sizeof(AudioPullPayload);
 }
 
 inline size_t encodePingPong(uint8_t* out, PacketType type, uint32_t seq, uint64_t timestamp_us) {
@@ -154,6 +191,12 @@ inline bool decodeHello(const uint8_t* payload, HelloPayload& out) {
     out.block_size = beToHost16(raw.block_size);
     out.plugin_ssrc = beToHost32(raw.plugin_ssrc);
     out.audio_port = beToHost16(raw.audio_port);
+    out.session_mode = raw.session_mode;
+    out.reserved = raw.reserved;
+    out.packet_frames = beToHost16(raw.packet_frames);
+    out.initial_warmup_packets = beToHost16(raw.initial_warmup_packets);
+    out.min_reserve_packets = beToHost16(raw.min_reserve_packets);
+    out.target_reserve_packets = beToHost16(raw.target_reserve_packets);
     return true;
 }
 
@@ -162,6 +205,18 @@ inline bool decodeAck(const uint8_t* payload, AckPayload& out) {
     std::memcpy(&raw, payload, sizeof(AckPayload));
     out.sample_rate = beToHost32(raw.sample_rate);
     out.engine_ssrc = beToHost32(raw.engine_ssrc);
+    out.packet_frames = beToHost16(raw.packet_frames);
+    out.max_frames_per_pull = beToHost16(raw.max_frames_per_pull);
+    return true;
+}
+
+inline bool decodeAudioPull(const uint8_t* payload, AudioPullPayload& out) {
+    AudioPullPayload raw{};
+    std::memcpy(&raw, payload, sizeof(AudioPullPayload));
+    out.request_id = beToHost32(raw.request_id);
+    out.frame_count = beToHost32(raw.frame_count);
+    out.host_fill = beToHost32(raw.host_fill);
+    out.host_target = beToHost32(raw.host_target);
     return true;
 }
 
