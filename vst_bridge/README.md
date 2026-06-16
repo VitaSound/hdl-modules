@@ -2,7 +2,7 @@
 
 VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
 
-**Версия:** 0.3.1 — см. [CHANGELOG.md](CHANGELOG.md).
+**Версия:** 0.4.0 — см. [CHANGELOG.md](CHANGELOG.md).
 
 В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
@@ -130,15 +130,15 @@ Workflow [`.github/workflows/vst-release.yml`](../.github/workflows/vst-release.
 | Триггер | Результат |
 |---------|-----------|
 | **Actions → vst-release → Run workflow** | Артефакты zip (90 дней) |
-| Тег `vst-v0.3.1` (версия = `CMakeLists.txt`) | GitHub Release + zip |
+| Тег `v0.4.0` (версия = [`VERSION`](../VERSION)) | GitHub Release: VST3 + UDP engine + legacy engine |
 
 Опубликовать релиз:
 
 ```bash
-# 1. Поднять VERSION в vst_bridge/CMakeLists.txt
+# 1. Поднять VERSION в корне репо и vst_bridge/CMakeLists.txt
 # 2. Закоммитить и запушить
-git tag vst-v0.3.1
-git push origin vst-v0.3.1
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
 Без тега — ручной запуск workflow: zip появятся в **Artifacts** на странице run.

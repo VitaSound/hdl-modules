@@ -1,6 +1,17 @@
 # Changelog — VitaSound Remote Synth
 
-Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза: `vst-vX.Y.Z` (должен совпадать с `CMakeLists.txt`).
+Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
+
+## [0.4.0] — 2026-06-16
+
+### Репозиторий
+
+- Разделение: **`hdl-modules-tester`** (UDP pull-only) и **`verilator_tests`** (legacy local).
+- Единый GitHub Release `v0.4.0`: VST3 (Linux/Windows) + оба engine-бинарника.
+
+### VST 0.4.0
+
+- Без изменений протокола относительно 0.3.1; engine-пути обновлены на `hdl-modules-tester/`.
 
 ## [0.3.1] — 2026-06-16
 
@@ -42,4 +53,5 @@
 
 - Переименование в **VitaSound Remote Synth**, GitHub release workflow, cross-build Windows из WSL.
 
+[0.4.0]: https://github.com/VitaSound/hdl-modules/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/UA3MQJ/hdl-modules/compare/vst-v0.2.5...vst-v0.3.1

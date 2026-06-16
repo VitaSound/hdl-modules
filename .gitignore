@@ -21,6 +21,9 @@ vst_bridge/dist/
 vst_bridge/.toolchains/
 vst_bridge/_deps/
 
+# Release staging (local)
+dist/
+
 # Verilator WAV recordings
 verilator_tests/*.wav
 

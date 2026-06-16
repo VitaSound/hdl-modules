@@ -1,0 +1,234 @@
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  build-vst-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake g++ git pkg-config zip \
+            libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
+            libcurl4-openssl-dev libasound2-dev libfreetype6-dev \
+            libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
+            libxrandr-dev libglu1-mesa-dev
+
+      - name: Build and package Linux VST3
+        working-directory: vst_bridge
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: "2"
+          GITHUB_ACTIONS: "true"
+        run: |
+          ./scripts/build_linux.sh --clean
+          ./scripts/build_release.sh --linux-only --skip-build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vst-linux-zip
+          path: vst_bridge/dist/*-linux-x86_64.zip
+          if-no-files-found: error
+
+  build-vst-windows:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Windows cross-build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake g++ git pkg-config zip curl \
+            libfontconfig1-dev libgtk-3-dev libwebkit2gtk-4.0-dev \
+            libcurl4-openssl-dev libfreetype6-dev \
+            libxinerama-dev libx11-dev libxext-dev libxcursor-dev \
+            libxrandr-dev libglu1-mesa-dev zlib1g
+
+      - name: Download llvm-mingw toolchain
+        timeout-minutes: 20
+        working-directory: vst_bridge
+        run: ./scripts/download_llvm_mingw.sh
+
+      - name: Build and package Windows VST3
+        working-directory: vst_bridge
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: "2"
+          GITHUB_ACTIONS: "true"
+          SKIP_LLVM_DOWNLOAD: "1"
+        run: |
+          ./scripts/build_windows_mingw.sh --clean
+          ./scripts/build_release.sh --windows-only --skip-build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vst-windows-zip
+          path: vst_bridge/dist/*-windows-x86_64.zip
+          if-no-files-found: error
+
+  build-tester-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator g++ make zip
+
+      - name: Build hdl-modules-tester
+        run: make -C hdl-modules-tester clean obj_dir/Vgenerator
+
+      - name: Package Linux engine
+        env:
+          PACKAGE_TARGET: tester-linux
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          ./scripts/package_engine_release.sh "$VERSION" dist
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tester-linux-zip
+          path: dist/HdlModulesTester-*-linux-x86_64.zip
+          if-no-files-found: error
+
+  build-tester-windows:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator g++ make zip curl
+
+      - name: Download llvm-mingw toolchain
+        timeout-minutes: 20
+        working-directory: vst_bridge
+        run: ./scripts/download_llvm_mingw.sh
+
+      - name: Cross-build Windows engine
+        run: ./hdl-modules-tester/scripts/build_windows_mingw.sh --clean
+
+      - name: Package Windows engine
+        env:
+          PACKAGE_TARGET: tester-windows
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          ./scripts/package_engine_release.sh "$VERSION" dist
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tester-windows-zip
+          path: dist/HdlModulesTester-*-windows-x86_64.zip
+          if-no-files-found: error
+
+  build-legacy-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install legacy build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator g++ make zip portaudio19-dev libasound2-dev
+
+      - name: Build verilator_tests legacy
+        run: make -C verilator_tests clean obj_dir/Vgenerator
+
+      - name: Package legacy engine
+        env:
+          PACKAGE_TARGET: legacy-linux
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          ./scripts/package_engine_release.sh "$VERSION" dist
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-linux-zip
+          path: dist/VgeneratorLegacy-*-linux-x86_64.zip
+          if-no-files-found: error
+
+  release:
+    needs:
+      - build-vst-linux
+      - build-vst-windows
+      - build-tester-linux
+      - build-tester-windows
+      - build-legacy-linux
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches VERSION
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          test "$TAG" = "${{ steps.version.outputs.version }}"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: "*-zip"
+          merge-multiple: true
+
+      - name: List release files
+        run: find dist -type f -name '*.zip' | sort
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: hdl-modules v${{ steps.version.outputs.version }}
+          files: dist/*.zip
+          generate_release_notes: true
+          body: |
+            ## VitaSound Remote Synth (VST3)
+
+            | Platform | Archive |
+            |----------|---------|
+            | Linux | `VitaSound-Remote-Synth-*-linux-x86_64.zip` |
+            | Windows | `VitaSound-Remote-Synth-*-windows-x86_64.zip` |
+
+            ## hdl-modules-tester (UDP engine)
+
+            | Platform | Archive |
+            |----------|---------|
+            | Linux | `HdlModulesTester-*-linux-x86_64.zip` |
+            | Windows | `HdlModulesTester-*-windows-x86_64.zip` |
+
+            ## verilator_tests (legacy local synth)
+
+            | Platform | Archive |
+            |----------|---------|
+            | Linux | `VgeneratorLegacy-*-linux-x86_64.zip` |
+
+            Docs: [ARCHITECTURE.md](https://github.com/${{ github.repository }}/blob/master/ARCHITECTURE.md), [vst_bridge/README.md](https://github.com/${{ github.repository }}/blob/master/vst_bridge/README.md).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
