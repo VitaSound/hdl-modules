@@ -1,3 +1,5 @@
+![Архитектура hdl-modules / VitaSound](docs/architecture.png)
+
 # hdl-modules
 
 Репозиторий, в котором будут собраны все модули

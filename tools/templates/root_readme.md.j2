@@ -1,8 +1,12 @@
+![Архитектура hdl-modules / VitaSound](docs/architecture.png)
+
 # {{ repo.name }}
 
 {{ repo.description_ru }}
 
 Наработки постепенно переосмысливаются и переносятся из [fpga-synth]({{ repo.legacy_source }})
+
+**Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-модули, Icarus-тесты, Verilator (клавиатура/MIDI/звук) и UDP-режим (VST + DAW).
 
 # назначение модулей
 
@@ -49,6 +53,8 @@ make all       # test → images → docs
 ## {{ repo.daw.title_ru }}
 
 {{ repo.daw.intro_ru }}:
+
+![VitaSound Remote Synth UI](vst_bridge/docs/ui.png)
 
 {% for link in repo.daw.links %}
 - {{ link.name }}: [{{ link.path }}]({{ link.path }}){% if link.hint %} — {{ link.hint }}{% endif %}
