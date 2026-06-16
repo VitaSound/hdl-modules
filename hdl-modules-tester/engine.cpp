@@ -1,4 +1,4 @@
-#include "input_udp.h"
+#include "engine.h"
 
 #include "net_socket.h"
 #include "protocol/hdl_net.h"
@@ -48,7 +48,7 @@ bool generateAndSendAudio(UdpSocket& audioSock,
         const uint16_t block_frames =
             static_cast<uint16_t>(remaining > packet_frames ? packet_frames : remaining);
 
-        synthGenerate(synth, state, mono.data(), block_frames);
+        synthGeneratePull(synth, state, mono.data(), block_frames);
 
         for (uint16_t i = 0; i < block_frames; ++i) {
             for (uint8_t ch = 0; ch < channels; ++ch) {
@@ -78,10 +78,10 @@ bool generateAndSendAudio(UdpSocket& audioSock,
 }
 } // namespace
 
-std::thread startUdpInput(const UdpInputConfig& cfg,
-                          SharedState& state,
-                          UdpSessionState& session,
-                          SynthCore& synth) {
+std::thread startEngine(const EngineConfig& cfg,
+                        SharedState& state,
+                        UdpSessionState& session,
+                        SynthCore& synth) {
     return std::thread([cfg, &state, &session, &synth]() {
         UdpSocket ctrlSock;
         UdpSocket audioSock;
@@ -90,8 +90,7 @@ std::thread startUdpInput(const UdpInputConfig& cfg,
             return;
         }
         if (!ctrlSock.bind(cfg.bindHost, cfg.controlPort)) {
-            std::cerr << "UDP input bind failed on " << cfg.bindHost << ":" << cfg.controlPort
-                      << "\n";
+            std::cerr << "UDP bind failed on " << cfg.bindHost << ":" << cfg.controlPort << "\n";
             return;
         }
         ctrlSock.setRecvTimeoutMs(200);
@@ -99,9 +98,8 @@ std::thread startUdpInput(const UdpInputConfig& cfg,
 
         const uint16_t packet_frames = cfg.packetFrames;
         const uint8_t channels = cfg.audioChannels;
-        synth.channels = 1;
 
-        std::cerr << "UDP control listening on " << cfg.bindHost << ":" << cfg.controlPort
+        std::cerr << "UDP listening on " << cfg.bindHost << ":" << cfg.controlPort
                   << " (pull mode, packet_frames=" << packet_frames << ")\n";
 
         std::array<bool, 128> pressed{};
@@ -144,8 +142,10 @@ std::thread startUdpInput(const UdpInputConfig& cfg,
 
                 state.gate.store(false, std::memory_order_relaxed);
                 state.note.store(-1, std::memory_order_relaxed);
+                pressed.fill(false);
                 audio_seq = 0;
                 sample_index = 0;
+                synth.fractional = 0;
 
                 hdlnet::AckPayload ack{};
                 ack.sample_rate = hello.sample_rate;
@@ -159,8 +159,7 @@ std::thread startUdpInput(const UdpInputConfig& cfg,
 
                 std::cerr << "[udp] HELLO from " << src.host << ":" << src.port
                           << " sr=" << hello.sample_rate
-                          << " audio_port=" << hello.audio_port
-                          << " pull mode\n";
+                          << " audio_port=" << hello.audio_port << "\n";
                 break;
             }
             case hdlnet::PacketType::AudioPull: {

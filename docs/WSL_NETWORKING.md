@@ -39,7 +39,7 @@ wsl --shutdown
 ```bash
 ./scripts/run_udp_engine.sh
 # в другом терминале WSL:
-python3 verilator_tests/scripts/udp_smoke_test.py --engine-host 127.0.0.1 --duration 2
+python3 hdl-modules-tester/scripts/udp_smoke_test.py --engine-host 127.0.0.1 --duration 2
 ```
 
 ## 2. Firewall Windows
@@ -118,13 +118,13 @@ Underruns **не обнуляются сами** — старые значени
 
 ## 8. Долгосрочно
 
-Стабильнее всего: engine **native Windows** (`verilator_tests/scripts/build_windows_mingw.sh` → `Vgenerator.exe`, VST host `127.0.0.1`, профиль **Local**). Текущий MVP через WSL2 NAT требует mirrored mode или консервативные reserve packets.
+Стабильнее всего: engine **native Windows** (`hdl-modules-tester/scripts/build_windows_mingw.sh` → `Vgenerator.exe`, VST host `127.0.0.1`, профиль **Local**). Текущий MVP через WSL2 NAT требует mirrored mode или консервативные reserve packets.
 
 ## 9. Native Windows engine (рекомендуется для Reaper на том же PC)
 
 ```bash
 # WSL
-cd verilator_tests && ./scripts/build_windows_mingw.sh
+cd hdl-modules-tester && ./scripts/build_windows_mingw.sh
 ```
 
 Скопировать `obj_dir_win/Vgenerator.exe` на Windows, запустить:

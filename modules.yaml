@@ -14,8 +14,8 @@ repo:
         path: vst_bridge/README.md
         hint: сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
       - name: Engine
-        path: verilator_tests/README.md
-        hint: "`make` или `verilator_tests/scripts/build_windows_mingw.sh`"
+        path: hdl-modules-tester/README.md
+        hint: "`make` или `hdl-modules-tester/scripts/build_windows_mingw.sh`"
       - name: Сеть WSL
         path: docs/WSL_NETWORKING.md
         hint: null

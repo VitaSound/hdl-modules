@@ -8,7 +8,7 @@
 
 - UDP **protocol v2**: `AudioPull`, расширенный `Hello`/`Ack`, `kSessionModePull`.
 - Engine генерирует PCM **только по запросу** (`input_udp`); `output_udp` — заглушка.
-- Синхронизация `hdl_net.h` между `vst_bridge/` и `verilator_tests/`.
+- Синхронизация `hdl_net.h` между `vst_bridge/` и `hdl-modules-tester/`.
 
 ### VST: сеть и буфер
 

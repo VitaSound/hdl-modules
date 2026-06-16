@@ -9,7 +9,7 @@
 #include "synth_core.h"
 #include "udp_session.h"
 
-struct UdpInputConfig {
+struct EngineConfig {
     std::string bindHost = "0.0.0.0";
     uint16_t controlPort = hdlnet::kDefaultControlPort;
     uint32_t engineSsrc = 0x454E474Eu; // "ENGN"
@@ -18,7 +18,7 @@ struct UdpInputConfig {
     uint16_t maxFramesPerPull = hdlnet::kDefaultMaxFramesPerPull;
 };
 
-std::thread startUdpInput(const UdpInputConfig& cfg,
-                          SharedState& state,
-                          UdpSessionState& session,
-                          SynthCore& synth);
+std::thread startEngine(const EngineConfig& cfg,
+                        SharedState& state,
+                        UdpSessionState& session,
+                        SynthCore& synth);

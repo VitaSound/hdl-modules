@@ -1,9 +1,7 @@
-#include "main_udp.h"
-
-#include "input_udp.h"
+#include "engine.h"
+#include "net_socket.h"
 #include "shared_state.h"
 #include "synth_core.h"
-#include "net_socket.h"
 
 #include "verilated.h"
 
@@ -28,16 +26,16 @@ void onSignal(int) {
 
 void printUsage() {
     std::cerr
-        << "Vgenerator UDP engine (MIDI in / PCM out for VST bridge, pull mode)\n"
+        << "Vgenerator UDP engine (hdl-modules-tester, pull mode for VST bridge)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
-        << "  --sample-rate R (default 48000)\n"
+        << "  --sample-rate R (default 48000, overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
         << "  --help\n";
 }
 } // namespace
 
-int runUdpEngineMain(int argc, char** argv) {
+int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
 
     SharedState state;
@@ -70,12 +68,12 @@ int runUdpEngineMain(int argc, char** argv) {
     }
 
     SynthCore synth;
-    if (!synthInit(synth, sampleRate, 2)) {
+    if (!synthInit(synth, sampleRate)) {
         return 1;
     }
 
-    UdpSessionState udpSession;
-    UdpInputConfig cfg;
+    UdpSessionState session;
+    EngineConfig cfg;
     UdpEndpoint bindEp;
     if (!parseHostPort(udpBind, bindEp)) {
         std::cerr << "Invalid --udp-bind: " << udpBind << "\n";
@@ -86,7 +84,7 @@ int runUdpEngineMain(int argc, char** argv) {
     cfg.controlPort = bindEp.port;
     cfg.packetFrames = udpBlockFrames;
 
-    std::thread inputThread = startUdpInput(cfg, state, udpSession, synth);
+    std::thread engineThread = startEngine(cfg, state, session, synth);
 
     std::cerr << "UDP engine | control " << cfg.bindHost << ":" << cfg.controlPort
               << " | pull mode | Ctrl+C to quit\n";
@@ -95,16 +93,10 @@ int runUdpEngineMain(int argc, char** argv) {
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 
-    if (inputThread.joinable()) {
-        inputThread.join();
+    if (engineThread.joinable()) {
+        engineThread.join();
     }
 
     synthDestroy(synth);
     return 0;
 }
-
-#ifdef HDL_ENGINE_UDP_MAIN
-int main(int argc, char** argv) {
-    return runUdpEngineMain(argc, argv);
-}
-#endif

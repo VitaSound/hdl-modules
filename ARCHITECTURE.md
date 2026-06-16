@@ -26,7 +26,7 @@ flowchart TB
     synth --> veri
   end
 
-  subgraph local_mode [Локальный режим — клавиатура / MIDI / звук]
+  subgraph legacy_mode [Legacy — verilator_tests]
     direction TB
     kb["input_keyboard<br/>evdev q2w3er…"]
     midi_in["input_midi<br/>ALSA sequencer"]
@@ -34,11 +34,11 @@ flowchart TB
     wav_out["output_wav<br/>файл .wav"]
   end
 
-  subgraph udp_mode [Сетевой режим — DAW + VST3]
+  subgraph udp_mode [UDP — hdl-modules-tester + VST3]
     direction TB
     daw["DAW<br/>Reaper / Bitwig"]
     vst["VitaSound Remote Synth<br/>vst_bridge VST3i"]
-    udp_eng["Vgenerator --input udp<br/>input_udp + synth_core"]
+    udp_eng["Vgenerator pull-only<br/>engine.cpp + synth_core"]
     proto["hdl_net v2<br/>UDP :5004 control :5005 audio<br/>Hello / MIDI / AudioPull"]
   end
 
@@ -52,7 +52,7 @@ flowchart TB
 
   daw -->|"MIDI трек"| vst
   vst <-->|proto| udp_eng
-  udp_eng --> synth
+  udp_eng -->|"AudioPull only"| synth
 
   readme -.-> hdl_lib
 ```
@@ -62,10 +62,12 @@ flowchart TB
 | Уровень | Инструмент | Что проверяем | Артефакт |
 |---------|------------|---------------|----------|
 | **Модульный RTL** | Icarus Verilog | Один `.v` или пакет в изоляции | `test.png`, waveform в README |
-| **Реалтайм на ПК** | Verilator + C++ | Тот же алгоритм под реальным clock, звук сразу | Наушники / WAV |
+| **Реалтайм на ПК** | Verilator + C++ (legacy) | Тот же алгоритм под реальным clock, звук сразу | Наушники / WAV |
 | **Через DAW** | VST3 + UDP engine | MIDI и PCM как в продакшене VitaSound | Reaper + `Vgenerator` |
 
-## Локальный режим (`verilator_tests`)
+## Legacy (`verilator_tests`)
+
+Локальный синт: клавиатура / MIDI → soundcard / WAV. Без сети.
 
 ```bash
 cd verilator_tests && make
@@ -77,11 +79,12 @@ cd verilator_tests && make
 |------|-------|------------|
 | `input_keyboard` | `output_soundcard` | Живая клавиатура PC → колонки |
 | `input_midi` | `output_soundcard` / `output_wav` | MIDI-клавиатура / секвенсер |
-| `input_udp` | (PCM по AudioPull) | Тот же synth, управление из VST |
 
 Поток: **событие** (клавиша / MIDI note) → `shared_state` (`gate`, `note`) → **Verilog** `generator.sv` → **PCM** → PortAudio или WAV.
 
-## Сетевой режим (UDP + VST)
+## UDP engine (`hdl-modules-tester`)
+
+Только сеть: HDL клокается **только** на `AudioPull` от VST host.
 
 ```bash
 ./scripts/run_udp_engine.sh          # engine в WSL/Linux
@@ -104,7 +107,7 @@ sequenceDiagram
   VST->>DAW: audio out
 ```
 
-Подробнее: [vst_bridge/README.md](vst_bridge/README.md), [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md).
+Подробнее: [hdl-modules-tester/README.md](hdl-modules-tester/README.md), [vst_bridge/README.md](vst_bridge/README.md), [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md).
 
 ## Где что лежит
 
@@ -114,10 +117,10 @@ sequenceDiagram
 | `modules.yaml` | Метаданные для `make docs` |
 | `tools/run_tests.py`, `make test` | Запуск Icarus по всем модулям |
 | `verilator_tests/generator.sv` | Топ синтезатора для Verilator |
-| `verilator_tests/input_*.cpp` | Адаптеры ввода ОС |
-| `verilator_tests/output_*.cpp` | Адаптеры вывода ОС |
+| `verilator_tests/` | Legacy: keyboard/MIDI → soundcard/wav |
+| `hdl-modules-tester/` | UDP engine для VST (pull-only) |
 | `vst_bridge/` | VST3-плагин (хост в DAW) |
-| `verilator_tests/protocol/hdl_net.h` | Протокол UDP (копия в `vst_bridge/protocol/`) |
+| `hdl-modules-tester/protocol/hdl_net.h` | Протокол UDP (копия в `vst_bridge/protocol/`) |
 
 ## Связь с будущей ПЛИС
 

@@ -7,7 +7,7 @@ VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine
 В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
 
-Протокол: [`protocol/hdl_net.h`](protocol/hdl_net.h) (копия [`../verilator_tests/protocol/hdl_net.h`](../verilator_tests/protocol/hdl_net.h)).
+Протокол: [`protocol/hdl_net.h`](protocol/hdl_net.h) (копия [`../hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h)).
 
 ## Архитектура
 
@@ -38,7 +38,7 @@ Engine (не VST):
 
 | Скрипт | Назначение |
 |--------|------------|
-| [`../verilator_tests/scripts/build_windows_mingw.sh`](../verilator_tests/scripts/build_windows_mingw.sh) | `Vgenerator.exe` для Windows |
+| [`../hdl-modules-tester/scripts/build_windows_mingw.sh`](../hdl-modules-tester/scripts/build_windows_mingw.sh) | `Vgenerator.exe` для Windows |
 | [`../scripts/run_udp_engine.sh`](../scripts/run_udp_engine.sh) | Engine в WSL/Linux (`obj_dir/Vgenerator`) |
 
 ## Сборка VST
@@ -150,7 +150,7 @@ git push origin vst-v0.3.1
 ### 1. Собрать engine для Windows (из WSL)
 
 ```bash
-cd verilator_tests
+cd hdl-modules-tester
 ./scripts/build_windows_mingw.sh
 ```
 
@@ -160,7 +160,7 @@ cd verilator_tests
 Vgenerator.exe --udp-bind 0.0.0.0:5004 --sample-rate 48000
 ```
 
-Или `verilator_tests/scripts/run_udp_engine_win.bat`.
+Или `hdl-modules-tester/scripts/run_udp_engine_win.bat`.
 
 ### 2. Собрать и установить VST
 

@@ -43,7 +43,7 @@ fi
 echo
 echo "Local smoke test (2 s):"
 if ss -uln 2>/dev/null | grep -q ':5004 '; then
-    python3 "$ROOT/verilator_tests/scripts/udp_smoke_test.py" \
+    python3 "$ROOT/hdl-modules-tester/scripts/udp_smoke_test.py" \
         --engine-host 127.0.0.1 --duration 1.5 --wav /tmp/hdl_net_check.wav 2>&1 | tail -3
 else
     echo "  skipped (engine not running)"
