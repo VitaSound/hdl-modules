@@ -71,7 +71,7 @@ categories:
 
       - id: dds_transform
         title: DDS transform
-        description_ru: Преобразователи формы базовой цифровой пилы
+        description_ru: Преобразователи формы базовой цифровой пилы и синус
         readme: dds_transform/README.md
         test_dir: dds_transform/test
         sources:
@@ -81,6 +81,7 @@ categories:
           - dds_transform/dds2revsaw.v
           - dds_transform/dds2square.v
           - dds_transform/dds2pwm.v
+          - dds_transform/dds2sin.v
         gtkw: dds_transform/test/test.gtkw
         image: dds_transform/test/test.png
         variants:
@@ -94,6 +95,8 @@ categories:
             label_ru: меандр
           - file: dds_transform/dds2pwm.v
             label_ru: PWM c 7-битной регулировкой %
+          - file: dds_transform/dds2sin.v
+            label_ru: "синус (WIDTH, LUT_BITS; дефолт 32×8 точек)"
 
       - id: vca
         title: VCA
