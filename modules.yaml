@@ -89,6 +89,52 @@ categories:
         gtkw: dds/test/test.gtkw
         image: dds/test/test.png
 
+      - id: note2dds
+        title: note2dds
+        description_ru: "MIDI note → DDS phase increment; таблица 12 semitones, параметр CLK_HZ"
+        source: dds/note2dds.v
+        test_dir: dds/note2dds_test
+        sources:
+          - dds/note2dds.v
+        gtkw: dds/note2dds_test/test.gtkw
+        image: dds/note2dds_test/test.png
+
+      - id: note_pitch2dds
+        title: note_pitch2dds
+        description_ru: "Note + pitch wheel + LFO pitch → DDS adder (dual note2dds + interp)"
+        source: dds/note_pitch2dds.v
+        test_dir: dds/note_pitch2dds_test
+        sources:
+          - dds/note_pitch2dds.v
+          - dds/note2dds.v
+        gtkw: dds/note_pitch2dds_test/test.gtkw
+        image: dds/note_pitch2dds_test/test.png
+
+      - id: mono_voice
+        title: Mono voice
+        description_ru: "Моно-голос: note_pitch2dds → dds → mux форм → adsr → vca; OUT_WIDTH параметр (дефолт 16)"
+        readme: mono_voice/README.md
+        source: mono_voice/mono_voice.v
+        test_dir: mono_voice/test
+        sources:
+          - mono_voice/mono_voice.v
+          - dds/note2dds.v
+          - dds/note_pitch2dds.v
+          - dds/dds.v
+          - dds_transform/dds2saw.v
+          - dds_transform/dds2revsaw.v
+          - dds_transform/dds2tria.v
+          - dds_transform/dds2square.v
+          - dds_transform/dds2pwm.v
+          - dds_transform/dds2sin.v
+          - adsr/adsr.v
+          - common/frqdivmod.v
+          - common/strobe_gen.v
+          - vca/svca_wide.v
+          - vca/svca.v
+        gtkw: mono_voice/test/test.gtkw
+        image: mono_voice/test/test.png
+
       - id: dds_transform
         title: DDS transform
         description_ru: Преобразователи формы базовой цифровой пилы и синус

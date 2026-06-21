@@ -25,10 +25,13 @@
 | N | Module | Description | Img |
 | - | ------ | --- | --- |
 | 1 | [dds](dds/README.md) | Генератор базовой цифровой пилы | ![dds](dds/test/test.png) |
-| 2 | [dds_transform](dds_transform/README.md) | Преобразователи формы базовой цифровой пилы и синус <br><br> [dds2saw.v](dds_transform/dds2saw.v) - пила <br> [dds2revsaw.v](dds_transform/dds2revsaw.v) - обратная пила <br> [dds2tria.v](dds_transform/dds2tria.v) - треугольник <br> [dds2square.v](dds_transform/dds2square.v) - меандр <br> [dds2pwm.v](dds_transform/dds2pwm.v) - PWM c 7-битной регулировкой % <br> [dds2sin.v](dds_transform/dds2sin.v) - синус (WIDTH, LUT_BITS; дефолт 32×8 точек) <br> | ![dds_transform](dds_transform/test/test.png) |
-| 3 | [vca](vca/README.md) | Модули VCA. 8 и 32 битные. Формат данных целочисленный без знака. То есть от 0 до N с центром в N/2. <br><br> [svca.v](vca/svca.v) - vca 8bit cv, in, out <br> [svca_wide.v](vca/svca_wide.v) - vca 8bit cv, in, 16bit out <br> [svca32.v](vca/svca32.v) - vca 32 bit cv, in, out <br> | ![vca](vca/test/test.png) |
-| 4 | [rnd](rnd/README.md) | Модули генерации псевдослучайных чисел 1, 8, n бит. <br><br> [rnd1.v](rnd/rnd1.v) - rnd 1bit <br> [rnd8.v](rnd/rnd8.v) - rnd 8 bit <br> [rndx.v](rnd/rndx.v) - rnd x bit (1..32) <br> | ![rnd](rnd/test/test.png) |
-| 5 | [adsr](adsr/README.md) | Генератор огибающей ADSR | ![adsr](adsr/test/test.png) |
+| 2 | [note2dds]() | MIDI note → DDS phase increment; таблица 12 semitones, параметр CLK_HZ | ![note2dds](dds/note2dds_test/test.png) |
+| 3 | [note_pitch2dds]() | Note + pitch wheel + LFO pitch → DDS adder (dual note2dds + interp) | ![note_pitch2dds](dds/note_pitch2dds_test/test.png) |
+| 4 | [mono_voice](mono_voice/README.md) | Моно-голос: note_pitch2dds → dds → mux форм → adsr → vca; OUT_WIDTH параметр (дефолт 16) | ![mono_voice](mono_voice/test/test.png) |
+| 5 | [dds_transform](dds_transform/README.md) | Преобразователи формы базовой цифровой пилы и синус <br><br> [dds2saw.v](dds_transform/dds2saw.v) - пила <br> [dds2revsaw.v](dds_transform/dds2revsaw.v) - обратная пила <br> [dds2tria.v](dds_transform/dds2tria.v) - треугольник <br> [dds2square.v](dds_transform/dds2square.v) - меандр <br> [dds2pwm.v](dds_transform/dds2pwm.v) - PWM c 7-битной регулировкой % <br> [dds2sin.v](dds_transform/dds2sin.v) - синус (WIDTH, LUT_BITS; дефолт 32×8 точек) <br> | ![dds_transform](dds_transform/test/test.png) |
+| 6 | [vca](vca/README.md) | Модули VCA. 8 и 32 битные. Формат данных целочисленный без знака. То есть от 0 до N с центром в N/2. <br><br> [svca.v](vca/svca.v) - vca 8bit cv, in, out <br> [svca_wide.v](vca/svca_wide.v) - vca 8bit cv, in, 16bit out <br> [svca32.v](vca/svca32.v) - vca 32 bit cv, in, out <br> | ![vca](vca/test/test.png) |
+| 7 | [rnd](rnd/README.md) | Модули генерации псевдослучайных чисел 1, 8, n бит. <br><br> [rnd1.v](rnd/rnd1.v) - rnd 1bit <br> [rnd8.v](rnd/rnd8.v) - rnd 8 bit <br> [rndx.v](rnd/rndx.v) - rnd x bit (1..32) <br> | ![rnd](rnd/test/test.png) |
+| 8 | [adsr](adsr/README.md) | Генератор огибающей ADSR | ![adsr](adsr/test/test.png) |
 
 # окружение
 

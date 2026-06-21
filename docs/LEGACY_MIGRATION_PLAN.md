@@ -82,8 +82,8 @@ flowchart TB
 |--------|------------|
 | `dds.v`, `dds32.v` | Phase accumulator (NCO) |
 | `sin.v` | Таблица синуса |
-| `note2dds.v` + `note2dds_1st..6st_gen.v` | MIDI note → частота (эволюция, несколько поколений) |
-| `note_pitch2dds.v` + `_1st..3st_gen.v` | Note + pitch wheel (+ LFO) → DDS adder |
+| `note2dds.v` + `note2dds_1st..6st_gen.v` | ~~MIDI note → частота~~ → **`dds/note2dds.v`** (gens не переносить) |
+| `note_pitch2dds.v` + `_1st..3st_gen.v` | ~~Note + pitch + LFO~~ → **`dds/note_pitch2dds.v`** (gens не переносить) |
 | `note_mono.v` | Один голос: gate + last note |
 | `note_mono_array.v`, `note_mono_harray.v` | Полифония (до 32 нот) |
 | `frqdivmod.v` | Делитель частоты |
@@ -160,9 +160,10 @@ flowchart TB
 
 | fpga-synth | Зачем | Куда в hdl-modules |
 |------------|-------|-------------------|
-| `note_pitch2dds.v` (одна финальная версия) | MIDI → частота DDS | `common/` или `dds/` |
-| `voice.v` (логика, не копия файла) | Сборка OSC+wave | `synths/mono_voice/top.sv` |
-| `adsr32` → уже есть `adsr.v` | Огибающая | Подключить в top |
+| ~~`note2dds.v`~~ | MIDI note → adder | **`dds/note2dds.v`** ✓ |
+| ~~`note_pitch2dds.v`~~ | Pitch/LFO → adder | **`dds/note_pitch2dds.v`** ✓ |
+| ~~`voice.v` (логика)~~ | Сборка OSC+wave+ADSR+VCA | **`mono_voice/mono_voice.v`** ✓ |
+| `adsr32` → уже есть `adsr.v` | Огибающая | подключено в `mono_voice` |
 
 ### Средний приоритет
 
@@ -248,17 +249,20 @@ synths/<name>/
 
 ### Фаза B — моно-голос (следующий шаг)
 
-- [ ] Перенести/упростить `note_pitch2dds` → один модуль с тестом
-- [ ] `synths/mono_voice/`: `dds` + `dds2saw` (или mux форм) + `adsr` + `svca`
+- [x] `note2dds.v` — MIDI note → DDS adder; таблица 12 semitones в Verilog (`initial for`, параметр `CLK_HZ`)
+- [x] `note_pitch2dds.v` — note + pitch wheel + LFO → dual `note2dds` + linear interp; Icarus self-check
+- [x] `mono_voice/` — `note_pitch2dds` → `dds` → mux `dds2*` → `adsr` → `svca_wide`; `OUT_WIDTH` default 16; тест A4 440 Hz
+- [ ] `synths/mono_voice/` Verilator + UDP (опционально, не блокирует)
 - [ ] Референс wiring: `fpga-synth/examples/VitaPolySimple/VitaPolySimple.v`
-- [ ] Icarus testbench для top (опционально)
-- [ ] UDP + VST отладка по паттерну `noise_box`
+
+**Не переносить:** `note2dds_1st..6st_gen.v`, `.mif`, `note_pitch2dds_1st..3st_gen.v`, копии в `examples/*/modules/`.
+
+**Supersaw (`voice_ssaw`) — фаза C:** RTL остаётся в fpga-synth; для `note_pitch2dds` достаточно LFO tie-off (`lfo_sig=128`, depth=0).
 
 ### Фаза C — расширения
 
-- [ ] Несколько форм волны (как `voice.v` mux)
-- [ ] LFO pitch (как в VitaPolySimple)
 - [ ] `voice_ssaw` / duo → `synths/duo/` или полифония в RTL
+- [ ] LFO AM (как в VitaPolySimple)
 - [ ] Параметры ADSR/wave по UDP (расширение протокола)
 
 ### Фаза D — FPGA prod (долгосрочно)
