@@ -1,12 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Sun Jun 21 09:01:11 2026
 [*]
-[dumpfile] "out.vcd"
-[savefile] "test.gtkw"
+[dumpfile] "/home/sea/hdl-modules/dds_transform/test/out.vcd"
+[dumpfile_mtime] "Sun Jun 21 09:00:03 2026"
+[dumpfile_size] 27184537
+[savefile] "/home/sea/hdl-modules/dds_transform/test/test.gtkw"
 [timestart] 0
 [size] 1318 784
-[pos] -1 -1
-*-23.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -899 278
+*-21.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] testbench.
 [sst_width] 269
 [signals_width] 290
@@ -16,11 +19,28 @@
 testbench.signal_out[31:0]
 @8022
 testbench.sin_signal_out[31:0]
+@20000
+-
+-
+-
 @8022
 testbench.tria_signal_out[31:0]
+@20000
+-
+-
+-
 @8022
 testbench.saw_signal_out[31:0]
+@20000
+-
+-
+-
 @8022
 testbench.square_signal_out[31:0]
+@20000
+-
+-
+@20001
+-
 [pattern_trace] 1
 [pattern_trace] 0
