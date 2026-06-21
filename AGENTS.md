@@ -144,6 +144,7 @@ GitHub Actions проверяет `git diff` только для `README.md` и 
 | CI red на git diff README | `make docs`, закоммитить README и `modules.yaml` |
 | CI red только на PNG | Нормально: PNG не сравниваются в CI; обновить локально `make images` |
 | Новый id не находится | Добавить в modules.yaml, проверить `make list` |
+| ADSR «молчит» в Icarus, `frqdivmod` tick = `X` | Нечётный `DIV` — см. [docs/TODO.md](docs/TODO.md) |
 
 ## Ссылки
 
