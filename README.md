@@ -17,6 +17,8 @@
 | 1 | powerup_reset | Генератор автоматического сигнала сброса и сброса по кнопке | ![powerup_reset](common/powerup_reset_test/test.png) |
 | 2 | frqdivmod | Целочисленный делитель частоты на 2, 3, 4 итд | ![frqdivmod](common/frqdivmod_test/test.png) |
 | 3 | strobe_gen | Формирователь строба шириной 1 clk от нч сигнала (например, от целочисленного делителя) | ![strobe_gen](common/strobe_gen_test/test.png) |
+| 4 | param_reg | Регистр параметра с записью по strobe wr (param_reg WIDTH; обёртки reg7 — MIDI CC, reg14 — ADSR A/D/R, pitch) | ![param_reg](common/param_reg_test/test.png) |
+| 5 | reg_sr | SR-регистр gate: set (NoteOn) / reset (NoteOff); замена legacy reg_rs | ![reg_sr](common/reg_sr_test/test.png) |
 
 Генерация
 

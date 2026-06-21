@@ -1,0 +1,23 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*]
+[dumpfile] "out.vcd"
+[savefile] "test.gtkw"
+[timestart] 0
+[size] 1318 784
+[pos] -1 -1
+*-16.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 290
+[sst_expanded] 1
+[sst_vpaned_height] 110
+@28
+testbench.clk
+testbench.rst
+testbench.wr7
+testbench.out7[6:0]
+testbench.wr14
+testbench.out14[13:0]
+[pattern_trace] 1
+[pattern_trace] 0

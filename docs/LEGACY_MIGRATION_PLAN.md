@@ -105,7 +105,7 @@ flowchart TB
 | Модуль | Назначение |
 |--------|------------|
 | `midi_in.v` | MIDI UART @ 50 MHz |
-| `reg1/7/14/14w/32/rs.v` | Параметрические регистры |
+| `reg1/7/14/14w/32/rs.v` | Параметрические регистры (см. §4 — перенесены `param_reg`, `reg7`, `reg14`, `reg_sr`) |
 | `powerup_reset.v` | Сброс по кнопке |
 | `fifo.v`, `spi_slave.v` | FIFO, SPI |
 | `signal_cross_domain.v`, `flag_cross_domain.v` | CDC |
@@ -130,6 +130,8 @@ flowchart TB
 | `frqdivmod.v` | [`common/frqdivmod.v`](../common/frqdivmod.v) | Перенесён, + Icarus test, PNG |
 | `powerup_reset.v` | [`common/powerup_reset.v`](../common/powerup_reset.v) | Перенесён, + тест |
 | — | [`common/strobe_gen.v`](../common/strobe_gen.v) | **Новый** (не было в fpga-synth) |
+| `reg7.v`, `reg14w.v` | [`common/param_reg.v`](../common/param_reg.v), [`reg7.v`](../common/reg7.v), [`reg14.v`](../common/reg14.v) | Параметрическое ядро + обёртки 7/14 bit; опциональный `rst` |
+| `reg_rs.v` | [`common/reg_sr.v`](../common/reg_sr.v) | Sync SR gate (set/reset); при `s&&r` — reset wins |
 | `dds.v` | [`dds/dds.v`](../dds/dds.v) | Перенесён, добавлен `reset` |
 | waveform mux в `voice` | [`dds_transform/`](../dds_transform/) | **Новая упаковка**: saw, revsaw, tri, square, pwm, **sin** ([`dds2sin.v`](../dds_transform/dds2sin.v)) |
 | `svca.v` | [`vca/svca.v`](../vca/svca.v) | Перенесён |
@@ -137,6 +139,8 @@ flowchart TB
 | `rnd1.v`, `rnd8.v`, `rndx.v` | [`rnd/`](../rnd/) | Перенесены |
 | `adsr32.v` | [`adsr/adsr.v`](../adsr/adsr.v) | Переработан под новый стиль |
 | `sin.v` | [`dds_transform/dds2sin.v`](../dds_transform/dds2sin.v) | 8-точечный LUT + симметрия; учебный путь: [`sandbox/Sine_tab/`](../sandbox/Sine_tab/) |
+
+**Не перенесены (reg*):** legacy split-write `reg14` (`wr_lsb`/`wr_msb`), `reg32` (покрывается `param_reg #(32)`), `reg1` (async latch).
 
 ### Runtime (не в `modules.yaml`, но в репо)
 
@@ -166,7 +170,6 @@ flowchart TB
 |------------|-------|
 | `note_mono`, `note_mono_*array` | Полифония в RTL (сейчас gate в `engine.cpp`) |
 | `lin2exp.v` | Кривая для MIDI CC |
-| `reg14w` и др. | Параметры с хоста (позже — по UDP?) |
 
 ### Низкий приоритет / только для FPGA на железе
 
@@ -238,7 +241,7 @@ synths/<name>/
 
 ### Фаза A — сделано
 
-- [x] Common: `frqdivmod`, `powerup_reset`, `strobe_gen`
+- [x] Common: `frqdivmod`, `powerup_reset`, `strobe_gen`, `param_reg`/`reg7`/`reg14`, `reg_sr`
 - [x] Generation: `dds`, `dds_transform`, `vca`, `rnd`, `adsr`
 - [x] Verilator MVP + legacy local + UDP tester + VST
 - [x] `synths/noise_box` (rndx 16-bit)
