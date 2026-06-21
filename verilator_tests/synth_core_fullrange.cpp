@@ -1,11 +1,11 @@
-#include "synth_core.h"
+#include "synth_core_fullrange.h"
 
-#include "Vnoise_box.h"
+#include "Vgenerator_fullrange.h"
 
 namespace {
 constexpr uint32_t VERILOG_CLK_HZ = 1000000;
 
-void stepVerilogCycles(Vnoise_box* top, uint32_t cycles) {
+void stepVerilogCycles(Vgenerator_fullrange* top, uint32_t cycles) {
     for (uint32_t i = 0; i < cycles; ++i) {
         top->clk = 0;
         top->eval();
@@ -15,20 +15,28 @@ void stepVerilogCycles(Vnoise_box* top, uint32_t cycles) {
 }
 } // namespace
 
-bool synthInit(SynthCore& core, uint32_t sampleRate) {
-    core.top = new Vnoise_box;
+bool synthInit(SynthCore& core, uint32_t sampleRate, int channels) {
+    core.top = new Vgenerator_fullrange;
     core.sampleRate = sampleRate;
+    core.channels = channels;
     core.fractional = 0;
 
     core.top->clk = 0;
     core.top->enable = 0;
-    core.top->note = 0;
+    core.top->note = 69;
     core.top->eval();
     return true;
 }
 
-void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames) {
+void synthGenerate(SynthCore& core, const SharedState& state, int16_t* out, unsigned long frames) {
     core.top->enable = state.gate.load(std::memory_order_relaxed) ? 1 : 0;
+    int note = state.note.load(std::memory_order_relaxed);
+    if (note < 0) {
+        note = 69;
+    } else if (note > 127) {
+        note = 127;
+    }
+    core.top->note = static_cast<uint8_t>(note);
 
     for (unsigned long i = 0; i < frames; ++i) {
         core.fractional += VERILOG_CLK_HZ;
@@ -38,10 +46,14 @@ void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono,
 
         int16_t sample = 0;
         if (core.top->enable) {
-            const uint16_t raw = core.top->audio_sample;
-            sample = static_cast<int16_t>(static_cast<int32_t>(raw) - 32768);
+            sample = core.top->audio_out ? 12000 : -12000;
         }
-        mono[i] = sample;
+        if (core.channels == 2) {
+            out[i * 2 + 0] = sample;
+            out[i * 2 + 1] = sample;
+        } else {
+            out[i] = sample;
+        }
     }
 }
 
@@ -49,5 +61,3 @@ void synthDestroy(SynthCore& core) {
     delete core.top;
     core.top = nullptr;
 }
-
-void synthPostEvent(SynthCore& /*core*/, const MidiEvent& /*event*/) {}

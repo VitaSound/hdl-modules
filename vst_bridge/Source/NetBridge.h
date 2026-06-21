@@ -12,6 +12,9 @@ struct PendingMidiEvent {
     hdlnet::PacketType type = hdlnet::PacketType::NoteOn;
     uint8_t note = 0;
     uint8_t velocity = 0;
+    uint8_t cc = 0;
+    uint8_t value = 0;
+    uint16_t pitch = 8192;
     uint64_t timestampUs = 0;
 };
 

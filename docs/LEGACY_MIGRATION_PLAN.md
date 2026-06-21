@@ -252,8 +252,11 @@ synths/<name>/
 - [x] `note2dds.v` — MIDI note → DDS adder; таблица 12 semitones в Verilog (`initial for`, параметр `CLK_HZ`)
 - [x] `note_pitch2dds.v` — note + pitch wheel + LFO → dual `note2dds` + linear interp; Icarus self-check
 - [x] `mono_voice/` — `note_pitch2dds` → `dds` → mux `dds2*` → `adsr` → `svca_wide`; `OUT_WIDTH` default 16; тест A4 440 Hz
-- [ ] `synths/mono_voice/` Verilator + UDP (опционально, не блокирует)
-- [ ] Референс wiring: `fpga-synth/examples/VitaPolySimple/VitaPolySimple.v`
+- [x] `synths/mono_synth/` — Verilator + UDP (`MonoSynth`), `note_mono`, ADSR CC 16–19, wave CC 48, pitch bend
+- [x] `verilator_tests/VgeneratorFull` — legacy MIDI 0..127 без VST (ALSA → PortAudio)
+- [x] Common: `note_mono`, `lin2exp_t`, `bitscan`, `prio_encoder` (из fpga-synth)
+- [x] HDLNet: `ControlChange`, `PitchBend`; VST forward CC/pitch
+- [ ] Референс wiring в FPGA-top: `fpga-synth/examples/VitaPolySimple/VitaPolySimple.v`
 
 **Не переносить:** `note2dds_1st..6st_gen.v`, `.mif`, `note_pitch2dds_1st..3st_gen.v`, копии в `examples/*/modules/`.
 
@@ -263,7 +266,8 @@ synths/<name>/
 
 - [ ] `voice_ssaw` / duo → `synths/duo/` или полифония в RTL
 - [ ] LFO AM (как в VitaPolySimple)
-- [ ] Параметры ADSR/wave по UDP (расширение протокола)
+- [x] Параметры ADSR/wave по UDP (CC 16–19, 48; pitch bend)
+- [ ] Legacy local: pitch wheel в `VgeneratorFull`
 
 ### Фаза D — FPGA prod (долгосрочно)
 

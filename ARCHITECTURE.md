@@ -23,18 +23,24 @@ flowchart TB
     direction TB
     kb["keyboard<br/>evdev"]
     midi["MIDI<br/>ALSA"]
-    leg_eng["Vgenerator<br/>generator.sv"]
+    leg_eng["Vgenerator / VgeneratorFull"]
     local_out["PortAudio / WAV"]
     kb --> leg_eng
     midi --> leg_eng
     leg_eng --> local_out
   end
 
+  subgraph synths_udp [synths — UDP engines]
+    direction TB
+    mono["mono_synth<br/>MonoSynth"]
+    noise["noise_box<br/>NoiseBox"]
+  end
+
   subgraph network [3. hdl-modules-tester + vst_bridge — DAW]
     direction TB
     daw["DAW<br/>Reaper / Bitwig"]
     vst["VitaSound Remote Synth<br/>VST3"]
-    net_eng["Vgenerator<br/>pull-only UDP"]
+    net_eng["UDP engine<br/>pull-only :5004"]
     proto["hdl_net v2<br/>:5004 ctrl :5005 PCM"]
     daw -->|"MIDI"| vst
     vst <-->|proto| net_eng
@@ -54,25 +60,40 @@ flowchart TB
 | Уровень | Инструмент | Что проверяем | Артефакт |
 |---------|------------|---------------|----------|
 | **Модульный RTL** | Icarus Verilog | Один `.v` или пакет в изоляции | `test.png`, waveform в README |
-| **Реалтайм на ПК** | Verilator + C++ (legacy) | Тот же алгоритм под реальным clock, звук сразу | Наушники / WAV |
-| **Через DAW** | VST3 + UDP engine | MIDI и PCM как в продакшене VitaSound | Reaper + `Vgenerator` |
+| **Реалтайм на ПК** | Verilator + C++ (legacy) | MIDI/клавиатура → soundcard напрямую | `VgeneratorFull`, AXELVOX |
+| **Через DAW** | VST3 + UDP engine | MIDI, ADSR CC, pitch bend | Reaper + `MonoSynth` |
 
 ## Legacy (`verilator_tests`)
 
 Локальный синт: клавиатура / MIDI → soundcard / WAV. Без сети.
 
 ```bash
-cd verilator_tests && make
-./obj_dir/Vgenerator                          # keyboard → soundcard
-./obj_dir/Vgenerator --input midi --output wav  # MIDI → файл
+cd verilator_tests && make full
+./obj_dir/VgeneratorFull --input-source midi --midi-port 32:0 --device-index 3 --sample-rate 48000
 ```
+
+| Бинарник | MIDI | Pitch / CC |
+|----------|------|------------|
+| `Vgenerator` | Note On/Off | нет |
+| `VgeneratorFull` | 0..127, highest note | pitch wheel **нет** |
 
 | Ввод | Вывод | Назначение |
 |------|-------|------------|
-| `input_keyboard` | `output_soundcard` | Живая клавиатура PC → колонки |
-| `input_midi` | `output_soundcard` / `output_wav` | MIDI-клавиатура / секвенсер |
+| `input_keyboard` | soundcard / WAV | PC-клавиатура, одна октава |
+| `input_midi` | soundcard / WAV | MIDI-клавиатура (ALSA) |
 
-Поток: **событие** (клавиша / MIDI note) → `shared_state` (`gate`, `note`) → **Verilog** `generator.sv` → **PCM** → PortAudio или WAV.
+Поток: **MIDI note** → `shared_state` (`gate`, `note`) → **Verilog** → **PCM** → PortAudio.
+
+Полный голос (`mono_voice`) + ADSR: [`synths/mono_synth/`](../synths/mono_synth/README.md).
+
+## UDP synths (`synths/`)
+
+| Engine | RTL | Запуск |
+|--------|-----|--------|
+| [`mono_synth`](synths/mono_synth/README.md) | `mono_voice` + MIDI-регистры | `./scripts/run_mono_synth.sh` |
+| [`noise_box`](synths/noise_box/README.md) | `rndx` шум | `./scripts/run_noise_box.sh` |
+
+На порту **5004** одновременно один engine. Протокол: `ControlChange` (CC 16–19, 48), `PitchBend`, `NoteOn/Off`, `AudioPull`.
 
 ## UDP engine (`hdl-modules-tester`)
 
@@ -108,10 +129,13 @@ sequenceDiagram
 | `common/`, `dds/`, `vca/`, … | Исходники RTL + `*_test/` |
 | `modules.yaml` | Метаданные для `make docs` |
 | `tools/run_tests.py`, `make test` | Запуск Icarus по всем модулям |
-| `verilator_tests/generator.sv` | Топ синтезатора для Verilator |
+| `verilator_tests/generator.sv` | Legacy MVP-топ (одна октава) |
+| `verilator_tests/generator_fullrange.sv` | Legacy MVP, полный MIDI |
 | `verilator_tests/` | Legacy: keyboard/MIDI → soundcard/wav |
-| `hdl-modules-tester/` | UDP engine для VST (pull-only) |
-| `synths/noise_box/` | Шумовой синт (`rndx` 16-bit) + NoiseBox UDP |
+| `common/note_mono.v`, `lin2exp_t.v` | MIDI alloc / CC curve (fpga-synth) |
+| `hdl-modules-tester/` | Общий UDP-стек для synths |
+| `synths/mono_synth/` | MonoSynth: mono_voice + ADSR CC + VST |
+| `synths/noise_box/` | NoiseBox: rndx 16-bit |
 | `vst_bridge/` | VST3-плагин (хост в DAW) |
 | `hdl-modules-tester/protocol/hdl_net.h` | Протокол UDP (копия в `vst_bridge/protocol/`) |
 

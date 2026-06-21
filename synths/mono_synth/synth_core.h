@@ -1,19 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include "midi_events.h"
 #include "shared_state.h"
 
-class Vgenerator;
+class Vmono_synth;
 
-// Verilog synth stepped only on AudioPull from VST host (no wall-clock audio loop).
 struct SynthCore {
-    Vgenerator* top = nullptr;
+    Vmono_synth* top = nullptr;
     uint32_t sampleRate = 48000;
     uint32_t fractional = 0;
+    std::vector<MidiEvent> pendingEvents;
 };
 
 bool synthInit(SynthCore& core, uint32_t sampleRate);
 void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames);
 void synthDestroy(SynthCore& core);
+void synthPostEvent(SynthCore& core, const MidiEvent& event);

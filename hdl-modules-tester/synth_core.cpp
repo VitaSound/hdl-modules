@@ -55,3 +55,5 @@ void synthDestroy(SynthCore& core) {
     delete core.top;
     core.top = nullptr;
 }
+
+void synthPostEvent(SynthCore& /*core*/, const MidiEvent& /*event*/) {}

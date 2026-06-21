@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
+#include "midi_events.h"
 #include "shared_state.h"
 
 class Vnoise_box;

@@ -4,7 +4,8 @@
 #include <string>
 
 #include "shared_state.h"
-#include "synth_core.h"
+
+struct SynthCore;
 
 int runWavOutput(SynthCore& synth,
                  SharedState& state,

@@ -121,7 +121,9 @@ vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-windows-x86_64.zip
 
 В каждом zip: `VitaSound Remote Synth.vst3` + `INSTALL.txt`.
 
-Linux-сборка требует `./scripts/install_linux_deps.sh` (один раз).
+Linux-сборка требует `./scripts/install_linux_deps.sh` (один раз). На **Ubuntu 24.04** пакет WebKit: `libwebkit2gtk-4.1-dev` (скрипт выбирает автоматически).
+
+MIDI CC из DAW: **16–19** (ADSR), **48** (waveform) — engine [`../synths/mono_synth/`](../synths/mono_synth/). Legacy MIDI без DAW: [`../verilator_tests/README.md`](../verilator_tests/README.md) (`VgeneratorFull`).
 
 ### GitHub Actions
 

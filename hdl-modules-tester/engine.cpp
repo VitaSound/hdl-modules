@@ -1,5 +1,6 @@
 #include "engine.h"
 
+#include "midi_events.h"
 #include "net_socket.h"
 #include "protocol/hdl_net.h"
 #include "synth_core.h"
@@ -148,6 +149,10 @@ std::thread startEngine(const EngineConfig& cfg,
                 sample_index = 0;
                 synth.fractional = 0;
 
+                MidiEvent reset_event{};
+                reset_event.type = MidiEventType::AllNotesOff;
+                synthPostEvent(synth, reset_event);
+
                 hdlnet::AckPayload ack{};
                 ack.sample_rate = hello.sample_rate;
                 ack.engine_ssrc = cfg.engineSsrc;
@@ -233,6 +238,12 @@ std::thread startEngine(const EngineConfig& cfg,
                     state.gate.store(any, std::memory_order_relaxed);
                     printUdpDebug(note.velocity > 0 ? "NOTE ON" : "NOTE OFF", any, note.note,
                                   note.velocity);
+
+                    MidiEvent event{};
+                    event.type = note.velocity > 0 ? MidiEventType::NoteOn : MidiEventType::NoteOff;
+                    event.note = note.note;
+                    event.velocity = note.velocity;
+                    synthPostEvent(synth, event);
                 }
                 break;
             }
@@ -246,6 +257,12 @@ std::thread startEngine(const EngineConfig& cfg,
                     const bool any = anyPressed(pressed);
                     state.gate.store(any, std::memory_order_relaxed);
                     printUdpDebug("NOTE OFF", any, note.note, note.velocity);
+
+                    MidiEvent event{};
+                    event.type = MidiEventType::NoteOff;
+                    event.note = note.note;
+                    event.velocity = note.velocity;
+                    synthPostEvent(synth, event);
                 }
                 break;
             }
@@ -253,6 +270,37 @@ std::thread startEngine(const EngineConfig& cfg,
                 pressed.fill(false);
                 state.gate.store(false, std::memory_order_relaxed);
                 printUdpDebug("ALL NOTES OFF", false, -1, 0);
+
+                MidiEvent event{};
+                event.type = MidiEventType::AllNotesOff;
+                synthPostEvent(synth, event);
+                break;
+            }
+            case hdlnet::PacketType::ControlChange: {
+                hdlnet::ControlChangePayload cc{};
+                if (!hdlnet::decodeControlChange(payload, cc)) {
+                    break;
+                }
+                std::cerr << "[udp] CC " << static_cast<int>(cc.cc)
+                          << " = " << static_cast<int>(cc.value) << "\n";
+
+                MidiEvent event{};
+                event.type = MidiEventType::ControlChange;
+                event.cc = cc.cc;
+                event.value = cc.value;
+                synthPostEvent(synth, event);
+                break;
+            }
+            case hdlnet::PacketType::PitchBend: {
+                hdlnet::PitchBendPayload bend{};
+                if (!hdlnet::decodePitchBend(payload, bend)) {
+                    break;
+                }
+
+                MidiEvent event{};
+                event.type = MidiEventType::PitchBend;
+                event.pitch = bend.value;
+                synthPostEvent(synth, event);
                 break;
             }
             default:

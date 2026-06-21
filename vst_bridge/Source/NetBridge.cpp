@@ -632,14 +632,31 @@ void NetBridge::run() {
                 host = engineHost_;
             }
 
-            hdlnet::NotePayload note{};
-            note.timestamp_us = event.timestampUs != 0 ? event.timestampUs : nowUs();
-            note.note = event.note;
-            note.velocity = event.velocity;
-
             std::array<uint8_t, 64> out{};
             const uint32_t seq = seq_.fetch_add(1) + 1;
-            const size_t len = hdlnet::encodeNote(out.data(), event.type, seq, note);
+            size_t len = 0;
+
+            if (event.type == hdlnet::PacketType::ControlChange) {
+                hdlnet::ControlChangePayload cc{};
+                cc.timestamp_us = event.timestampUs != 0 ? event.timestampUs : nowUs();
+                cc.cc = event.cc;
+                cc.value = event.value;
+                len = hdlnet::encodeControlChange(out.data(), seq, cc);
+            } else if (event.type == hdlnet::PacketType::PitchBend) {
+                hdlnet::PitchBendPayload bend{};
+                bend.timestamp_us = event.timestampUs != 0 ? event.timestampUs : nowUs();
+                bend.value = event.pitch;
+                len = hdlnet::encodePitchBend(out.data(), seq, bend);
+            } else if (event.type == hdlnet::PacketType::AllNotesOff) {
+                len = hdlnet::encodeAllNotesOff(out.data(), seq);
+            } else {
+                hdlnet::NotePayload note{};
+                note.timestamp_us = event.timestampUs != 0 ? event.timestampUs : nowUs();
+                note.note = event.note;
+                note.velocity = event.velocity;
+                len = hdlnet::encodeNote(out.data(), event.type, seq, note);
+            }
+
             controlSocket.write(host, static_cast<int>(ctrlPort), out.data(), static_cast<int>(len));
         }
 

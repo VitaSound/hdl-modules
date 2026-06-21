@@ -7,6 +7,7 @@
 | Каталог | Описание |
 |---------|----------|
 | [`noise_box/`](noise_box/) | 16-bit шум (`rndx`), gate от любой MIDI-ноты |
+| [`mono_synth/`](mono_synth/) | Моно-голос: note_mono + ADSR/wave CC + mono_voice |
 
 ## Паттерн
 

@@ -116,10 +116,39 @@ static void testNoteAndAudio() {
     CHECK(decoded[3] == -2000);
 }
 
+static void testControlChangeAndPitchBend() {
+    uint8_t buf[128]{};
+
+    hdlnet::ControlChangePayload cc_in{987654321ull, 16, 64};
+    const size_t cc_len = hdlnet::encodeControlChange(buf, 11, cc_in);
+
+    hdlnet::ControlHeader hdr{};
+    hdlnet::PacketType type{};
+    CHECK(hdlnet::readControlHeader(buf, cc_len, hdr, type));
+    CHECK(type == hdlnet::PacketType::ControlChange);
+
+    hdlnet::ControlChangePayload cc_out{};
+    CHECK(hdlnet::decodeControlChange(buf + sizeof(hdlnet::ControlHeader), cc_out));
+    CHECK(cc_out.timestamp_us == 987654321ull);
+    CHECK(cc_out.cc == 16);
+    CHECK(cc_out.value == 64);
+
+    hdlnet::PitchBendPayload bend_in{111222333ull, 8192};
+    const size_t bend_len = hdlnet::encodePitchBend(buf, 12, bend_in);
+    CHECK(hdlnet::readControlHeader(buf, bend_len, hdr, type));
+    CHECK(type == hdlnet::PacketType::PitchBend);
+
+    hdlnet::PitchBendPayload bend_out{};
+    CHECK(hdlnet::decodePitchBend(buf + sizeof(hdlnet::ControlHeader), bend_out));
+    CHECK(bend_out.timestamp_us == 111222333ull);
+    CHECK(bend_out.value == 8192);
+}
+
 int main() {
     testHelloRoundTrip();
     testAckAndAudioPull();
     testNoteAndAudio();
+    testControlChangeAndPitchBend();
     if (g_failures == 0) {
         std::printf("hdl_net tests: OK\n");
         return 0;

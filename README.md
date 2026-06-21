@@ -60,8 +60,14 @@ make all       # test → images → docs
 
 ![VitaSound Remote Synth UI](vst_bridge/docs/ui.png)
 
-- VST: [vst_bridge/README.md](vst_bridge/README.md) — сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
-- Engine: [hdl-modules-tester/README.md](hdl-modules-tester/README.md) — `make` или `hdl-modules-tester/scripts/build_windows_mingw.sh`
+| Режим | Как | Документация |
+|-------|-----|--------------|
+| **DAW + VST** | `MonoSynth` + VitaSound Remote Synth | [synths/mono_synth/README.md](synths/mono_synth/README.md) |
+| **Legacy MIDI** | `VgeneratorFull` → soundcard (без Reaper) | [verilator_tests/README.md](verilator_tests/README.md) |
+| Smoke UDP | `e2e_mono_synth.sh` | [scripts/e2e_mono_synth.sh](scripts/e2e_mono_synth.sh) |
+
+- VST: [vst_bridge/README.md](vst_bridge/README.md) — `build_linux.sh` (Ubuntu 24: `libwebkit2gtk-4.1-dev`)
+- Engine: [hdl-modules-tester/README.md](hdl-modules-tester/README.md), [synths/README.md](synths/README.md)
 - Сеть WSL: [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md)
 
 # sandbox

@@ -7,7 +7,8 @@
 #include <portaudio.h>
 
 #include "shared_state.h"
-#include "synth_core.h"
+
+struct SynthCore;
 
 struct OutputDeviceInfo {
     int index = -1;

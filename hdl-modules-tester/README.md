@@ -1,12 +1,26 @@
 # hdl-modules-tester
 
-UDP-only Verilator engine for **VitaSound Remote Synth** (VST3). HDL is clocked only on `AudioPull` from the VST host — no local soundcard, keyboard, or MIDI.
+Общий UDP-стек (pull-mode) для Verilator synths и **VitaSound Remote Synth** (VST3). HDL тактуется только на `AudioPull` от VST — без локального soundcard/MIDI в этом каталоге.
 
-RTL: symlink [`generator.sv`](generator.sv) → [`../verilator_tests/generator.sv`](../verilator_tests/generator.sv).
+| Engine | RTL | Назначение |
+|--------|-----|------------|
+| `obj_dir/Vgenerator` | [`generator.sv`](generator.sv) | MVP square-wave UDP (default) |
+| [`../synths/mono_synth/`](../synths/mono_synth/) | `mono_voice` | MonoSynth + ADSR CC |
+| [`../synths/noise_box/`](../synths/noise_box/) | `rndx` | NoiseBox |
 
-Protocol: [`protocol/hdl_net.h`](protocol/hdl_net.h) (canonical copy; sync to [`../vst_bridge/protocol/`](../vst_bridge/protocol/)).
+Protocol: [`protocol/hdl_net.h`](protocol/hdl_net.h) — sync to [`../vst_bridge/protocol/`](../vst_bridge/protocol/).
 
-Legacy local synth (keyboard/MIDI/soundcard): [`../verilator_tests/`](../verilator_tests/).
+**Legacy local** (MIDI → soundcard без DAW): [`../verilator_tests/`](../verilator_tests/) — `VgeneratorFull`.
+
+## Protocol v2 (control :5004, audio :5005)
+
+| Packet | Назначение |
+|--------|------------|
+| Hello / Ack | Сессия, sample rate |
+| NoteOn / NoteOff / AllNotesOff | MIDI ноты |
+| ControlChange | CC (ADSR 16–19, wave 48) |
+| PitchBend | Pitch wheel 0..16383 |
+| AudioPull | Запрос PCM от VST |
 
 ## Dependencies
 
@@ -25,13 +39,35 @@ make clean && make
 
 Binary: `obj_dir/Vgenerator`
 
+MonoSynth: `make -C ../synths/mono_synth`
+
 ## Run
 
 ```bash
 ./obj_dir/Vgenerator --udp-bind 0.0.0.0:5004 --sample-rate 48000
+./scripts/run_mono_synth.sh   # from repo root
 ```
 
-Or from repo root: [`../scripts/run_udp_engine.sh`](../scripts/run_udp_engine.sh)
+## Smoke test
+
+```bash
+make test_hdl_net
+python3 scripts/udp_smoke_test.py --duration 2
+python3 scripts/udp_smoke_test.py --duration 2 --cc-attack 0
+```
+
+E2E: [`../scripts/e2e_ubuntu.sh`](../scripts/e2e_ubuntu.sh), [`../scripts/e2e_mono_synth.sh`](../scripts/e2e_mono_synth.sh)
+
+## VST bridge (Ubuntu 24)
+
+```bash
+cd ../vst_bridge
+./scripts/install_linux_deps.sh   # libwebkit2gtk-4.1-dev on Noble
+./scripts/build_linux.sh
+cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3" ~/.vst3/
+```
+
+Reaper: engine `127.0.0.1`, profile **Local**. См. [`../synths/mono_synth/README.md`](../synths/mono_synth/README.md).
 
 ## Windows (native engine)
 
@@ -40,15 +76,6 @@ Or from repo root: [`../scripts/run_udp_engine.sh`](../scripts/run_udp_engine.sh
 ```
 
 Copy `obj_dir_win/Vgenerator.exe` to Windows; VST host `127.0.0.1`, profile **Local**.
-
-## Smoke test
-
-```bash
-make test_hdl_net
-python3 scripts/udp_smoke_test.py --duration 2
-```
-
-Full E2E: [`../scripts/e2e_ubuntu.sh`](../scripts/e2e_ubuntu.sh)
 
 ## VST bridge
 

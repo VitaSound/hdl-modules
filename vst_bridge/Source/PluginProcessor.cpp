@@ -116,6 +116,15 @@ void HdlVerilatorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
         } else if (msg.isAllNotesOff() || msg.isAllSoundOff()) {
             event.type = hdlnet::PacketType::AllNotesOff;
             netBridge_.queueMidi(event);
+        } else if (msg.isController()) {
+            event.type = hdlnet::PacketType::ControlChange;
+            event.cc = static_cast<uint8_t>(msg.getControllerNumber());
+            event.value = static_cast<uint8_t>(msg.getControllerValue());
+            netBridge_.queueMidi(event);
+        } else if (msg.isPitchWheel()) {
+            event.type = hdlnet::PacketType::PitchBend;
+            event.pitch = static_cast<uint16_t>(msg.getPitchWheelValue());
+            netBridge_.queueMidi(event);
         }
     }
 

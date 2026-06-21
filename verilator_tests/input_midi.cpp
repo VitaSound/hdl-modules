@@ -23,6 +23,21 @@ bool anyPressed(const std::array<bool, 128>& pressed) {
     }
     return false;
 }
+
+int highestPressedNote(const std::array<bool, 128>& pressed) {
+    for (int note = 127; note >= 0; --note) {
+        if (pressed[static_cast<size_t>(note)]) {
+            return note;
+        }
+    }
+    return -1;
+}
+
+void updateGateAndNote(SharedState& state, const std::array<bool, 128>& pressed) {
+    const bool any = anyPressed(pressed);
+    state.gate.store(any, std::memory_order_relaxed);
+    state.note.store(highestPressedNote(pressed), std::memory_order_relaxed);
+}
 } // namespace
 
 std::vector<MidiPortInfo> listMidiInputPorts() {
@@ -123,23 +138,20 @@ std::thread startMidiInput(int srcClient, int srcPort, SharedState& state) {
                 if (note >= 0 && note < 128) {
                     if (velocity > 0) {
                         pressed[note] = true;
-                        state.note.store(note, std::memory_order_relaxed); // только NOTE ON обновляет note
                     } else {
-                        // NOTE ON с velocity=0 трактуем как NOTE OFF: только сброс маски
                         pressed[note] = false;
                     }
-                    const bool any = anyPressed(pressed);
-                    state.gate.store(any, std::memory_order_relaxed);
-                    printMidiDebug(velocity > 0 ? "NOTE ON" : "NOTE OFF", any, note, velocity);
+                    updateGateAndNote(state, pressed);
+                    printMidiDebug(velocity > 0 ? "NOTE ON" : "NOTE OFF", anyPressed(pressed), note,
+                                  velocity);
                 }
             } else if (ev->type == SND_SEQ_EVENT_NOTEOFF) {
                 const int note = ev->data.note.note;
                 const int velocity = ev->data.note.velocity;
                 if (note >= 0 && note < 128) {
                     pressed[note] = false;
-                    const bool any = anyPressed(pressed);
-                    state.gate.store(any, std::memory_order_relaxed);
-                    printMidiDebug("NOTE OFF", any, note, velocity);
+                    updateGateAndNote(state, pressed);
+                    printMidiDebug("NOTE OFF", anyPressed(pressed), note, velocity);
                 }
             }
         }

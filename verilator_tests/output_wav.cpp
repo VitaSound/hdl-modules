@@ -1,5 +1,11 @@
 #include "output_wav.h"
 
+#ifdef SYNTH_CORE_FULLRANGE
+#include "synth_core_fullrange.h"
+#else
+#include "synth_core.h"
+#endif
+
 #include <chrono>
 #include <algorithm>
 #include <fstream>

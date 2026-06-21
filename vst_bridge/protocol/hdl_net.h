@@ -31,6 +31,8 @@ enum class PacketType : uint8_t {
     NoteOff = 6,
     AllNotesOff = 7,
     AudioPull = 8,
+    ControlChange = 9,
+    PitchBend = 10,
 };
 
 #pragma pack(push, 1)
@@ -77,6 +79,19 @@ struct NotePayload {
     uint64_t timestamp_us;
     uint8_t note;
     uint8_t velocity;
+};
+
+struct ControlChangePayload {
+    uint64_t timestamp_us;
+    uint8_t cc;
+    uint8_t value;
+    uint8_t pad[6];
+};
+
+struct PitchBendPayload {
+    uint64_t timestamp_us;
+    uint16_t value;
+    uint8_t pad[6];
 };
 
 struct AudioHeader {
@@ -184,6 +199,30 @@ inline size_t encodeNote(uint8_t* out, PacketType type, uint32_t seq, const Note
     return sizeof(ControlHeader) + sizeof(NotePayload);
 }
 
+inline size_t encodeAllNotesOff(uint8_t* out, uint32_t seq) {
+    writeControlHeader(out, PacketType::AllNotesOff, seq, 0);
+    return sizeof(ControlHeader);
+}
+
+inline size_t encodeControlChange(uint8_t* out, uint32_t seq, const ControlChangePayload& cc) {
+    writeControlHeader(out, PacketType::ControlChange, seq, sizeof(ControlChangePayload));
+    auto* p = reinterpret_cast<ControlChangePayload*>(out + sizeof(ControlHeader));
+    p->timestamp_us = hostToBe64(cc.timestamp_us);
+    p->cc = cc.cc;
+    p->value = cc.value;
+    std::memset(p->pad, 0, sizeof(p->pad));
+    return sizeof(ControlHeader) + sizeof(ControlChangePayload);
+}
+
+inline size_t encodePitchBend(uint8_t* out, uint32_t seq, const PitchBendPayload& bend) {
+    writeControlHeader(out, PacketType::PitchBend, seq, sizeof(PitchBendPayload));
+    auto* p = reinterpret_cast<PitchBendPayload*>(out + sizeof(ControlHeader));
+    p->timestamp_us = hostToBe64(bend.timestamp_us);
+    p->value = hostToBe16(bend.value);
+    std::memset(p->pad, 0, sizeof(p->pad));
+    return sizeof(ControlHeader) + sizeof(PitchBendPayload);
+}
+
 inline bool decodeHello(const uint8_t* payload, HelloPayload& out) {
     HelloPayload raw{};
     std::memcpy(&raw, payload, sizeof(HelloPayload));
@@ -233,6 +272,23 @@ inline bool decodeNote(const uint8_t* payload, NotePayload& out) {
     out.timestamp_us = beToHost64(raw.timestamp_us);
     out.note = raw.note;
     out.velocity = raw.velocity;
+    return true;
+}
+
+inline bool decodeControlChange(const uint8_t* payload, ControlChangePayload& out) {
+    ControlChangePayload raw{};
+    std::memcpy(&raw, payload, sizeof(ControlChangePayload));
+    out.timestamp_us = beToHost64(raw.timestamp_us);
+    out.cc = raw.cc;
+    out.value = raw.value;
+    return true;
+}
+
+inline bool decodePitchBend(const uint8_t* payload, PitchBendPayload& out) {
+    PitchBendPayload raw{};
+    std::memcpy(&raw, payload, sizeof(PitchBendPayload));
+    out.timestamp_us = beToHost64(raw.timestamp_us);
+    out.value = beToHost16(raw.value);
     return true;
 }
 

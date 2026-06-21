@@ -20,6 +20,7 @@ PT_ACK = 2
 PT_NOTE_ON = 5
 PT_NOTE_OFF = 6
 PT_AUDIO_PULL = 8
+PT_CONTROL_CHANGE = 9
 
 SESSION_MODE_PULL = 1
 PACKET_FRAMES = 256
@@ -84,6 +85,11 @@ def encode_pull(seq: int, request_id: int, frame_count: int, host_fill: int, hos
     return be32(HDLM) + struct.pack(">BB", VER, PT_AUDIO_PULL) + be16(len(payload)) + be32(seq) + payload
 
 
+def encode_control_change(seq: int, cc: int, value: int) -> bytes:
+    payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", cc, value) + bytes(6)
+    return be32(HDLM) + struct.pack(">BB", VER, PT_CONTROL_CHANGE) + be16(len(payload)) + be32(seq) + payload
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine-host", default="127.0.0.1")
@@ -92,6 +98,7 @@ def main() -> int:
     parser.add_argument("--duration", type=float, default=2.0)
     parser.add_argument("--note", type=int, default=60)
     parser.add_argument("--wav", type=Path, default=Path("udp_test_out.wav"))
+    parser.add_argument("--cc-attack", type=int, default=None, help="Send MIDI CC 16 before note-on")
     args = parser.parse_args()
 
     ctrl = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -120,13 +127,19 @@ def main() -> int:
         return 1
     print("ACK received (protocol v2 pull)")
 
+    if args.cc_attack is not None:
+        ctrl.sendto(
+            encode_control_change(2, 16, args.cc_attack),
+            (args.engine_host, args.control_port),
+        )
+
     note_payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", args.note, 100)
-    note_on = be32(HDLM) + struct.pack(">BB", VER, PT_NOTE_ON) + be16(len(note_payload)) + be32(2) + note_payload
+    note_on = be32(HDLM) + struct.pack(">BB", VER, PT_NOTE_ON) + be16(len(note_payload)) + be32(3) + note_payload
     ctrl.sendto(note_on, (args.engine_host, args.control_port))
 
     pcm: list[int] = []
     request_id = 0
-    seq = 3
+    seq = 4
     target_fill = TARGET_RESERVE * PACKET_FRAMES
     warmup = WARMUP_PACKETS * PACKET_FRAMES
 
