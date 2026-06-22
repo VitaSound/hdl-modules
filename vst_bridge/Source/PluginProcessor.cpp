@@ -73,9 +73,7 @@ void HdlVerilatorAudioProcessor::setTestNote(bool on) {
     testNoteOn_ = on;
 
     PendingMidiEvent event{};
-    event.note = 60;
-    event.velocity = on ? 100 : 0;
-    event.type = on ? hdlnet::PacketType::NoteOn : hdlnet::PacketType::NoteOff;
+    event.bytes = {0x90, 60, static_cast<uint8_t>(on ? 100 : 0)};
     netBridge_.queueMidi(event);
 }
 
@@ -84,9 +82,7 @@ void HdlVerilatorAudioProcessor::reassertTestNote() {
         return;
     }
     PendingMidiEvent event{};
-    event.note = 60;
-    event.velocity = 100;
-    event.type = hdlnet::PacketType::NoteOn;
+    event.bytes = {0x90, 60, 100};
     netBridge_.queueMidi(event);
 }
 
@@ -100,32 +96,15 @@ void HdlVerilatorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 
     for (const auto metadata : midi) {
         const auto msg = metadata.getMessage();
+        const auto* raw = msg.getRawData();
+        const int rawSize = msg.getRawDataSize();
+        if (rawSize <= 0 || raw == nullptr) {
+            continue;
+        }
         PendingMidiEvent event{};
         event.timestampUs = static_cast<uint64_t>(metadata.samplePosition);
-
-        if (msg.isNoteOn()) {
-            event.type = hdlnet::PacketType::NoteOn;
-            event.note = static_cast<uint8_t>(msg.getNoteNumber());
-            event.velocity = static_cast<uint8_t>(msg.getVelocity());
-            netBridge_.queueMidi(event);
-        } else if (msg.isNoteOff()) {
-            event.type = hdlnet::PacketType::NoteOff;
-            event.note = static_cast<uint8_t>(msg.getNoteNumber());
-            event.velocity = static_cast<uint8_t>(msg.getVelocity());
-            netBridge_.queueMidi(event);
-        } else if (msg.isAllNotesOff() || msg.isAllSoundOff()) {
-            event.type = hdlnet::PacketType::AllNotesOff;
-            netBridge_.queueMidi(event);
-        } else if (msg.isController()) {
-            event.type = hdlnet::PacketType::ControlChange;
-            event.cc = static_cast<uint8_t>(msg.getControllerNumber());
-            event.value = static_cast<uint8_t>(msg.getControllerValue());
-            netBridge_.queueMidi(event);
-        } else if (msg.isPitchWheel()) {
-            event.type = hdlnet::PacketType::PitchBend;
-            event.pitch = static_cast<uint16_t>(msg.getPitchWheelValue());
-            netBridge_.queueMidi(event);
-        }
+        event.bytes.assign(raw, raw + rawSize);
+        netBridge_.queueMidi(event);
     }
 
     auto* left = buffer.getWritePointer(0);

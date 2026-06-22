@@ -10,7 +10,8 @@ CPP_SRCS = \
 	synth_core.cpp \
 	main.cpp \
 	$(TESTER)/engine.cpp \
-	$(TESTER)/net_socket.cpp
+	$(TESTER)/net_socket.cpp \
+	$(TESTER)/midi_decode.cpp
 
 .PHONY: all clean
 

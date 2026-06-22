@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Send HELLO + pull loop + NOTE_ON; receive PCM from pull-mode engine."""
+"""Send HELLO + pull loop + raw MIDI; receive PCM from pull-mode engine."""
 
 from __future__ import annotations
 
@@ -13,14 +13,12 @@ from pathlib import Path
 
 HDLM = 0x48444C4D
 HDLA = 0x48444C41
-VER = 2
+VER = 3
 
 PT_HELLO = 1
 PT_ACK = 2
-PT_NOTE_ON = 5
-PT_NOTE_OFF = 6
+PT_MIDI_HOST_TO_ENGINE = 5
 PT_AUDIO_PULL = 8
-PT_CONTROL_CHANGE = 9
 
 SESSION_MODE_PULL = 1
 PACKET_FRAMES = 256
@@ -85,9 +83,15 @@ def encode_pull(seq: int, request_id: int, frame_count: int, host_fill: int, hos
     return be32(HDLM) + struct.pack(">BB", VER, PT_AUDIO_PULL) + be16(len(payload)) + be32(seq) + payload
 
 
-def encode_control_change(seq: int, cc: int, value: int) -> bytes:
-    payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", cc, value) + bytes(6)
-    return be32(HDLM) + struct.pack(">BB", VER, PT_CONTROL_CHANGE) + be16(len(payload)) + be32(seq) + payload
+def encode_midi(seq: int, midi_bytes: bytes) -> bytes:
+    payload = be64(int(time.time() * 1e6)) + be16(len(midi_bytes)) + midi_bytes
+    return (
+        be32(HDLM)
+        + struct.pack(">BB", VER, PT_MIDI_HOST_TO_ENGINE)
+        + be16(len(payload))
+        + be32(seq)
+        + payload
+    )
 
 
 def main() -> int:
@@ -125,21 +129,20 @@ def main() -> int:
     if ack is None:
         print("No ACK from engine", file=sys.stderr)
         return 1
-    print("ACK received (protocol v2 pull)")
+    print("ACK received (protocol v3 pull)")
 
+    seq = 2
     if args.cc_attack is not None:
-        ctrl.sendto(
-            encode_control_change(2, 16, args.cc_attack),
-            (args.engine_host, args.control_port),
-        )
+        cc = bytes([0xB0, 16, args.cc_attack & 0x7F])
+        ctrl.sendto(encode_midi(seq, cc), (args.engine_host, args.control_port))
+        seq += 1
 
-    note_payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", args.note, 100)
-    note_on = be32(HDLM) + struct.pack(">BB", VER, PT_NOTE_ON) + be16(len(note_payload)) + be32(3) + note_payload
-    ctrl.sendto(note_on, (args.engine_host, args.control_port))
+    note_on = bytes([0x90, args.note & 0x7F, 100])
+    ctrl.sendto(encode_midi(seq, note_on), (args.engine_host, args.control_port))
+    seq += 1
 
     pcm: list[int] = []
     request_id = 0
-    seq = 4
     target_fill = TARGET_RESERVE * PACKET_FRAMES
     warmup = WARMUP_PACKETS * PACKET_FRAMES
 
@@ -165,9 +168,8 @@ def main() -> int:
             else:
                 pcm.extend(samples[0::2])
 
-    note_off_payload = be64(int(time.time() * 1e6)) + struct.pack(">BB", args.note, 0)
-    note_off = be32(HDLM) + struct.pack(">BB", VER, PT_NOTE_OFF) + be16(len(note_off_payload)) + be32(3) + note_off_payload
-    ctrl.sendto(note_off, (args.engine_host, args.control_port))
+    note_off = bytes([0x90, args.note & 0x7F, 0])
+    ctrl.sendto(encode_midi(seq, note_off), (args.engine_host, args.control_port))
 
     if not pcm:
         print("No audio packets received", file=sys.stderr)

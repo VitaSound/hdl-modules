@@ -20,6 +20,14 @@
 | 4 | param_reg | Регистр параметра с записью по strobe wr (param_reg WIDTH; обёртки reg7 — MIDI CC, reg14 — ADSR A/D/R, pitch) | ![param_reg](common/param_reg_test/test.png) |
 | 5 | reg_sr | SR-регистр gate: set (NoteOn) / reset (NoteOff); замена legacy reg_rs | ![reg_sr](common/reg_sr_test/test.png) |
 
+## I/O (граница ПЛИС)
+
+[Интерфейсы с внешним миром; к модулям обычно прилагается внешняя схема (опторазвязка MIDI IN, ЦАП)](io/README.md)
+
+| N | Module | Description | Img |
+| - | ------ | --- | --- |
+| 1 | midi_in | MIDI byte parser: channel voice → ch_message/lsb/msb; SysEx skip (v1); UART — на плате | ![midi_in](io/midi_in_test/test.png) |
+
 Генерация
 
 | N | Module | Description | Img |
@@ -60,14 +68,8 @@ make all       # test → images → docs
 
 ![VitaSound Remote Synth UI](vst_bridge/docs/ui.png)
 
-| Режим | Как | Документация |
-|-------|-----|--------------|
-| **DAW + VST** | `MonoSynth` + VitaSound Remote Synth | [synths/mono_synth/README.md](synths/mono_synth/README.md) |
-| **Legacy MIDI** | `VgeneratorFull` → soundcard (без Reaper) | [verilator_tests/README.md](verilator_tests/README.md) |
-| Smoke UDP | `e2e_mono_synth.sh` | [scripts/e2e_mono_synth.sh](scripts/e2e_mono_synth.sh) |
-
-- VST: [vst_bridge/README.md](vst_bridge/README.md) — `build_linux.sh` (Ubuntu 24: `libwebkit2gtk-4.1-dev`)
-- Engine: [hdl-modules-tester/README.md](hdl-modules-tester/README.md), [synths/README.md](synths/README.md)
+- VST: [vst_bridge/README.md](vst_bridge/README.md) — сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
+- Engine: [hdl-modules-tester/README.md](hdl-modules-tester/README.md) — `make` или `hdl-modules-tester/scripts/build_windows_mingw.sh`
 - Сеть WSL: [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md)
 
 # sandbox

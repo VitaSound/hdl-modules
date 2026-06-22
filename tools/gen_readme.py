@@ -39,12 +39,14 @@ def main() -> int:
     data = load_data()
     categories = {cat["id"]: cat for cat in data["categories"]}
     common = categories["common"]
+    io_cat = categories.get("io")
     generation = categories["generation"]
 
     root_content = render_template(
         "root_readme.md.j2",
         repo=data["repo"],
         common=common,
+        io=io_cat,
         generation=generation,
     )
     write_readme(ROOT / "README.md", root_content)
@@ -62,6 +64,21 @@ def main() -> int:
         modules=common_modules,
     )
     write_readme(ROOT / common["readme"], common_content)
+
+    if io_cat and io_cat.get("modules"):
+        io_modules = []
+        for module in io_cat["modules"]:
+            item = dict(module)
+            item["image_rel"] = f"{Path(module['test_dir']).name}/test.png"
+            io_modules.append(item)
+
+        io_content = render_template(
+            "category_readme.md.j2",
+            title="I/O modules",
+            subtitle="Граница ПЛИС с внешним миром",
+            modules=io_modules,
+        )
+        write_readme(ROOT / io_cat["readme"], io_content)
 
     for package in generation["packages"]:
         if not package.get("readme"):

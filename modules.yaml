@@ -75,6 +75,20 @@ categories:
         gtkw: common/reg_sr_test/test.gtkw
         image: common/reg_sr_test/test.png
 
+  - id: io
+    title_ru: I/O (граница ПЛИС)
+    subtitle_ru: Интерфейсы с внешним миром; к модулям обычно прилагается внешняя схема (опторазвязка MIDI IN, ЦАП)
+    readme: io/README.md
+    modules:
+      - id: midi_in
+        description_ru: "MIDI byte parser: channel voice → ch_message/lsb/msb; SysEx skip (v1); UART — на плате"
+        source: io/midi_in.v
+        test_dir: io/midi_in_test
+        sources:
+          - io/midi_in.v
+        gtkw: io/midi_in_test/test.gtkw
+        image: io/midi_in_test/test.png
+
   - id: generation
     title_ru: Генерация
     packages:

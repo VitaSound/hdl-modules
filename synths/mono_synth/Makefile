@@ -7,7 +7,7 @@ VT_CFLAGS = -I.. -I../../../hdl-modules-tester
 
 RTL_SRCS = \
 	top.sv \
-	adsr_regs_to_ctrl4.v \
+	../../io/midi_in.v \
 	../../mono_voice/mono_voice.v \
 	../../dds/note2dds.v \
 	../../dds/note_pitch2dds.v \
@@ -33,7 +33,8 @@ CPP_SRCS = \
 	synth_core.cpp \
 	main.cpp \
 	$(TESTER)/engine.cpp \
-	$(TESTER)/net_socket.cpp
+	$(TESTER)/net_socket.cpp \
+	$(TESTER)/midi_decode.cpp
 
 .PHONY: all clean
 

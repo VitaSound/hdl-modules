@@ -78,22 +78,35 @@ static void testAckAndAudioPull() {
     CHECK(pull_out.host_target == 3072);
 }
 
-static void testNoteAndAudio() {
+static void testMidiAndAudio() {
     uint8_t buf[256]{};
-    hdlnet::NotePayload note_in{123456789ull, 60, 100};
-    const size_t note_len =
-        hdlnet::encodeNote(buf, hdlnet::PacketType::NoteOn, 42, note_in);
+    const uint8_t midi_in[] = {0x90, 60, 100};
+    const size_t midi_len =
+        hdlnet::encodeMidi(buf,
+                           hdlnet::PacketType::MidiHostToEngine,
+                           42,
+                           123456789ull,
+                           midi_in,
+                           static_cast<uint16_t>(sizeof(midi_in)));
 
     hdlnet::ControlHeader hdr{};
     hdlnet::PacketType type{};
-    CHECK(hdlnet::readControlHeader(buf, note_len, hdr, type));
-    CHECK(type == hdlnet::PacketType::NoteOn);
+    CHECK(hdlnet::readControlHeader(buf, midi_len, hdr, type));
+    CHECK(type == hdlnet::PacketType::MidiHostToEngine);
 
-    hdlnet::NotePayload note_out{};
-    CHECK(hdlnet::decodeNote(buf + sizeof(hdlnet::ControlHeader), note_out));
-    CHECK(note_out.timestamp_us == 123456789ull);
-    CHECK(note_out.note == 60);
-    CHECK(note_out.velocity == 100);
+    uint64_t ts = 0;
+    const uint8_t* midi_data = nullptr;
+    uint16_t midi_out_len = 0;
+    CHECK(hdlnet::decodeMidi(buf + sizeof(hdlnet::ControlHeader),
+                             hdr.payload_len,
+                             ts,
+                             midi_data,
+                             midi_out_len));
+    CHECK(ts == 123456789ull);
+    CHECK(midi_out_len == 3);
+    CHECK(midi_data[0] == 0x90);
+    CHECK(midi_data[1] == 60);
+    CHECK(midi_data[2] == 100);
 
     std::vector<int16_t> samples{1000, -1000, 2000, -2000};
     const size_t audio_len =
@@ -116,39 +129,10 @@ static void testNoteAndAudio() {
     CHECK(decoded[3] == -2000);
 }
 
-static void testControlChangeAndPitchBend() {
-    uint8_t buf[128]{};
-
-    hdlnet::ControlChangePayload cc_in{987654321ull, 16, 64};
-    const size_t cc_len = hdlnet::encodeControlChange(buf, 11, cc_in);
-
-    hdlnet::ControlHeader hdr{};
-    hdlnet::PacketType type{};
-    CHECK(hdlnet::readControlHeader(buf, cc_len, hdr, type));
-    CHECK(type == hdlnet::PacketType::ControlChange);
-
-    hdlnet::ControlChangePayload cc_out{};
-    CHECK(hdlnet::decodeControlChange(buf + sizeof(hdlnet::ControlHeader), cc_out));
-    CHECK(cc_out.timestamp_us == 987654321ull);
-    CHECK(cc_out.cc == 16);
-    CHECK(cc_out.value == 64);
-
-    hdlnet::PitchBendPayload bend_in{111222333ull, 8192};
-    const size_t bend_len = hdlnet::encodePitchBend(buf, 12, bend_in);
-    CHECK(hdlnet::readControlHeader(buf, bend_len, hdr, type));
-    CHECK(type == hdlnet::PacketType::PitchBend);
-
-    hdlnet::PitchBendPayload bend_out{};
-    CHECK(hdlnet::decodePitchBend(buf + sizeof(hdlnet::ControlHeader), bend_out));
-    CHECK(bend_out.timestamp_us == 111222333ull);
-    CHECK(bend_out.value == 8192);
-}
-
 int main() {
     testHelloRoundTrip();
     testAckAndAudioPull();
-    testNoteAndAudio();
-    testControlChangeAndPitchBend();
+    testMidiAndAudio();
     if (g_failures == 0) {
         std::printf("hdl_net tests: OK\n");
         return 0;

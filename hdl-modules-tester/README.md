@@ -12,14 +12,13 @@ Protocol: [`protocol/hdl_net.h`](protocol/hdl_net.h) — sync to [`../vst_bridge
 
 **Legacy local** (MIDI → soundcard без DAW): [`../verilator_tests/`](../verilator_tests/) — `VgeneratorFull`.
 
-## Protocol v2 (control :5004, audio :5005)
+## Protocol v3 (control :5004, audio :5005)
 
 | Packet | Назначение |
 |--------|------------|
 | Hello / Ack | Сессия, sample rate |
-| NoteOn / NoteOff / AllNotesOff | MIDI ноты |
-| ControlChange | CC (ADSR 16–19, wave 48) |
-| PitchBend | Pitch wheel 0..16383 |
+| MidiHostToEngine | Сырые MIDI-байты 1:1 (как DIN/UART) |
+| MidiEngineToHost | MIDI от engine к host (зарезервировано) |
 | AudioPull | Запрос PCM от VST |
 
 ## Dependencies

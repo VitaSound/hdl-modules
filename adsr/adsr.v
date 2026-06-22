@@ -1,223 +1,97 @@
-/* ===================
- * Envelope generator
- * ===================
- *
- * Creates an 8-bit ADSR (attack, decay, sustain, release) volume envelope.
- *
- *        ..
- *     A . `. D    S
- *      .    `----------
- *     .                . R
- *    .                  `  .
- *  ---------------------------->
- *                             t
- 
- даже если работать на частоте 44100,
- и прибавлять минимальное значение - 1.
- то период не будет длиннее 2х секунд при 16 битах.
-
- https://docs.google.com/spreadsheets/d/1mJjj54YKQSbWEbEiOg4bpXEgip-hPy3FrPeEfphbzk0/edit?gid=1902719290#gid=1902719290
-
-поэтому решено аккумулятор для ADSR примернять 24 бита
-и субдискр - 48000. 
- */
+// Legacy adsr32 FSM (fpga-synth) with tick gating for ~48 kHz envelope updates.
 module adsr #(
-		parameter SAMPLE_CLK_FREQ = 48000,
-		parameter MASTER_CLK_FREQ = 50000000,
-		parameter WIDTH = 8,
-		parameter CTRL_WIDTH = 4,
-		parameter ACCUMULATOR_BITS = 24
+    parameter ACCUM_BITS = 32,
+    parameter RATE_BITS  = 32
+)(
+    input  wire                   clk,
+    input  wire                   rst,
+    input  wire                   tick,
+    input  wire                   gate,
+    input  wire [RATE_BITS - 1:0] attack_rate,
+    input  wire [RATE_BITS - 1:0] decay_rate,
+    input  wire [RATE_BITS - 1:0] sustain_level,
+    input  wire [RATE_BITS - 1:0] release_rate,
+    output wire [ACCUM_BITS - 1:0] signal_out
+);
 
-	)
-	(
-		clk, rst, low_strobe, gate, a, d, s, r, signal_out
-	);
+    localparam [2:0] IDLE    = 3'd0;
+    localparam [2:0] ATTACK  = 3'd1;
+    localparam [2:0] DECAY   = 3'd2;
+    localparam [2:0] SUSTAIN = 3'd3;
+    localparam [2:0] RELEASE = 3'd4;
 
-	input wire clk, rst, low_strobe;
-	output wire [(ACCUMULATOR_BITS - 1):0] signal_out;
+    reg [2:0] state;
+    reg [ACCUM_BITS - 1:0] sout;
 
-	input wire gate;
-	input wire [(CTRL_WIDTH-1):0] a;
-	input wire [(CTRL_WIDTH-1):0] d;
-	input wire [(CTRL_WIDTH-1):0] s;
-	input wire [(CTRL_WIDTH-1):0] r;
+    initial begin
+        state = IDLE;
+        sout  = {ACCUM_BITS{1'b0}};
+    end
 
-	assign signal_out = accumulator;
+    wire [ACCUM_BITS:0] sum_attack = {1'b0, sout} + {{(ACCUM_BITS - RATE_BITS){1'b0}}, attack_rate};
+    wire attack_overflow = sum_attack > {1'b0, {ACCUM_BITS{1'b1}}};
+    wire [ACCUM_BITS - 1:0] next_attack = attack_overflow ? {ACCUM_BITS{1'b1}} : sum_attack[ACCUM_BITS - 1:0];
 
-	localparam  ACCUMULATOR_SIZE = 2**ACCUMULATOR_BITS;
-	localparam  ACCUMULATOR_MAX  = ACCUMULATOR_SIZE-1;
+    wire [ACCUM_BITS - 1:0] next_decay =
+        (sout > decay_rate) && ((sout - decay_rate) > sustain_level)
+            ? (sout - decay_rate)
+            : sustain_level;
 
-	reg [ACCUMULATOR_BITS-1:0] accumulator;
+    wire [ACCUM_BITS - 1:0] next_release =
+        (sout > release_rate) ? (sout - release_rate) : {ACCUM_BITS{1'b0}};
 
-	localparam OFF     = 3'd0;
-	localparam ATTACK  = 3'd1;
-	localparam DECAY   = 3'd2;
-	localparam SUSTAIN = 3'd3;
-	localparam RELEASE = 3'd4;
+    always @(posedge clk) begin
+        if (rst) begin
+            state <= IDLE;
+            sout  <= {ACCUM_BITS{1'b0}};
+        end else if (tick) begin
+            case (state)
+                IDLE: begin
+                    if (gate)
+                        state <= ATTACK;
+                end
 
+                ATTACK: begin
+                    if (!gate) begin
+                        state <= RELEASE;
+                    end else begin
+                        sout <= next_attack;
+                        if (attack_overflow)
+                            state <= DECAY;
+                    end
+                end
 
-	reg[2:0] state;
+                DECAY: begin
+                    if (!gate) begin
+                        state <= RELEASE;
+                    end else begin
+                        sout <= next_decay;
+                        if (sout == sustain_level || next_decay == sustain_level)
+                            state <= SUSTAIN;
+                    end
+                end
 
-	`define CALCULATE_PHASE_INCREMENT(n) $rtoi(ACCUMULATOR_SIZE / (n * SAMPLE_CLK_FREQ))
+                SUSTAIN: begin
+                    if (!gate)
+                        state <= RELEASE;
+                end
 
-	initial begin
-		state <= OFF;
-		accumulator = 0;
-	end
+                RELEASE: begin
+                    if (gate) begin
+                        sout  <= {ACCUM_BITS{1'b0}};
+                        state <= ATTACK;
+                    end else begin
+                        sout <= next_release;
+                        if (next_release == {ACCUM_BITS{1'b0}})
+                            state <= IDLE;
+                    end
+                end
 
-	function [(ACCUMULATOR_BITS - 1):0] attack_table;
-		input [(CTRL_WIDTH-1):0] param;
-		begin
-			case(param)
-				4'b0000: attack_table = `CALCULATE_PHASE_INCREMENT(0.002); //0.002 
-				4'b0001: attack_table = `CALCULATE_PHASE_INCREMENT(0.008);
-				4'b0010: attack_table = `CALCULATE_PHASE_INCREMENT(0.016);
-				4'b0011: attack_table = `CALCULATE_PHASE_INCREMENT(0.024);
-				4'b0100: attack_table = `CALCULATE_PHASE_INCREMENT(0.038);
-				4'b0101: attack_table = `CALCULATE_PHASE_INCREMENT(0.056);
-				4'b0110: attack_table = `CALCULATE_PHASE_INCREMENT(0.068);
-				4'b0111: attack_table = `CALCULATE_PHASE_INCREMENT(0.080);
-				4'b1000: attack_table = `CALCULATE_PHASE_INCREMENT(0.100);
-				4'b1001: attack_table = `CALCULATE_PHASE_INCREMENT(0.250);
-				4'b1010: attack_table = `CALCULATE_PHASE_INCREMENT(0.500);
-				4'b1011: attack_table = `CALCULATE_PHASE_INCREMENT(0.800);
-				4'b1100: attack_table = `CALCULATE_PHASE_INCREMENT(1.000);
-				4'b1101: attack_table = `CALCULATE_PHASE_INCREMENT(3.000);
-				4'b1110: attack_table = `CALCULATE_PHASE_INCREMENT(5.000);
-				4'b1111: attack_table = `CALCULATE_PHASE_INCREMENT(8.000);
-				default: attack_table = 65535;
-			endcase
-		end
-	endfunction
+                default: state <= IDLE;
+            endcase
+        end
+    end
 
-	function [(ACCUMULATOR_BITS - 1):0] decay_release_table;
-		input [(CTRL_WIDTH-1):0] param;
-		begin
-			case(param)
-				4'b0000: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.006); //0.006
-				4'b0001: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.024);
-				4'b0010: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.048);
-				4'b0011: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.072);
-				4'b0100: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.114);
-				4'b0101: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.168);
-				4'b0110: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.204);
-				4'b0111: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.240);
-				4'b1000: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.300);
-				4'b1001: decay_release_table = `CALCULATE_PHASE_INCREMENT(0.750);
-				4'b1010: decay_release_table = `CALCULATE_PHASE_INCREMENT(1.500);
-				4'b1011: decay_release_table = `CALCULATE_PHASE_INCREMENT(2.400);
-				4'b1100: decay_release_table = `CALCULATE_PHASE_INCREMENT(3.000);
-				4'b1101: decay_release_table = `CALCULATE_PHASE_INCREMENT(9.000);
-				4'b1110: decay_release_table = `CALCULATE_PHASE_INCREMENT(15.00);
-				4'b1111: decay_release_table = `CALCULATE_PHASE_INCREMENT(24.00);
-				default: decay_release_table = 65535;
-			endcase
-		end
-	endfunction
-
-
-	// value to add to accumulator during attack phase
-	// calculated from lookup table below based on attack parameter
-	reg [(ACCUMULATOR_BITS - 1):0] attack_step;
-	always @(a) begin
-		attack_step <= attack_table(a); // convert 4-bit value into phase increment amount
-	end
-
-	// value to add to accumulator during decay phase
-	// calculated from lookup table below based on decay parameter
-	reg [(ACCUMULATOR_BITS - 1):0] decay_step;
-	always @(d) begin
-		decay_step <= decay_release_table(d); // convert 4-bit value into phase increment amount
-	end
-
-	
-	reg [(ACCUMULATOR_BITS - 1):0] release_inc;
-	always @(r) begin
-		release_inc <= decay_release_table(r); // convert 4-bit value into phase increment amount
-	end
-
-
-	wire [ACCUMULATOR_BITS-1:0] next_acc_inc = accumulator + attack_step;
-	wire [ACCUMULATOR_BITS-1:0] next_acc_dec = accumulator - decay_step;
-
-	wire [ACCUMULATOR_BITS-1:0] sustain_volume;
-	assign sustain_volume = s << (ACCUMULATOR_BITS - CTRL_WIDTH);
-
-	assign overflow_max = accumulator > next_acc_inc;
-	assign overflow_min = accumulator < next_acc_dec;
-	assign upderflow_sust = accumulator < sustain_volume;
-
-	always @(posedge clk) begin
-		case (state)
-			OFF:
-				begin
-					if ( gate == 1'b0 ) begin
-						state <= OFF;
-					end else begin
-						if (overflow_max) begin
-							state <= RELEASE;
-						end else begin
-							state <= ATTACK;
-							if (low_strobe) begin
-								accumulator <= next_acc_inc;
-							end else begin
-								accumulator <= accumulator;
-							end
-						end
-					end
-				end
-			ATTACK:
-				begin
-					if ( gate == 1'b0 ) begin
-						state <= RELEASE;
-					end else begin
-						if (overflow_max) begin
-							state <= DECAY;
-						end else begin
-							if (low_strobe) begin
-								accumulator <= next_acc_inc;
-							end else begin
-								accumulator <= accumulator;
-							end
-						end
-					end
-				end
-			DECAY:
-				begin
-					if ( gate == 1'b0 ) begin
-						state <= RELEASE;
-					end else begin
-						if (upderflow_sust) begin
-							state <= SUSTAIN;
-						end else begin
-							if (low_strobe) begin
-								accumulator <= next_acc_dec;
-							end else begin
-								accumulator <= accumulator;
-							end
-						end
-					end
-				end
-			SUSTAIN:
-				begin
-					if ( gate == 1'b0 ) begin
-						state <= RELEASE;
-					end
-				end
-			RELEASE:
-				begin
-					if ( gate == 1'b0 ) begin
-						if (overflow_min) begin
-							state <= OFF;
-							accumulator <= 0;
-						end else begin
-							accumulator <= next_acc_dec;
-						end
-					end else begin
-						state <= ATTACK;
-					end
-				end
-		endcase
-	end
+    assign signal_out = sout;
 
 endmodule

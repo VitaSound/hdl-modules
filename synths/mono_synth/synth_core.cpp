@@ -2,6 +2,10 @@
 
 #include "Vmono_synth.h"
 
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
 namespace {
 constexpr uint32_t VERILOG_CLK_HZ = 960000;
 
@@ -14,53 +18,71 @@ void stepVerilogCycles(Vmono_synth* top, uint32_t cycles) {
     }
 }
 
-void clearStrobes(Vmono_synth* top) {
-    top->note_on = 0;
-    top->note_off = 0;
-    top->cc_wr = 0;
-    top->pitch_wr = 0;
-    top->rst = 0;
+void feedMidiByte(Vmono_synth* top, uint8_t byte) {
+    top->byte_in = byte;
+    top->byte_valid = 1;
+    stepVerilogCycles(top, 1);
+    top->byte_valid = 0;
 }
 
-void applyEvent(Vmono_synth* top, const MidiEvent& event) {
-    clearStrobes(top);
-
-    switch (event.type) {
-    case MidiEventType::NoteOn:
-        top->note = event.note;
-        top->note_on = 1;
-        stepVerilogCycles(top, 1);
-        break;
-    case MidiEventType::NoteOff:
-        top->note = event.note;
-        top->note_off = 1;
-        stepVerilogCycles(top, 1);
-        break;
-    case MidiEventType::AllNotesOff:
-        top->rst = 1;
-        stepVerilogCycles(top, 1);
-        break;
-    case MidiEventType::ControlChange:
-        top->cc_num = event.cc;
-        top->cc_val = event.value;
-        top->cc_wr = 1;
-        stepVerilogCycles(top, 1);
-        break;
-    case MidiEventType::PitchBend:
-        top->pitch_val = event.pitch;
-        top->pitch_wr = 1;
-        stepVerilogCycles(top, 1);
-        break;
+void logMidiDecoded(const MidiDecoded& msg) {
+    if (!msg.ready) {
+        return;
     }
 
-    clearStrobes(top);
+    const int ch = static_cast<int>(msg.chan) + 1;
+    switch (msg.ch_message) {
+    case 0x8:
+        std::cerr << "[midi] NOTE OFF ch=" << ch << " note=" << static_cast<int>(msg.note) << "\n";
+        break;
+    case 0x9:
+        if (msg.msb > 0) {
+            std::cerr << "[midi] NOTE ON ch=" << ch << " note=" << static_cast<int>(msg.note)
+                      << " vel=" << static_cast<int>(msg.msb) << "\n";
+        } else {
+            std::cerr << "[midi] NOTE OFF ch=" << ch << " note=" << static_cast<int>(msg.note)
+                      << "\n";
+        }
+        break;
+    case 0xB:
+        std::cerr << "[midi] CC ch=" << ch << " cc=" << static_cast<int>(msg.lsb)
+                  << " val=" << static_cast<int>(msg.msb) << "\n";
+        break;
+    case 0xE: {
+        const int bend = (static_cast<int>(msg.msb) << 7) | static_cast<int>(msg.lsb);
+        std::cerr << "[midi] PITCH ch=" << ch << " val=" << bend << "\n";
+        break;
+    }
+    default:
+        std::cerr << "[midi] msg=0x" << std::hex << static_cast<int>(msg.ch_message) << std::dec
+                  << " ch=" << ch << " d1=" << static_cast<int>(msg.lsb)
+                  << " d2=" << static_cast<int>(msg.msb) << "\n";
+        break;
+    }
+    std::cerr.flush();
 }
 
-void drainPendingEvents(SynthCore& core) {
-    for (const MidiEvent& event : core.pendingEvents) {
-        applyEvent(core.top, event);
+void logMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
+    std::cerr << "[midi] rx " << len << " bytes:";
+    for (size_t i = 0; i < len; ++i) {
+        std::cerr << ' ' << std::hex << std::setw(2) << std::setfill('0')
+                  << static_cast<unsigned>(data[i]);
     }
-    core.pendingEvents.clear();
+    std::cerr << std::dec << '\n';
+
+    MidiDecoded decoded{};
+    for (size_t i = 0; i < len; ++i) {
+        midiDecodeFeed(core.midiDecode, data[i], decoded);
+        logMidiDecoded(decoded);
+    }
+    std::cerr.flush();
+}
+
+void drainPendingMidi(SynthCore& core) {
+    for (uint8_t byte : core.pendingMidiBytes) {
+        feedMidiByte(core.top, byte);
+    }
+    core.pendingMidiBytes.clear();
 }
 } // namespace
 
@@ -68,22 +90,37 @@ bool synthInit(SynthCore& core, uint32_t sampleRate) {
     core.top = new Vmono_synth;
     core.sampleRate = sampleRate;
     core.fractional = 0;
-    core.pendingEvents.clear();
+    core.midiDecode = {};
+    core.pendingMidiBytes.clear();
+    core.midiOutBytes.clear();
 
     core.top->clk = 0;
-    clearStrobes(core.top);
-    core.top->note = 0;
+    core.top->byte_valid = 0;
+    core.top->byte_in = 0;
+    core.top->rst = 0;
     core.top->eval();
     return true;
 }
 
-void synthPostEvent(SynthCore& core, const MidiEvent& event) {
-    core.pendingEvents.push_back(event);
+void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
+    if (core.midiLog && len > 0 && data != nullptr) {
+        logMidiBytes(core, data, len);
+    }
+    core.pendingMidiBytes.insert(core.pendingMidiBytes.end(), data, data + len);
+}
+
+bool synthDrainMidiOut(SynthCore& core, std::vector<uint8_t>& out) {
+    if (core.midiOutBytes.empty()) {
+        return false;
+    }
+    out = std::move(core.midiOutBytes);
+    core.midiOutBytes.clear();
+    return true;
 }
 
 void synthGeneratePull(SynthCore& core, const SharedState& /*state*/, int16_t* mono,
                        unsigned long frames) {
-    drainPendingEvents(core);
+    drainPendingMidi(core);
 
     for (unsigned long i = 0; i < frames; ++i) {
         core.fractional += VERILOG_CLK_HZ;
@@ -99,5 +136,6 @@ void synthGeneratePull(SynthCore& core, const SharedState& /*state*/, int16_t* m
 void synthDestroy(SynthCore& core) {
     delete core.top;
     core.top = nullptr;
-    core.pendingEvents.clear();
+    core.pendingMidiBytes.clear();
+    core.midiOutBytes.clear();
 }

@@ -82,7 +82,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 
 Пример: CC 16 ramp 0→127 перед длинной нотой (медленный attack); CC 19 высокое значение до note off (длинный release).
 
-Pitch bend поддерживается через UDP `PitchBend` (VST пересылает wheel из DAW).
+Pitch bend пересылается как обычный MIDI (status `0xE0` + 2 data bytes) в `MidiHostToEngine`.
 
 ## Архитектура
 
@@ -90,13 +90,13 @@ Pitch bend поддерживается через UDP `PitchBend` (VST пере
 Reaper → VitaSound Remote Synth (VST3) ──UDP :5004/:5005──► MonoSynth (Verilator)
 ```
 
-Протокол: [`hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h) — `NoteOn/Off`, `ControlChange`, `PitchBend`, `AudioPull`.
+Протокол v3: [`hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h) — `MidiHostToEngine` (raw bytes), `AudioPull`.
 
 ## RTL
 
 | Файл | Назначение |
 |------|------------|
-| `top.sv` | Top: note_mono, reg7/reg14, mono_voice |
-| `adsr_regs_to_ctrl4.v` | 14-bit ADSR regs → 4-bit mono_voice |
+| `top.sv` | Top: `io/midi_in`, note_mono, reg7/reg14, mono_voice |
+| `../../io/midi_in.v` | Byte FSM MIDI (без UART) |
 | `../../common/note_mono.v` | Bitmap клавиш, highest note |
 | `../../common/lin2exp_t.v` | CC → exponential rate (fpga-synth) |

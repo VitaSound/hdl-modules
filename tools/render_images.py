@@ -27,6 +27,8 @@ def load_modules() -> list[dict]:
     for category in data["categories"]:
         if category["id"] == "common":
             modules.extend(category["modules"])
+        elif category["id"] == "io":
+            modules.extend(category["modules"])
         elif category["id"] == "generation":
             modules.extend(category["packages"])
     return modules

@@ -22,6 +22,10 @@ def find_module(module_id: str) -> dict:
             for entry in category["modules"]:
                 if entry["id"] == module_id:
                     return entry
+        elif category["id"] == "io":
+            for entry in category["modules"]:
+                if entry["id"] == module_id:
+                    return entry
         elif category["id"] == "generation":
             for entry in category["packages"]:
                 if entry["id"] == module_id:

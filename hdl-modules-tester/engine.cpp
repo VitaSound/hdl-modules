@@ -13,24 +13,6 @@
 namespace {
 constexpr size_t kRecvBufferSize = 2048;
 
-void printUdpDebug(const char* eventType, bool gate, int note, int velocity) {
-    std::cerr << "[udp] " << eventType
-              << " | NOTE " << note
-              << " | VELOCITY " << velocity
-              << " | GATE " << (gate ? "ON" : "OFF")
-              << "\n";
-    std::cerr.flush();
-}
-
-bool anyPressed(const std::array<bool, 128>& pressed) {
-    for (bool v : pressed) {
-        if (v) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool generateAndSendAudio(UdpSocket& audioSock,
                           SynthCore& synth,
                           SharedState& state,
@@ -78,6 +60,22 @@ bool generateAndSendAudio(UdpSocket& audioSock,
     }
     return true;
 }
+
+void sendMidiOutIfAny(UdpSocket& ctrlSock, SynthCore& synth, const UdpEndpoint& dest) {
+    std::vector<uint8_t> midi_out;
+    if (!synthDrainMidiOut(synth, midi_out) || midi_out.empty()) {
+        return;
+    }
+    std::array<uint8_t, hdlnet::kMaxMidiBytes + 64> out{};
+    static uint32_t midi_seq = 0;
+    const size_t out_len = hdlnet::encodeMidi(out.data(),
+                                                hdlnet::PacketType::MidiEngineToHost,
+                                                ++midi_seq,
+                                                0,
+                                                midi_out.data(),
+                                                static_cast<uint16_t>(midi_out.size()));
+    ctrlSock.sendTo(out.data(), out_len, dest);
+}
 } // namespace
 
 std::thread startEngine(const EngineConfig& cfg,
@@ -104,11 +102,11 @@ std::thread startEngine(const EngineConfig& cfg,
         std::cerr << "UDP listening on " << cfg.bindHost << ":" << cfg.controlPort
                   << " (pull mode, packet_frames=" << packet_frames << ")\n";
 
-        std::array<bool, 128> pressed{};
         std::array<uint8_t, kRecvBufferSize> buffer{};
         uint32_t ack_seq = 0;
         uint32_t audio_seq = 0;
         uint64_t sample_index = 0;
+        UdpEndpoint last_plugin{};
 
         std::vector<int16_t> mono(packet_frames);
         std::vector<int16_t> interleaved(packet_frames * channels);
@@ -129,6 +127,7 @@ std::thread startEngine(const EngineConfig& cfg,
             }
 
             const uint8_t* payload = buffer.data() + sizeof(hdlnet::ControlHeader);
+            last_plugin = src;
 
             switch (type) {
             case hdlnet::PacketType::Hello: {
@@ -144,14 +143,12 @@ std::thread startEngine(const EngineConfig& cfg,
 
                 state.gate.store(false, std::memory_order_relaxed);
                 state.note.store(-1, std::memory_order_relaxed);
-                pressed.fill(false);
                 audio_seq = 0;
                 sample_index = 0;
                 synth.fractional = 0;
 
-                MidiEvent reset_event{};
-                reset_event.type = MidiEventType::AllNotesOff;
-                synthPostEvent(synth, reset_event);
+                static constexpr uint8_t kAllNotesOff[] = {0xB0, 123, 0};
+                synthPostMidiBytes(synth, kAllNotesOff, sizeof(kAllNotesOff));
 
                 hdlnet::AckPayload ack{};
                 ack.sample_rate = hello.sample_rate;
@@ -211,6 +208,7 @@ std::thread startEngine(const EngineConfig& cfg,
                                      audio_seq,
                                      sample_index,
                                      effective_rate);
+                sendMidiOutIfAny(ctrlSock, synth, last_plugin);
                 break;
             }
             case hdlnet::PacketType::Ping: {
@@ -222,85 +220,16 @@ std::thread startEngine(const EngineConfig& cfg,
                 ctrlSock.sendTo(out.data(), out_len, UdpEndpoint{src.host, src.port});
                 break;
             }
-            case hdlnet::PacketType::NoteOn: {
-                hdlnet::NotePayload note{};
-                if (!hdlnet::decodeNote(payload, note)) {
+            case hdlnet::PacketType::MidiHostToEngine: {
+                uint64_t ts = 0;
+                const uint8_t* midi_data = nullptr;
+                uint16_t midi_len = 0;
+                if (!hdlnet::decodeMidi(payload, hdr.payload_len, ts, midi_data, midi_len)) {
                     break;
                 }
-                if (note.note < 128) {
-                    if (note.velocity > 0) {
-                        pressed[note.note] = true;
-                        state.note.store(note.note, std::memory_order_relaxed);
-                    } else {
-                        pressed[note.note] = false;
-                    }
-                    const bool any = anyPressed(pressed);
-                    state.gate.store(any, std::memory_order_relaxed);
-                    printUdpDebug(note.velocity > 0 ? "NOTE ON" : "NOTE OFF", any, note.note,
-                                  note.velocity);
-
-                    MidiEvent event{};
-                    event.type = note.velocity > 0 ? MidiEventType::NoteOn : MidiEventType::NoteOff;
-                    event.note = note.note;
-                    event.velocity = note.velocity;
-                    synthPostEvent(synth, event);
+                if (midi_len > 0 && midi_data != nullptr) {
+                    synthPostMidiBytes(synth, midi_data, midi_len);
                 }
-                break;
-            }
-            case hdlnet::PacketType::NoteOff: {
-                hdlnet::NotePayload note{};
-                if (!hdlnet::decodeNote(payload, note)) {
-                    break;
-                }
-                if (note.note < 128) {
-                    pressed[note.note] = false;
-                    const bool any = anyPressed(pressed);
-                    state.gate.store(any, std::memory_order_relaxed);
-                    printUdpDebug("NOTE OFF", any, note.note, note.velocity);
-
-                    MidiEvent event{};
-                    event.type = MidiEventType::NoteOff;
-                    event.note = note.note;
-                    event.velocity = note.velocity;
-                    synthPostEvent(synth, event);
-                }
-                break;
-            }
-            case hdlnet::PacketType::AllNotesOff: {
-                pressed.fill(false);
-                state.gate.store(false, std::memory_order_relaxed);
-                printUdpDebug("ALL NOTES OFF", false, -1, 0);
-
-                MidiEvent event{};
-                event.type = MidiEventType::AllNotesOff;
-                synthPostEvent(synth, event);
-                break;
-            }
-            case hdlnet::PacketType::ControlChange: {
-                hdlnet::ControlChangePayload cc{};
-                if (!hdlnet::decodeControlChange(payload, cc)) {
-                    break;
-                }
-                std::cerr << "[udp] CC " << static_cast<int>(cc.cc)
-                          << " = " << static_cast<int>(cc.value) << "\n";
-
-                MidiEvent event{};
-                event.type = MidiEventType::ControlChange;
-                event.cc = cc.cc;
-                event.value = cc.value;
-                synthPostEvent(synth, event);
-                break;
-            }
-            case hdlnet::PacketType::PitchBend: {
-                hdlnet::PitchBendPayload bend{};
-                if (!hdlnet::decodePitchBend(payload, bend)) {
-                    break;
-                }
-
-                MidiEvent event{};
-                event.type = MidiEventType::PitchBend;
-                event.pitch = bend.value;
-                synthPostEvent(synth, event);
                 break;
             }
             default:

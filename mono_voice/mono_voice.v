@@ -3,11 +3,11 @@ module mono_voice #(
     parameter OUT_WIDTH        = 16,
     parameter DDS_WIDTH        = 32,
     parameter SAMPLE_CLK_FREQ  = 48000,
-    parameter ADSR_CTRL_WIDTH  = 4,
+    parameter ADSR_RATE_BITS   = 32,
     parameter PWM_DUTY         = 7'd64
 )(clk, rst, gate,
   note, pitch, lfo_sig, lfo_depth, lfo_depth_fine, wave_form,
-  a, d, s, r,
+  attack_rate, decay_rate, sustain_level, release_rate,
   signal_out);
 
     input  wire clk, rst, gate;
@@ -17,7 +17,10 @@ module mono_voice #(
     input  wire [6:0] lfo_depth;
     input  wire [6:0] lfo_depth_fine;
     input  wire [2:0] wave_form;
-    input  wire [ADSR_CTRL_WIDTH - 1:0] a, d, s, r;
+    input  wire [ADSR_RATE_BITS - 1:0] attack_rate;
+    input  wire [ADSR_RATE_BITS - 1:0] decay_rate;
+    input  wire [ADSR_RATE_BITS - 1:0] sustain_level;
+    input  wire [ADSR_RATE_BITS - 1:0] release_rate;
     output wire [OUT_WIDTH - 1:0] signal_out;
 
     localparam SAW      = 3'b000;
@@ -83,24 +86,23 @@ module mono_voice #(
         .signal_out(adsr_strobe)
     );
 
-    wire [23:0] adsr_env;
+    wire [31:0] adsr_env;
     adsr #(
-        .SAMPLE_CLK_FREQ(SAMPLE_CLK_FREQ),
-        .MASTER_CLK_FREQ(CLK_HZ),
-        .CTRL_WIDTH(ADSR_CTRL_WIDTH)
+        .ACCUM_BITS(32),
+        .RATE_BITS(ADSR_RATE_BITS)
     ) env(
         .clk(clk),
         .rst(rst),
-        .low_strobe(adsr_strobe),
+        .tick(adsr_strobe),
         .gate(gate),
-        .a(a),
-        .d(d),
-        .s(s),
-        .r(r),
+        .attack_rate(attack_rate),
+        .decay_rate(decay_rate),
+        .sustain_level(sustain_level),
+        .release_rate(release_rate),
         .signal_out(adsr_env)
     );
 
-    wire [7:0] adsr_cv = adsr_env[23:16];
+    wire [7:0] adsr_cv = adsr_env[31:24];
 
     generate
         if (OUT_WIDTH == 16) begin : gen_wide

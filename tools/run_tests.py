@@ -22,6 +22,9 @@ def load_modules() -> list[dict]:
         if category["id"] == "common":
             for entry in category["modules"]:
                 modules.append(entry)
+        elif category["id"] == "io":
+            for entry in category["modules"]:
+                modules.append(entry)
         elif category["id"] == "generation":
             for entry in category["packages"]:
                 modules.append(entry)

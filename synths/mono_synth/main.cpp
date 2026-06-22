@@ -31,6 +31,7 @@ void printUsage() {
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
         << "  --sample-rate R (default 48000, overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
+        << "  --midi-log           print MIDI bytes/events from host to stderr\n"
         << "  --help\n";
 }
 } // namespace
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
     uint32_t sampleRate = DEFAULT_SAMPLE_RATE;
     std::string udpBind = "0.0.0.0:5004";
     uint16_t udpBlockFrames = 256;
+    bool midiLog = false;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -57,6 +59,8 @@ int main(int argc, char** argv) {
             sampleRate = static_cast<uint32_t>(std::stoul(argv[++i]));
         } else if (arg == "--udp-block-frames" && i + 1 < argc) {
             udpBlockFrames = static_cast<uint16_t>(std::stoul(argv[++i]));
+        } else if (arg == "--midi-log") {
+            midiLog = true;
         } else if (arg == "--help" || arg == "-h") {
             printUsage();
             return 0;
@@ -71,6 +75,7 @@ int main(int argc, char** argv) {
     if (!synthInit(synth, sampleRate)) {
         return 1;
     }
+    synth.midiLog = midiLog;
 
     UdpSessionState session;
     EngineConfig cfg;
@@ -87,7 +92,11 @@ int main(int argc, char** argv) {
     std::thread engineThread = startEngine(cfg, state, session, synth);
 
     std::cerr << "MonoSynth | control " << cfg.bindHost << ":" << cfg.controlPort
-              << " | pull mode | Ctrl+C to quit\n";
+              << " | pull mode";
+    if (midiLog) {
+        std::cerr << " | midi-log";
+    }
+    std::cerr << " | Ctrl+C to quit\n";
 
     while (state.running.load(std::memory_order_relaxed)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(30));

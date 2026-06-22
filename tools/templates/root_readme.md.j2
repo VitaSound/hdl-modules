@@ -18,6 +18,18 @@
 | {{ loop.index }} | {{ module.id }} | {{ module.description_ru }} | ![{{ module.id }}]({{ module.image }}) |
 {% endfor %}
 
+{% if io and io.modules %}
+## {{ io.title_ru }}
+
+[{{ io.subtitle_ru }}]({{ io.readme }})
+
+| N | Module | Description | Img |
+| - | ------ | --- | --- |
+{% for module in io.modules %}
+| {{ loop.index }} | {{ module.id }} | {{ module.description_ru }} | ![{{ module.id }}]({{ module.image }}) |
+{% endfor %}
+{% endif %}
+
 {{ generation.title_ru }}
 
 | N | Module | Description | Img |

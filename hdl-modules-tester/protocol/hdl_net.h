@@ -8,7 +8,7 @@ namespace hdlnet {
 
 constexpr uint32_t kMagicControl = 0x48444C4Du; // "HDLM"
 constexpr uint32_t kMagicAudio = 0x48444C41u;   // "HDLA"
-constexpr uint8_t kVersion = 2;
+constexpr uint8_t kVersion = 3;
 
 constexpr uint16_t kDefaultControlPort = 5004;
 constexpr uint16_t kDefaultAudioPort = 5005;
@@ -19,20 +19,23 @@ constexpr size_t kAudioHeaderSize = 22;
 constexpr size_t kMaxAudioPacketBytes =
     kAudioHeaderSize + kMaxAudioFrames * kMaxAudioChannels * sizeof(int16_t);
 
+constexpr uint16_t kMaxMidiBytes = 1024;
+constexpr size_t kMidiHeaderPayloadSize = sizeof(uint64_t) + sizeof(uint16_t);
+
 constexpr uint8_t kSessionModePull = 1;
 constexpr uint16_t kDefaultMaxFramesPerPull = 2048;
+
+constexpr uint16_t kCapAudioPush = 0x0001;
 
 enum class PacketType : uint8_t {
     Hello = 1,
     Ack = 2,
     Ping = 3,
     Pong = 4,
-    NoteOn = 5,
-    NoteOff = 6,
-    AllNotesOff = 7,
+    MidiHostToEngine = 5,
+    MidiEngineToHost = 6,
     AudioPull = 8,
-    ControlChange = 9,
-    PitchBend = 10,
+    AudioPush = 9,
 };
 
 #pragma pack(push, 1)
@@ -62,6 +65,8 @@ struct AckPayload {
     uint32_t engine_ssrc;
     uint16_t packet_frames;
     uint16_t max_frames_per_pull;
+    uint16_t caps;
+    uint16_t reserved;
 };
 
 struct AudioPullPayload {
@@ -75,23 +80,9 @@ struct TimestampPayload {
     uint64_t timestamp_us;
 };
 
-struct NotePayload {
+struct MidiPayloadHeader {
     uint64_t timestamp_us;
-    uint8_t note;
-    uint8_t velocity;
-};
-
-struct ControlChangePayload {
-    uint64_t timestamp_us;
-    uint8_t cc;
-    uint8_t value;
-    uint8_t pad[6];
-};
-
-struct PitchBendPayload {
-    uint64_t timestamp_us;
-    uint16_t value;
-    uint8_t pad[6];
+    uint16_t length;
 };
 
 struct AudioHeader {
@@ -170,6 +161,8 @@ inline size_t encodeAck(uint8_t* out, uint32_t seq, const AckPayload& payload) {
     p->engine_ssrc = hostToBe32(payload.engine_ssrc);
     p->packet_frames = hostToBe16(payload.packet_frames);
     p->max_frames_per_pull = hostToBe16(payload.max_frames_per_pull);
+    p->caps = hostToBe16(payload.caps);
+    p->reserved = hostToBe16(payload.reserved);
     return sizeof(ControlHeader) + sizeof(AckPayload);
 }
 
@@ -190,37 +183,40 @@ inline size_t encodePingPong(uint8_t* out, PacketType type, uint32_t seq, uint64
     return sizeof(ControlHeader) + sizeof(TimestampPayload);
 }
 
-inline size_t encodeNote(uint8_t* out, PacketType type, uint32_t seq, const NotePayload& note) {
-    writeControlHeader(out, type, seq, sizeof(NotePayload));
-    auto* p = reinterpret_cast<NotePayload*>(out + sizeof(ControlHeader));
-    p->timestamp_us = hostToBe64(note.timestamp_us);
-    p->note = note.note;
-    p->velocity = note.velocity;
-    return sizeof(ControlHeader) + sizeof(NotePayload);
+inline size_t encodeMidi(uint8_t* out,
+                         PacketType type,
+                         uint32_t seq,
+                         uint64_t timestamp_us,
+                         const uint8_t* data,
+                         uint16_t length) {
+    const uint16_t payload_len = static_cast<uint16_t>(kMidiHeaderPayloadSize + length);
+    writeControlHeader(out, type, seq, payload_len);
+    auto* hdr = reinterpret_cast<MidiPayloadHeader*>(out + sizeof(ControlHeader));
+    hdr->timestamp_us = hostToBe64(timestamp_us);
+    hdr->length = hostToBe16(length);
+    if (length > 0 && data != nullptr) {
+        std::memcpy(out + sizeof(ControlHeader) + kMidiHeaderPayloadSize, data, length);
+    }
+    return sizeof(ControlHeader) + payload_len;
 }
 
-inline size_t encodeAllNotesOff(uint8_t* out, uint32_t seq) {
-    writeControlHeader(out, PacketType::AllNotesOff, seq, 0);
-    return sizeof(ControlHeader);
-}
-
-inline size_t encodeControlChange(uint8_t* out, uint32_t seq, const ControlChangePayload& cc) {
-    writeControlHeader(out, PacketType::ControlChange, seq, sizeof(ControlChangePayload));
-    auto* p = reinterpret_cast<ControlChangePayload*>(out + sizeof(ControlHeader));
-    p->timestamp_us = hostToBe64(cc.timestamp_us);
-    p->cc = cc.cc;
-    p->value = cc.value;
-    std::memset(p->pad, 0, sizeof(p->pad));
-    return sizeof(ControlHeader) + sizeof(ControlChangePayload);
-}
-
-inline size_t encodePitchBend(uint8_t* out, uint32_t seq, const PitchBendPayload& bend) {
-    writeControlHeader(out, PacketType::PitchBend, seq, sizeof(PitchBendPayload));
-    auto* p = reinterpret_cast<PitchBendPayload*>(out + sizeof(ControlHeader));
-    p->timestamp_us = hostToBe64(bend.timestamp_us);
-    p->value = hostToBe16(bend.value);
-    std::memset(p->pad, 0, sizeof(p->pad));
-    return sizeof(ControlHeader) + sizeof(PitchBendPayload);
+inline bool decodeMidi(const uint8_t* payload,
+                       size_t payload_len,
+                       uint64_t& timestamp_us,
+                       const uint8_t*& data,
+                       uint16_t& length) {
+    if (payload_len < kMidiHeaderPayloadSize) {
+        return false;
+    }
+    MidiPayloadHeader raw{};
+    std::memcpy(&raw, payload, sizeof(MidiPayloadHeader));
+    timestamp_us = beToHost64(raw.timestamp_us);
+    length = beToHost16(raw.length);
+    if (length > kMaxMidiBytes || payload_len < kMidiHeaderPayloadSize + length) {
+        return false;
+    }
+    data = payload + kMidiHeaderPayloadSize;
+    return true;
 }
 
 inline bool decodeHello(const uint8_t* payload, HelloPayload& out) {
@@ -246,6 +242,8 @@ inline bool decodeAck(const uint8_t* payload, AckPayload& out) {
     out.engine_ssrc = beToHost32(raw.engine_ssrc);
     out.packet_frames = beToHost16(raw.packet_frames);
     out.max_frames_per_pull = beToHost16(raw.max_frames_per_pull);
+    out.caps = beToHost16(raw.caps);
+    out.reserved = beToHost16(raw.reserved);
     return true;
 }
 
@@ -263,32 +261,6 @@ inline bool decodeTimestamp(const uint8_t* payload, uint64_t& timestamp_us) {
     TimestampPayload raw{};
     std::memcpy(&raw, payload, sizeof(TimestampPayload));
     timestamp_us = beToHost64(raw.timestamp_us);
-    return true;
-}
-
-inline bool decodeNote(const uint8_t* payload, NotePayload& out) {
-    NotePayload raw{};
-    std::memcpy(&raw, payload, sizeof(NotePayload));
-    out.timestamp_us = beToHost64(raw.timestamp_us);
-    out.note = raw.note;
-    out.velocity = raw.velocity;
-    return true;
-}
-
-inline bool decodeControlChange(const uint8_t* payload, ControlChangePayload& out) {
-    ControlChangePayload raw{};
-    std::memcpy(&raw, payload, sizeof(ControlChangePayload));
-    out.timestamp_us = beToHost64(raw.timestamp_us);
-    out.cc = raw.cc;
-    out.value = raw.value;
-    return true;
-}
-
-inline bool decodePitchBend(const uint8_t* payload, PitchBendPayload& out) {
-    PitchBendPayload raw{};
-    std::memcpy(&raw, payload, sizeof(PitchBendPayload));
-    out.timestamp_us = beToHost64(raw.timestamp_us);
-    out.value = beToHost16(raw.value);
     return true;
 }
 

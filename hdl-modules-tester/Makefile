@@ -8,6 +8,7 @@ CPP_SRCS = \
 	main.cpp \
 	engine.cpp \
 	synth_core.cpp \
+	midi_decode.cpp \
 	net_socket.cpp
 
 .PHONY: all clean test_hdl_net

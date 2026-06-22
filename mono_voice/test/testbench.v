@@ -15,10 +15,10 @@ module testbench();
   reg [6:0] lfo_depth;
   reg [6:0] lfo_depth_fine;
   reg [2:0] wave_form;
-  reg [3:0] a;
-  reg [3:0] d;
-  reg [3:0] s;
-  reg [3:0] r;
+  reg [31:0] attack_rate;
+  reg [31:0] decay_rate;
+  reg [31:0] sustain_level;
+  reg [31:0] release_rate;
   wire [15:0] signal_out;
 
   integer errors;
@@ -48,10 +48,10 @@ module testbench();
     .lfo_depth(lfo_depth),
     .lfo_depth_fine(lfo_depth_fine),
     .wave_form(wave_form),
-    .a(a),
-    .d(d),
-    .s(s),
-    .r(r),
+    .attack_rate(attack_rate),
+    .decay_rate(decay_rate),
+    .sustain_level(sustain_level),
+    .release_rate(release_rate),
     .signal_out(signal_out)
   );
 
@@ -108,10 +108,10 @@ module testbench();
     lfo_depth = 7'd0;
     lfo_depth_fine = 7'd0;
     wave_form = 3'd1;
-    a = 4'd0;
-    d = 4'd0;
-    s = 4'd15;
-    r = 4'd15;
+    attack_rate = 32'd20000;
+    decay_rate = 32'd20000;
+    sustain_level = {7'd127, 25'b0};
+    release_rate = 32'd500000;
     errors = 0;
 
     repeat (4) @(posedge clk);
@@ -125,7 +125,7 @@ module testbench();
         errors = errors + 1;
     end
 
-    r = 4'd0;
+    release_rate = 32'd500000;
     gate = 0;
     repeat (200000) @(posedge clk);
     if ((signal_out > 16'd33000) || (signal_out < 16'd32500)) begin

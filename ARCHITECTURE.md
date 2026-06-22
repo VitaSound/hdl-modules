@@ -93,7 +93,7 @@ cd verilator_tests && make full
 | [`mono_synth`](synths/mono_synth/README.md) | `mono_voice` + MIDI-регистры | `./scripts/run_mono_synth.sh` |
 | [`noise_box`](synths/noise_box/README.md) | `rndx` шум | `./scripts/run_noise_box.sh` |
 
-На порту **5004** одновременно один engine. Протокол: `ControlChange` (CC 16–19, 48), `PitchBend`, `NoteOn/Off`, `AudioPull`.
+На порту **5004** одновременно один engine. Протокол v3: `MidiHostToEngine` (raw MIDI bytes), `AudioPull`.
 
 ## UDP engine (`hdl-modules-tester`)
 

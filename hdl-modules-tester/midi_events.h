@@ -1,24 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
-
-enum class MidiEventType : uint8_t {
-    NoteOn = 0,
-    NoteOff = 1,
-    AllNotesOff = 2,
-    ControlChange = 3,
-    PitchBend = 4,
-};
-
-struct MidiEvent {
-    MidiEventType type = MidiEventType::NoteOn;
-    uint8_t note = 0;
-    uint8_t velocity = 0;
-    uint8_t cc = 0;
-    uint8_t value = 0;
-    uint16_t pitch = 8192;
-};
+#include <vector>
 
 struct SynthCore;
 
-void synthPostEvent(SynthCore& core, const MidiEvent& event);
+void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len);
+bool synthDrainMidiOut(SynthCore& core, std::vector<uint8_t>& out);
