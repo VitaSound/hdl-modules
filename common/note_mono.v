@@ -22,17 +22,26 @@ module note_mono(clk, rst, note_on, note_off, note, out_note, out_gate);
     assign out_gate = |keys;
 
     reg [6:0] highest_note;
+    reg [6:0] latched_note;
     integer k;
 
     always @* begin
         highest_note = 7'd0;
-        for (k = 127; k >= 0; k = k - 1) begin
+        for (k = 0; k <= 127; k = k + 1) begin
             if (keys[k]) begin
                 highest_note = k[6:0];
             end
         end
     end
 
-    assign out_note = highest_note;
+    always @(posedge clk) begin
+        if (rst) begin
+            latched_note <= 7'd0;
+        end else if (|keys) begin
+            latched_note <= highest_note;
+        end
+    end
+
+    assign out_note = latched_note;
 
 endmodule
