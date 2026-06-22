@@ -12,7 +12,7 @@ module mono_synth (
     output wire [15:0] audio_sample
 );
 
-    localparam integer CLK_HZ = 960_000;
+    localparam integer CLK_HZ = 1_000_000;
 
     wire [6:0] active_note;
     wire       gate;

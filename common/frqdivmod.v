@@ -1,40 +1,22 @@
 module frqdivmod(clk, signal_out);
 parameter DIV=2;
-// calculated parameters
+// Single posedge counter: stable in Icarus for odd DIV (legacy dual-edge negedge path caused X).
 parameter WITH = ($clog2(DIV+1)>0) ? $clog2(DIV+1) : 1;
 
 input wire clk;
 output wire signal_out;
 
-reg clk_n; 
-
-reg [(WITH-1):0] pos_cnt; 
-reg [(WITH-1):0] neg_cnt; 
+reg [(WITH-1):0] pos_cnt;
 
 wire [(WITH-1):0] div_value = DIV[(WITH-1):0];
+wire [(WITH-1):0] next_pos = (pos_cnt + 1'b1) % div_value;
 
-initial begin
-	clk_n <= 1'b0;
+initial
 	pos_cnt <= {(WITH){1'b0}};
-	neg_cnt <= {(WITH){1'b0}};
-end
 
-assign signal_out = (DIV==1) ? clk : clk_n;
+assign signal_out = (DIV == 1) ? clk : (pos_cnt >= (DIV / 2));
 
-always @ (posedge clk) begin
-	pos_cnt <= (pos_cnt + 1'b1) % div_value;
-end
+always @(posedge clk)
+	pos_cnt <= next_pos;
 
-always @ (negedge clk) begin
-	neg_cnt <= (neg_cnt + 1'b1) % div_value;
-end
-
-always @(clk, pos_cnt, neg_cnt) begin //pos_cnt in sens list addd for resolve warning "variable is read inside the Always Construct but isn't in the Always Construct's Event Control"
-	if ((DIV%2) == 1'b0) begin
-		clk_n <= ( pos_cnt >= (DIV/2)) ? 1'b1 : 1'b0;
-	end else begin
-		clk_n <= (( pos_cnt > (DIV/2)) || ( neg_cnt > (DIV/2))) ? 1'b1 : 1'b0;
-	end
-end
-	
 endmodule

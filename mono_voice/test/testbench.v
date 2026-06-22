@@ -1,10 +1,9 @@
 `timescale 1ns / 1ps
 
 module testbench();
-  localparam CLK_HZ = 960_000;
+  localparam CLK_HZ = 1_000_000;
   localparam TEST_DURATION = 200_000_000;
   localparam integer EXP_PERIOD_NS = 1_000_000_000 / 440;
-  localparam integer CLK_HALF_NS = 500_000_000 / CLK_HZ;
   localparam integer TOL_NS = EXP_PERIOD_NS / 20;
 
   reg clk;
@@ -33,7 +32,7 @@ module testbench();
   integer i;
   integer t_limit;
 
-  always #(CLK_HALF_NS) clk <= ~clk;
+  always #500 clk <= ~clk;
 
   mono_voice #(
     .CLK_HZ(CLK_HZ),

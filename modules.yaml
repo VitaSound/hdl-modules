@@ -41,6 +41,7 @@ categories:
         test_dir: common/frqdivmod_test
         sources:
           - common/frqdivmod.v
+          - common/strobe_gen.v
         gtkw: common/frqdivmod_test/test.gtkw
         image: common/frqdivmod_test/test.png
 
