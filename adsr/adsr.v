@@ -1,7 +1,8 @@
-// Legacy adsr32 FSM (fpga-synth) with tick gating for ~48 kHz envelope updates.
+// Legacy adsr32 FSM; envelope advances on tick (audio-rate strobe, not system clk).
 module adsr #(
     parameter ACCUM_BITS = 32,
-    parameter RATE_BITS  = 32
+    parameter RATE_BITS  = 32,
+    parameter CV_BITS    = 8
 )(
     input  wire                   clk,
     input  wire                   rst,

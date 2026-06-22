@@ -2,8 +2,10 @@ module mono_voice #(
     parameter CLK_HZ           = 1_000_000,
     parameter OUT_WIDTH        = 16,
     parameter DDS_WIDTH        = 32,
-    parameter SAMPLE_CLK_FREQ  = 48000,
+    parameter SAMPLE_CLK_FREQ  = 44100,
     parameter ADSR_RATE_BITS   = 32,
+    parameter LEGACY_ADSR_CLK_HZ = 50_000_000,
+    parameter LEGACY_RATE_INPUT  = 0,
     parameter PWM_DUTY         = 7'd64
 )(clk, rst, gate,
   note, pitch, lfo_sig, lfo_depth, lfo_depth_fine, wave_form,
@@ -31,6 +33,14 @@ module mono_voice #(
     localparam PWM_WAVE = 3'b101;
 
     localparam integer ADSR_DIV = (CLK_HZ + (SAMPLE_CLK_FREQ / 2)) / SAMPLE_CLK_FREQ;
+
+    wire [63:0] attack_wide  = attack_rate * LEGACY_ADSR_CLK_HZ;
+    wire [63:0] decay_wide   = decay_rate * LEGACY_ADSR_CLK_HZ;
+    wire [63:0] release_wide = release_rate * LEGACY_ADSR_CLK_HZ;
+
+    wire [31:0] attack_eff  = LEGACY_RATE_INPUT ? (attack_wide / SAMPLE_CLK_FREQ) : attack_rate;
+    wire [31:0] decay_eff   = LEGACY_RATE_INPUT ? (decay_wide / SAMPLE_CLK_FREQ) : decay_rate;
+    wire [31:0] release_eff = LEGACY_RATE_INPUT ? (release_wide / SAMPLE_CLK_FREQ) : release_rate;
 
     wire [31:0] adder_center;
     note_pitch2dds #(.CLK_HZ(CLK_HZ)) transl1(
@@ -89,20 +99,21 @@ module mono_voice #(
     wire [31:0] adsr_env;
     adsr #(
         .ACCUM_BITS(32),
-        .RATE_BITS(ADSR_RATE_BITS)
+        .RATE_BITS(ADSR_RATE_BITS),
+        .CV_BITS(8)
     ) env(
         .clk(clk),
         .rst(rst),
         .tick(adsr_strobe),
         .gate(gate),
-        .attack_rate(attack_rate),
-        .decay_rate(decay_rate),
+        .attack_rate(attack_eff),
+        .decay_rate(decay_eff),
         .sustain_level(sustain_level),
-        .release_rate(release_rate),
+        .release_rate(release_eff),
         .signal_out(adsr_env)
     );
 
-    wire [7:0] adsr_cv = adsr_env[31:24];
+    wire [7:0] adsr_cv = adsr_env[31 -: 8];
 
     generate
         if (OUT_WIDTH == 16) begin : gen_wide

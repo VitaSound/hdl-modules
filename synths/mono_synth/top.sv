@@ -6,7 +6,8 @@ module mono_synth (
     output wire [15:0] audio_sample
 );
 
-    localparam integer CLK_HZ = 1_000_000;
+    localparam integer CLK_HZ    = 1_000_000;
+    localparam integer AUDIO_HZ  = 44100;
 
     wire       midi_command_ready;
     wire [3:0] ch_message;
@@ -97,7 +98,8 @@ module mono_synth (
     mono_voice #(
         .CLK_HZ(CLK_HZ),
         .OUT_WIDTH(16),
-        .SAMPLE_CLK_FREQ(48000)
+        .SAMPLE_CLK_FREQ(AUDIO_HZ),
+        .LEGACY_RATE_INPUT(1)
     ) u_voice(
         .clk(clk),
         .rst(rst),

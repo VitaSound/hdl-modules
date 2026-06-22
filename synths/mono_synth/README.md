@@ -78,6 +78,8 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | 19 | Release |
 | 48 | Waveform: 0=saw, 1=square, 2=triangle, 3=sine, 4=ramp, 5=PWM |
 
+**Sample rate:** RTL `mono_synth` собран с **AUDIO_HZ=44100** (ADSR tick + C++ `VERILOG_CLK_HZ=1 MHz`). Проект FL и Hello должны использовать **44100 Hz** (или пересобрать с другим `AUDIO_HZ` в `top.sv`).
+
 В Reaper: piano roll → lane **MIDI CC 16** (и 17–19, 48) → нарисовать envelope перед/во время ноты. Insert → MIDI CC/OSC control item — альтернатива.
 
 Пример: CC 16 ramp 0→127 перед длинной нотой (медленный attack); CC 19 высокое значение до note off (длинный release).

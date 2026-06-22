@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace {
-constexpr uint32_t VERILOG_CLK_HZ = 960000;
+constexpr uint32_t VERILOG_CLK_HZ = 1000000;
 
 void stepVerilogCycles(Vmono_synth* top, uint32_t cycles) {
     for (uint32_t i = 0; i < cycles; ++i) {

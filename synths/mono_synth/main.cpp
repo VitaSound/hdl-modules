@@ -16,7 +16,7 @@
 namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
-constexpr uint32_t DEFAULT_SAMPLE_RATE = 48000;
+constexpr uint32_t DEFAULT_SAMPLE_RATE = 44100;
 
 void onSignal(int) {
     if (g_running_ptr != nullptr) {
@@ -29,7 +29,7 @@ void printUsage() {
         << "MonoSynth UDP engine (synths/mono_synth, pull mode for VST bridge)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
-        << "  --sample-rate R (default 48000, overridden by Hello)\n"
+        << "  --sample-rate R (default 44100, must match mono_synth AUDIO_HZ; overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
         << "  --midi-log           print MIDI bytes/events from host to stderr\n"
         << "  --help\n";

@@ -21,18 +21,20 @@ module note_mono(clk, rst, note_on, note_off, note, out_note, out_gate);
 
     assign out_gate = |keys;
 
-    reg [6:0] highest_note;
-    reg [6:0] latched_note;
-    integer k;
+    wire [127:0] highest_onehot;
+    wire [6:0]   highest_note;
 
-    always @* begin
-        highest_note = 7'd0;
-        for (k = 0; k <= 127; k = k + 1) begin
-            if (keys[k]) begin
-                highest_note = k[6:0];
-            end
-        end
-    end
+    bitscan #(.WIDTH(128)) u_bitscan(
+        .in(keys),
+        .out(highest_onehot)
+    );
+
+    prio_encoder #(.LINES(128)) u_prio(
+        .in(highest_onehot),
+        .out(highest_note)
+    );
+
+    reg [6:0] latched_note;
 
     always @(posedge clk) begin
         if (rst) begin

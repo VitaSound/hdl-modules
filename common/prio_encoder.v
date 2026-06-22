@@ -2,16 +2,19 @@ module prio_encoder #(parameter LINES = 128) (in, out);
     localparam WIDTH = $clog2(LINES);
 
     input  wire [LINES - 1:0] in;
-    output wor  [WIDTH - 1:0] out;
+    output wire [WIDTH - 1:0] out;
 
-    genvar gi, gj;
-    generate
-        for (gi = 0; gi < LINES; gi = gi + 1) begin : bi_gen
-            for (gj = 0; gj < WIDTH; gj = gj + 1) begin : bj_gen
-                if (gi[gj]) begin
-                    assign out[gj] = in[gi];
-                end
+    reg [WIDTH - 1:0] out_r;
+    integer gi;
+
+    always @* begin
+        out_r = {WIDTH{1'b0}};
+        for (gi = 0; gi < LINES; gi = gi + 1) begin
+            if (in[gi]) begin
+                out_r = gi[WIDTH - 1:0];
             end
         end
-    endgenerate
+    end
+
+    assign out = out_r;
 endmodule

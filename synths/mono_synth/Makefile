@@ -25,6 +25,8 @@ RTL_SRCS = \
 	../../common/reg7.v \
 	../../common/reg14.v \
 	../../common/note_mono.v \
+	../../common/bitscan.v \
+	../../common/prio_encoder.v \
 	../../common/lin2exp_t.v \
 	../../vca/svca_wide.v \
 	../../vca/svca.v
