@@ -14,6 +14,7 @@ module testbench();
     reg tick;
     reg gate;
     reg note_on;
+    reg sound_off;
     reg [31:0] attack_rate;
     reg [31:0] decay_rate;
     reg [31:0] sustain_level;
@@ -36,6 +37,7 @@ module testbench();
         .tick(tick),
         .gate(gate),
         .note_on(note_on),
+        .sound_off(sound_off),
         .attack_rate(attack_rate),
         .decay_rate(decay_rate),
         .sustain_level(sustain_level),
@@ -67,6 +69,7 @@ module testbench();
         begin
             gate = 0;
             note_on = 0;
+            sound_off = 0;
             tick = 0;
             rst = 1;
             repeat (2) @(posedge clk);
@@ -294,8 +297,8 @@ module testbench();
             gate = 1;
             run_ticks(2, 1);
 
-            if (env.state != ATTACK || signal_out != 32'd0) begin
-                $display("FAIL adsr retrigger: expected ATTACK@0, state=%0d out=%0h",
+            if (env.state != ATTACK || signal_out == 32'd0) begin
+                $display("FAIL adsr retrigger: expected ATTACK with held env, state=%0d out=%0h",
                          env.state, signal_out);
                 errors = errors + 1;
             end else begin
@@ -364,7 +367,7 @@ module testbench();
             note_on = 0;
             wait_state(ATTACK, 100);
 
-            if (env.state != ATTACK || signal_out != 32'd0) begin
+            if (env.state != ATTACK || signal_out == 32'd0) begin
                 $display("FAIL adsr trigger_staccato: state=%0d out=%0h",
                          env.state, signal_out);
                 errors = errors + 1;
@@ -394,6 +397,62 @@ module testbench();
         end
     endtask
 
+    task check_sound_off_panic;
+        integer held;
+        begin
+            env_reset();
+            sustain_level = {7'd96, 25'b0};
+            attack_rate  = 32'd400_000;
+            decay_rate   = 32'd100_000;
+            release_rate = 32'd1;
+
+            gate = 1;
+            wait_state(SUSTAIN, 300_000);
+
+            if (env.state != SUSTAIN) begin
+                $display("FAIL adsr sound_off: expected SUSTAIN, got %0d", env.state);
+                errors = errors + 1;
+                disable check_sound_off_panic;
+            end
+
+            held = signal_out;
+            if (held == 0) begin
+                $display("FAIL adsr sound_off: sustain env zero before sound_off");
+                errors = errors + 1;
+                disable check_sound_off_panic;
+            end
+
+            tick = 0;
+            @(negedge clk);
+            sound_off = 1;
+            @(posedge clk);
+            #1;
+            sound_off = 0;
+
+            if (env.state != IDLE || signal_out != 32'd0) begin
+                $display("FAIL adsr sound_off: state=%0d out=%0h expect IDLE/0",
+                         env.state, signal_out);
+                errors = errors + 1;
+            end else begin
+                $display("OK adsr sound_off_panic");
+            end
+
+            gate = 1;
+            note_on = 1;
+            pulse_tick();
+            note_on = 0;
+            #1;
+
+            if (env.state != ATTACK) begin
+                $display("FAIL adsr sound_off: retrigger after panic state=%0d out=%0h",
+                         env.state, signal_out);
+                errors = errors + 1;
+            end else begin
+                $display("OK adsr sound_off_retrigger");
+            end
+        end
+    endtask
+
     initial begin
         $dumpfile("out.vcd");
         $dumpvars(0, testbench);
@@ -403,6 +462,7 @@ module testbench();
         tick = 0;
         gate = 0;
         note_on = 0;
+        sound_off = 0;
         attack_rate = 32'd10000;
         decay_rate = 32'd10000;
         sustain_level = {7'd64, 25'b0};
@@ -421,6 +481,7 @@ module testbench();
         check_trigger_staccato();
         check_min_rate_attack();
         check_cv8_high_sustain_quantized();
+        check_sound_off_panic();
 
         if (errors)
             $fatal(1, "adsr: %0d check(s) failed", errors);

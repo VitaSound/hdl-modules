@@ -11,6 +11,7 @@ module testbench();
   reg rst;
   reg gate;
   reg note_on;
+  reg sound_off;
   reg [6:0] note;
   reg [13:0] pitch;
   reg [7:0] lfo_sig;
@@ -53,6 +54,7 @@ module testbench();
     .rst(rst),
     .gate(gate),
         .note_on(note_on),
+    .sound_off(sound_off),
     .note(note),
     .pitch(pitch),
     .lfo_sig(lfo_sig),
@@ -113,6 +115,7 @@ module testbench();
   task voice_reset;
     begin
       gate = 0;
+      sound_off = 0;
       rst = 1;
       repeat (4) @(posedge clk);
       rst = 0;
@@ -323,8 +326,8 @@ module testbench();
       if (dut.env.state != 3'd1) begin
         $display("FAIL mono_voice fast_staccato: state=%0d", dut.env.state);
         errors = errors + 1;
-      end else if (env_start > 32'h00FF_FFFF) begin
-        $display("FAIL mono_voice fast_staccato: env not reset %0h", env_start);
+      end else if (env_start == 32'd0) begin
+        $display("FAIL mono_voice fast_staccato: env unexpectedly zero %0h", env_start);
         errors = errors + 1;
       end else begin
         $display("OK mono_voice fast_staccato");
@@ -355,6 +358,37 @@ module testbench();
     end
   endtask
 
+  task check_sound_off_silence;
+    begin
+      voice_reset();
+      attack_rate  = 32'd1_000_000;
+      decay_rate   = 32'd500_000;
+      sustain_level = {7'd127, 25'b0};
+      release_rate = 32'd1;
+      gate = 1;
+      wait_env_state(SUSTAIN, 3_000_000);
+
+      gate = 0;
+      sound_off = 1;
+      @(negedge clk);
+      @(posedge clk);
+      #1;
+      sound_off = 0;
+      repeat (5000) @(posedge clk);
+
+      if (dut.env.state != 3'd0 || dut.env.signal_out != 32'd0) begin
+        $display("FAIL mono_voice sound_off: env state=%0d out=%0h",
+                 dut.env.state, dut.env.signal_out);
+        errors = errors + 1;
+      end else if ((signal_out > 16'd33000) || (signal_out < 16'd32500)) begin
+        $display("FAIL mono_voice sound_off: signal_out=%0d expect ~32768", signal_out);
+        errors = errors + 1;
+      end else begin
+        $display("OK mono_voice sound_off_silence");
+      end
+    end
+  endtask
+
   initial begin
     $dumpfile("out.vcd");
     $dumpvars(0, testbench);
@@ -363,6 +397,7 @@ module testbench();
     rst = 1;
     gate = 0;
     note_on = 0;
+    sound_off = 0;
     note = 7'd69;
     pitch = 14'd8192;
     lfo_sig = 8'd128;
@@ -394,6 +429,7 @@ module testbench();
     check_staccato_retrigger();
     check_fast_staccato();
     check_release_silence();
+    check_sound_off_silence();
 
     if (errors)
       $fatal(1, "mono_voice: %0d check(s) failed", errors);

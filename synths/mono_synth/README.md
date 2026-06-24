@@ -84,8 +84,8 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 
 | CC | Параметр |
 |----|----------|
-| 74 | Cutoff MSB → `fcut14[13:7]` |
-| 106 | Cutoff LSB → `fcut14[6:0]` (14-bit индекс, CC74+106) |
+| 74 | Cutoff MSB → `fcut14[13:7]`; без CC106 дублируется в LSB (полный 7-bit диапазон) |
+| 106 | Cutoff LSB → `fcut14[6:0]` (14-bit fine, после CC74) |
 | 71 | Resonance / Q (`127 − CC`, 0 = мягко, 127 = резко) |
 | 22 | Режим (старшие биты CC): **0–31**=LP, **32–63**=HP, **64–95**=BP, **96–127**=notch |
 

@@ -9,6 +9,7 @@ module adsr #(
     input  wire                   tick,
     input  wire                   gate,
     input  wire                   note_on,
+    input  wire                   sound_off,
     input  wire [RATE_BITS - 1:0] attack_rate,
     input  wire [RATE_BITS - 1:0] decay_rate,
     input  wire [RATE_BITS - 1:0] sustain_level,
@@ -51,6 +52,9 @@ module adsr #(
             gate_d      <= 1'b0;
             gate_fell   <= 1'b0;
             note_on_lat <= 1'b0;
+        end else if (sound_off) begin
+            gate_fell   <= 1'b0;
+            note_on_lat <= 1'b0;
         end else begin
             gate_d <= gate;
             if (!gate && gate_d)
@@ -66,9 +70,13 @@ module adsr #(
         if (rst) begin
             state <= IDLE;
             sout  <= {ACCUM_BITS{1'b0}};
+        end else if (sound_off) begin
+            state         <= IDLE;
+            sout          <= {ACCUM_BITS{1'b0}};
+            gate_fell     <= 1'b0;
+            note_on_lat   <= 1'b0;
         end else if (tick) begin
             if (note_on_lat || note_on) begin
-                sout          <= {ACCUM_BITS{1'b0}};
                 state         <= ATTACK;
                 note_on_lat   <= 1'b0;
                 gate_fell     <= 1'b0;
@@ -110,7 +118,6 @@ module adsr #(
 
                     RELEASE: begin
                         if (gate && !gate_release) begin
-                            sout  <= {ACCUM_BITS{1'b0}};
                             state <= ATTACK;
                             gate_fell <= 1'b0;
                         end else begin

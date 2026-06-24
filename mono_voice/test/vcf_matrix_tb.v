@@ -62,6 +62,7 @@ module vcf_matrix_tb();
         .rst(rst),
         .gate(gate),
         .note_on(note_on),
+        .sound_off(1'b0),
         .note(note),
         .pitch(pitch),
         .lfo_sig(8'd128),

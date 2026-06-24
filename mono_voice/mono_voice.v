@@ -8,14 +8,14 @@ module mono_voice #(
     parameter LEGACY_RATE_INPUT  = 0,
     parameter PWM_DUTY         = 7'd64,
     parameter USE_SVF          = 0
-)(clk, rst, gate, note_on,
+)(clk, rst, gate, note_on, sound_off,
   note, pitch, lfo_sig, lfo_depth, lfo_depth_fine, wave_form,
   attack_rate, decay_rate, sustain_level, release_rate,
   svf_f, svf_q, svf_mode,
   audio_valid,
   signal_out);
 
-    input  wire clk, rst, gate, note_on;
+    input  wire clk, rst, gate, note_on, sound_off;
     input  wire [6:0] note;
     input  wire [13:0] pitch;
     input  wire [7:0] lfo_sig;
@@ -144,6 +144,7 @@ module mono_voice #(
         .tick(decim_strobe),
         .gate(gate),
         .note_on(note_on),
+        .sound_off(sound_off),
         .attack_rate(attack_eff),
         .decay_rate(decay_eff),
         .sustain_level(sustain_level),
@@ -158,12 +159,6 @@ module mono_voice #(
 
     generate
         if (USE_SVF) begin : gen_svf
-            reg gate_d;
-            always @(posedge clk)
-                gate_d <= gate;
-
-            wire svf_rst = rst || (gate && !gate_d);
-
             wire signed [15:0] svf_hp;
             wire signed [15:0] svf_bp;
             wire signed [15:0] svf_lp;
@@ -180,7 +175,7 @@ module mono_voice #(
 
             svf u_svf(
                 .clk(clk),
-                .rst(svf_rst),
+                .rst(rst),
                 .tick(1'b1),
                 .f(svf_f),
                 .q(svf_q_eff),

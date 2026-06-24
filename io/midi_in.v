@@ -16,7 +16,9 @@ module midi_in #(
     output wire       sysex_byte_valid,
     output wire [7:0] sysex_byte,
     output wire       sysex_done,
-    output wire       sysex_overflow
+    output wire       sysex_overflow,
+    output wire       sys_rt_valid,
+    output wire [7:0] sys_rt_byte
 );
 
     localparam [7:0] ST_IDLE      = 8'd0;
@@ -44,19 +46,26 @@ module midi_in #(
     reg [7:0] sysex_byte_r;
     reg sysex_done_r;
     reg sysex_overflow_r;
+    reg sys_rt_valid_r;
+    reg [7:0] sys_rt_byte_r;
 
     initial begin
         sysex_byte_valid_r = 1'b0;
         sysex_byte_r       = 8'd0;
         sysex_done_r       = 1'b0;
         sysex_overflow_r   = 1'b0;
+        sys_rt_valid_r     = 1'b0;
+        sys_rt_byte_r      = 8'd0;
     end
+
+    wire sys_rt_byte_in = (byte_in >= 8'hF8) && (byte_in != 8'hF0) && (byte_in != 8'hF7);
 
     always @(posedge clk) begin
         midi_command_ready_r <= 1'b0;
         sysex_byte_valid_r   <= 1'b0;
         sysex_done_r         <= 1'b0;
         sysex_overflow_r     <= 1'b0;
+        sys_rt_valid_r       <= 1'b0;
 
         if (rst) begin
             rcv_state <= ST_IDLE;
@@ -64,6 +73,11 @@ module midi_in #(
             byte2     <= 8'd0;
             byte3     <= 8'd0;
         end else if (byte_valid) begin
+            if (sys_rt_byte_in) begin
+                sys_rt_valid_r <= 1'b1;
+                sys_rt_byte_r <= byte_in;
+            end
+
             case (rcv_state)
                 ST_IDLE: begin
                     if (byte_in == 8'hF0) begin
@@ -127,5 +141,7 @@ module midi_in #(
     assign sysex_byte       = sysex_byte_r;
     assign sysex_done       = sysex_done_r;
     assign sysex_overflow   = sysex_overflow_r;
+    assign sys_rt_valid     = sys_rt_valid_r;
+    assign sys_rt_byte      = sys_rt_byte_r;
 
 endmodule

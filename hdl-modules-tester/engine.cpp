@@ -147,8 +147,6 @@ std::thread startEngine(const EngineConfig& cfg,
                 sample_index = 0;
                 synth.fractional = 0;
 
-                static constexpr uint8_t kAllNotesOff[] = {0xB0, 123, 0};
-                synthPostMidiBytes(synth, kAllNotesOff, sizeof(kAllNotesOff));
                 synthOnSessionStart(synth);
 
                 hdlnet::AckPayload ack{};

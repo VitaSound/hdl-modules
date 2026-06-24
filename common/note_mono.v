@@ -1,6 +1,7 @@
-module note_mono(clk, rst, note_on, note_off, note, out_note, out_gate);
+module note_mono(clk, rst, note_on, note_off, all_notes_off, all_sound_off, note, out_note, out_gate);
 
     input  wire clk, rst, note_on, note_off;
+    input  wire       all_notes_off, all_sound_off;
     input  wire [6:0] note;
     output wire [6:0] out_note;
     output wire       out_gate;
@@ -9,8 +10,12 @@ module note_mono(clk, rst, note_on, note_off, note, out_note, out_gate);
 
     initial keys = 128'd0;
 
+    wire keys_clear = all_notes_off || all_sound_off;
+
     always @(posedge clk) begin
         if (rst) begin
+            keys <= 128'd0;
+        end else if (keys_clear) begin
             keys <= 128'd0;
         end else if (note_on) begin
             keys[note] <= 1'b1;
