@@ -28,7 +28,10 @@ RTL_SRCS = \
 	../../common/bitscan.v \
 	../../common/prio_encoder.v \
 	../../common/lin2exp_t.v \
-	../../vca/svca_wide.v \
+	../../svf/svf.v \
+	svf_cutoff14_to_f.v \
+	svf_cc_to_q.v \
+	../../vca/svca16.v \
 	../../vca/svca.v
 
 CPP_SRCS = \

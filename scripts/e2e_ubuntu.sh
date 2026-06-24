@@ -15,5 +15,5 @@ ENGINE_PID=$!
 trap 'kill "$ENGINE_PID" 2>/dev/null || true' EXIT
 
 sleep 2
-python3 hdl-modules-tester/scripts/udp_smoke_test.py --duration 2.0 --wav /tmp/hdl_e2e.wav
+python3 hdl-modules-tester/scripts/udp_smoke_test.py --duration 2.0 --wav /tmp/hdl_e2e.wav --sample-rate 48000
 echo "E2E Ubuntu OK — see /tmp/hdl_e2e.wav"

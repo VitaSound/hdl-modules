@@ -63,9 +63,9 @@ def parse_audio(data: bytes):
     return seq, ts, frames, ch, samples
 
 
-def encode_hello(seq: int, audio_port: int) -> bytes:
+def encode_hello(seq: int, audio_port: int, sample_rate: int) -> bytes:
     payload = (
-        be32(48000)
+        be32(sample_rate)
         + be16(256)
         + be32(0x50595448)
         + be16(audio_port)
@@ -103,6 +103,12 @@ def main() -> int:
     parser.add_argument("--note", type=int, default=60)
     parser.add_argument("--wav", type=Path, default=Path("udp_test_out.wav"))
     parser.add_argument("--cc-attack", type=int, default=None, help="Send MIDI CC 16 before note-on")
+    parser.add_argument(
+        "--sample-rate",
+        type=int,
+        default=44100,
+        help="Hello sample_rate (must match engine RTL / DAW; default 44100 for mono_synth)",
+    )
     args = parser.parse_args()
 
     ctrl = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -113,7 +119,10 @@ def main() -> int:
     audio.bind(("0.0.0.0", args.audio_port))
     audio.settimeout(0.05)
 
-    ctrl.sendto(encode_hello(1, args.audio_port), (args.engine_host, args.control_port))
+    ctrl.sendto(
+        encode_hello(1, args.audio_port, args.sample_rate),
+        (args.engine_host, args.control_port),
+    )
 
     ack = None
     deadline = time.time() + 3.0
@@ -178,7 +187,7 @@ def main() -> int:
     with wave.open(str(args.wav), "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
-        wf.setframerate(48000)
+        wf.setframerate(args.sample_rate)
         wf.writeframes(struct.pack(f"{len(pcm)}h", *pcm))
 
     peak = max(abs(s) for s in pcm)

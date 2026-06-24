@@ -109,6 +109,14 @@ void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
     core.pendingMidiBytes.insert(core.pendingMidiBytes.end(), data, data + len);
 }
 
+void synthOnSessionStart(SynthCore& core) {
+    drainPendingMidi(core);
+    core.top->rst = 1;
+    stepVerilogCycles(core.top, 4);
+    core.top->rst = 0;
+    core.fractional = 0;
+}
+
 bool synthDrainMidiOut(SynthCore& core, std::vector<uint8_t>& out) {
     if (core.midiOutBytes.empty()) {
         return false;
@@ -123,13 +131,17 @@ void synthGeneratePull(SynthCore& core, const SharedState& /*state*/, int16_t* m
     drainPendingMidi(core);
 
     for (unsigned long i = 0; i < frames; ++i) {
-        core.fractional += VERILOG_CLK_HZ;
-        const uint32_t cycles = core.fractional / core.sampleRate;
-        core.fractional %= core.sampleRate;
-        stepVerilogCycles(core.top, cycles);
-
-        const uint16_t raw = core.top->audio_sample;
-        mono[i] = static_cast<int16_t>(static_cast<int32_t>(raw) - 32768);
+        while (true) {
+            core.top->clk = 0;
+            core.top->eval();
+            core.top->clk = 1;
+            core.top->eval();
+            if (core.top->audio_valid) {
+                const uint16_t raw = core.top->audio_sample;
+                mono[i] = static_cast<int16_t>(static_cast<int32_t>(raw) - 32768);
+                break;
+            }
+        }
     }
 }
 

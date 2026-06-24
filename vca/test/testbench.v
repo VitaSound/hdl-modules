@@ -12,6 +12,10 @@ module testbench();
   wire [WIDTH-1:0] vca_signal_out;
   wire [WIDTH-1:0] vcaw_signal_out;
   wire [WIDTH-1:0] vca32_signal_out;
+  wire [15:0] svca16_out;
+
+  reg signed [15:0] s16_in;
+  reg signed [15:0] s16_cv;
 
   reg clk;
   initial clk <= 0;
@@ -71,10 +75,44 @@ module testbench();
     .signal_out(vca32_signal_out)
   );
 
+  svca16 svca16_1(
+    .in(s16_in),
+    .cv(s16_cv),
+    .signal_out(svca16_out)
+  );
+
+  integer svca16_err;
+
   initial
   begin
     $dumpfile("out.vcd");
     $dumpvars(0,testbench);
+
+    svca16_err = 0;
+    s16_in = 16'sd16384;
+    s16_cv = 16'sd32767;
+    #1;
+    if (svca16_out !== 16'd49151) begin
+        $display("FAIL svca16 unity pos: got %0d", svca16_out);
+        svca16_err = svca16_err + 1;
+    end
+    s16_in = -16'sd16384;
+    s16_cv = 16'sd32767;
+    #1;
+    if (svca16_out !== 16'd16384) begin
+        $display("FAIL svca16 unity neg: got %0d", svca16_out);
+        svca16_err = svca16_err + 1;
+    end
+    s16_in = 16'sd10000;
+    s16_cv = 16'sd0;
+    #1;
+    if (svca16_out !== 16'd32768) begin
+        $display("FAIL svca16 zero cv: got %0d", svca16_out);
+        svca16_err = svca16_err + 1;
+    end
+    if (svca16_err)
+      $fatal(1, "svca16: %0d check(s) failed", svca16_err);
+    $display("OK svca16 unity/zero gain");
 
     #TEST_DURATION;
     $display("DDS test completed.");

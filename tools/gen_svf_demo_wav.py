@@ -18,6 +18,7 @@ FS_HZ = 48_000
 Q17 = 131_072
 MASK36 = (1 << 36) - 1
 MASK18 = (1 << 18) - 1
+IN_SHIFT = 14
 
 
 def s36(value: int) -> int:
@@ -49,7 +50,7 @@ SEGMENTS: tuple[Segment, ...] = (
     Segment("hp", 3000, 1.0, 3.0, "HP 3 kHz Q=1"),
     Segment("hp", 400, 2.0, 3.0, "HP 400 Hz Q=2"),
     Segment("bp", 1000, 6.0, 4.0, "BP 1 kHz Q=6"),
-    Segment("br", 1000, 2.0, 4.0, "BR 1 kHz Q=2"),
+    Segment("notch", 1000, 2.0, 4.0, "notch 1 kHz Q=2"),
 )
 
 GAP_S = 0.15
@@ -65,33 +66,32 @@ def q_coeff(q: float) -> int:
     return int(round((1.0 / q) * Q17))
 
 
-def sat18(value: int) -> int:
-    if value > 131_071:
-        return 131_071
-    if value < -131_072:
-        return -131_072
+def sat16(value: int) -> int:
+    if value > 32_767:
+        return 32_767
+    if value < -32_768:
+        return -32_768
     return value
 
 
 def svf_tick(
     z1: int,
     z2: int,
-    in12: int,
+    in16: int,
     f: int,
     q: int,
 ) -> tuple[int, int, int, int, int, int]:
-    """One SVF sample; fixed-point matches svf/svf.v."""
-    in18 = in12 & 0xFFF
-    if in18 & 0x800:
-        in18 -= 4096
+    """One SVF sample; fixed-point matches svf/svf.v (16-bit ports, IN_SHIFT=14)."""
+    if in16 >= (1 << 15):
+        in16 -= 1 << 16
 
     bp_scaled = z1 >> 17
     multq = s36(bp_scaled * q)
-    in36 = s36(int(in18) << 18)
+    in36 = s36(int(in16) << IN_SHIFT)
     hp_full = s36(in36 - multq - z2)
-    hp = s18(hp_full >> 17)
+    hp_int = s18(hp_full >> 17)
 
-    f_hp = s36(f * hp)
+    f_hp = s36(f * hp_int)
     z1_next = s36(f_hp + z1)
     f_bp = s36(f * bp_scaled)
     z2_next = s36(f_bp + z2)
@@ -101,19 +101,21 @@ def svf_tick(
     if -1 < z2_next < 1:
         z2_next = 0
 
-    lp = s18(z2_next >> 18)
-    bp = s18(z1_next >> 18)
-    br = s18(sat18(hp + lp))
-    return z1_next, z2_next, hp, bp, lp, br
+    hp = sat16(hp_full >> IN_SHIFT)
+    lp = sat16(z2_next >> IN_SHIFT)
+    bp = sat16(z1_next >> IN_SHIFT)
+    notch_sum = (hp_full >> IN_SHIFT) + (z2_next >> IN_SHIFT)
+    notch = sat16(notch_sum)
+    return z1_next, z2_next, hp, bp, lp, notch
 
 
-def pick_output(mode: str, hp: int, bp: int, lp: int, br: int) -> int:
+def pick_output(mode: str, hp: int, bp: int, lp: int, notch: int) -> int:
     if mode == "hp":
         return hp
     if mode == "bp":
         return bp
-    if mode == "br":
-        return br
+    if mode == "notch":
+        return notch
     return lp
 
 
@@ -131,11 +133,11 @@ def render_segment(
     out = np.zeros(n, dtype=np.int64)
 
     for i in range(n + WARMUP_SAMPLES):
-        # White noise, 12-bit signed (same headroom as RTL testbench).
-        in12 = int(rng.integers(-2048, 2048))
-        z1, z2, hp, bp, lp, br = svf_tick(z1, z2, in12, f, q)
+        # White noise, 16-bit signed (same headroom as RTL testbench).
+        in16 = int(rng.integers(-32768, 32768))
+        z1, z2, hp, bp, lp, notch = svf_tick(z1, z2, in16, f, q)
         if i >= WARMUP_SAMPLES:
-            out[i - WARMUP_SAMPLES] = pick_output(seg.mode, hp, bp, lp, br)
+            out[i - WARMUP_SAMPLES] = pick_output(seg.mode, hp, bp, lp, notch)
 
     return out
 

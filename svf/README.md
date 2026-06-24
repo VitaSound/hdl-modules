@@ -1,10 +1,10 @@
 # SVF
 
-Цифровой state-variable фильтр Chamberlin: HP, BP, LP, BR за один `tick`.
+Цифровой state-variable фильтр Chamberlin: HP, BP, LP, notch за один `tick`.
 Коэффициенты: `f = 2·sin(π·Fc/Fs)`, `q = 1/Q` (signed 18-bit, Q17 в умножениях).
-Вход 12-bit signed; выходы 18-bit. Рекомендуется `Fc < Fs/6` при высоком Q.
+Вход/выходы 16-bit signed (`IN_SHIFT=14` внутри). Рекомендуется `Fc < Fs/6` при высоком Q.
 Теория резонанса: [Katjaas — Complex Resonator](https://www.katjaas.nl/complexintegrator/complexresonator.html).
-Демо на слух (~20 с, LP/HP/BP/BR, разные Fc и Q): `make svf-demo` → `svf/test/demo.wav`.
+Демо на слух (~20 с, LP/HP/BP/notch, разные Fc и Q): `make svf-demo` → `svf/test/demo.wav`.
 
 
 ![svf](test/test.png)

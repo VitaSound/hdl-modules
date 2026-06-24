@@ -10,6 +10,7 @@ module testbench();
   reg clk;
   reg rst;
   reg gate;
+  reg note_on;
   reg [6:0] note;
   reg [13:0] pitch;
   reg [7:0] lfo_sig;
@@ -21,6 +22,7 @@ module testbench();
   reg [31:0] sustain_level;
   reg [31:0] release_rate;
   wire [15:0] signal_out;
+  wire        audio_valid_unused;
 
   integer errors;
   integer wf;
@@ -50,6 +52,7 @@ module testbench();
     .clk(clk),
     .rst(rst),
     .gate(gate),
+        .note_on(note_on),
     .note(note),
     .pitch(pitch),
     .lfo_sig(lfo_sig),
@@ -60,6 +63,10 @@ module testbench();
     .decay_rate(decay_rate),
     .sustain_level(sustain_level),
     .release_rate(release_rate),
+    .svf_f(18'sd0),
+    .svf_q(18'sd0),
+    .svf_mode(2'd0),
+    .audio_valid(audio_valid_unused),
     .signal_out(signal_out)
   );
 
@@ -268,7 +275,7 @@ module testbench();
 
       while (dut.env.state == 3'd2) begin
         @(posedge clk);
-        cv = dut.adsr_cv;
+        cv = dut.env.signal_out[31:24];
         if (!cv_seen[cv]) begin
           cv_seen[cv] = 1;
           cv_unique = cv_unique + 1;
@@ -285,6 +292,42 @@ module testbench();
         errors = errors + 1;
       end else begin
         $display("OK mono_voice cv8_decay tag=%0d (%0d cv8 steps)", tag, cv_unique);
+      end
+    end
+  endtask
+
+  task check_fast_staccato;
+    integer env_start;
+    begin
+      voice_reset();
+      note_on = 0;
+      attack_rate  = 32'hFFFF_FFFF;
+      decay_rate   = 32'hFFFF_FFFF;
+      sustain_level = {7'd127, 25'b0};
+      release_rate = 32'hFFFF_FFFF;
+      gate = 1;
+      note = 7'd69;
+      wait_env_state(SUSTAIN, 3_000_000);
+
+      gate = 0;
+      repeat (5) @(posedge clk);
+      gate = 1;
+      note_on = 1;
+      @(posedge clk);
+      #0;
+      note_on = 0;
+
+      wait_env_state(3'd1, 500_000);
+      env_start = dut.env.signal_out;
+
+      if (dut.env.state != 3'd1) begin
+        $display("FAIL mono_voice fast_staccato: state=%0d", dut.env.state);
+        errors = errors + 1;
+      end else if (env_start > 32'h00FF_FFFF) begin
+        $display("FAIL mono_voice fast_staccato: env not reset %0h", env_start);
+        errors = errors + 1;
+      end else begin
+        $display("OK mono_voice fast_staccato");
       end
     end
   endtask
@@ -319,6 +362,7 @@ module testbench();
     clk = 0;
     rst = 1;
     gate = 0;
+    note_on = 0;
     note = 7'd69;
     pitch = 14'd8192;
     lfo_sig = 8'd128;
@@ -348,6 +392,7 @@ module testbench();
     check_cv8_decay_steps(7'd127, 2, 4, 127);
     check_cv8_decay_steps(7'd64, 32, 200, 64);
     check_staccato_retrigger();
+    check_fast_staccato();
     check_release_silence();
 
     if (errors)

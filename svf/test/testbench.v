@@ -12,12 +12,12 @@ module testbench();
     reg clk;
     reg rst;
     reg tick;
-    reg signed [11:0] noise_in;
+    reg signed [15:0] noise_in;
     wire [7:0] rnd8_out;
 
     reg signed [17:0] f_coeff;
     reg signed [17:0] q_coeff;
-    wire signed [17:0] hp, bp, lp, br;
+    wire signed [15:0] hp, bp, lp, notch;
 
   integer errors;
   integer n;
@@ -66,7 +66,7 @@ module testbench();
         .hp(hp),
         .bp(bp),
         .lp(lp),
-        .br(br)
+        .notch(notch)
     );
 
     task run_ticks;
@@ -86,7 +86,7 @@ module testbench();
         clk       = 1'b0;
         rst       = 1'b1;
         tick      = 1'b0;
-        noise_in  = 12'sd0;
+        noise_in  = 16'sd0;
         errors    = 0;
         f_coeff   = svf_f_coeff(FC_HZ, CLK_HZ);
         q_coeff   = svf_q_coeff(Q_VAL);
@@ -105,12 +105,12 @@ module testbench();
         f_coeff <= svf_f_coeff(FC_HZ, CLK_HZ);
         q_coeff <= svf_q_coeff(8.0);
 
-        noise_in <= 12'sd2047;
+        noise_in <= 16'sd32767;
         @(posedge clk);
         tick <= 1'b1;
         @(posedge clk);
         tick <= 1'b0;
-        noise_in <= 12'sd0;
+        noise_in <= 16'sd0;
 
         peak_bp   = 0;
         peak_late = 0;
@@ -127,7 +127,7 @@ module testbench();
                 peak_late = abs_val;
         end
 
-        if (peak_bp < 30) begin
+        if (peak_bp < 512) begin
             $display("FAIL svf impulse: peak_bp=%0d too small", peak_bp);
             errors = errors + 1;
         end else if (peak_late > (peak_bp / 3)) begin
@@ -152,7 +152,7 @@ module testbench();
         sum_in_sq = 0;
         sum_lp_sq = 0;
         for (sample_idx = 0; sample_idx < NOISE_SAMPLES; sample_idx = sample_idx + 1) begin
-            noise_in <= ($signed({1'b0, rnd8_out}) - 9'sd128) <<< 4;
+            noise_in <= ($signed({1'b0, rnd8_out}) - 9'sd128) <<< 8;
             @(posedge clk);
             tick <= 1'b1;
             @(posedge clk);

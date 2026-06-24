@@ -28,7 +28,7 @@ testbench.lp[17:0]
 @20000
 -
 @8022
-testbench.br[17:0]
+testbench.notch[17:0]
 @20000
 -
 [pattern_trace] 0

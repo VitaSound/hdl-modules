@@ -18,7 +18,7 @@ make -C synths/mono_synth
 ```bash
 ./scripts/run_mono_synth.sh
 # или вручную:
-./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 48000
+./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 44100
 ```
 
 На порту **5004** одновременно может работать только один UDP engine.
@@ -37,7 +37,7 @@ make -C synths/mono_synth
 python3 hdl-modules-tester/scripts/udp_smoke_test.py --duration 3 --cc-attack 0
 ```
 
-## Reaper на Ubuntu 24
+## FL Studio / Reaper (44100 Hz)
 
 ### Зависимости (один раз)
 
@@ -55,7 +55,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 ### E2E в DAW
 
 1. Терминал: `./scripts/run_mono_synth.sh`
-2. Reaper: новый проект, **Project sample rate 48000 Hz**, buffer **512–1024**
+2. DAW: **44100 Hz** (FL: Settings → Audio; Reaper: Project sample rate), buffer **512–1024**
 3. MIDI-трек → FX → **VST3i: VitaSound Remote Synth**
 4. В UI VST: **Engine host** `127.0.0.1`, **Network profile** `Local`, **Play**
 5. **Test note** (C4) или ноты с piano roll / Virtual MIDI keyboard
@@ -76,9 +76,22 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | 17 | Decay |
 | 18 | Sustain |
 | 19 | Release |
-| 48 | Waveform: 0=saw, 1=square, 2=triangle, 3=sine, 4=ramp, 5=PWM |
+| 48 | Waveform (старшие биты CC): **0–15**=saw, **16–31**=square, **32–47**=triangle, **48–63**=sine, **64–79**=ramp, **80–127**=PWM |
 
-**Sample rate:** RTL `mono_synth` собран с **AUDIO_HZ=44100** (ADSR tick + C++ `VERILOG_CLK_HZ=1 MHz`). Проект FL и Hello должны использовать **44100 Hz** (или пересобрать с другим `AUDIO_HZ` в `top.sv`).
+### SVF-фильтр (MIDI CC, не зависит от ноты)
+
+Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff LUT: **10 Hz … 20 kHz** (лог., @ CLK 1 MHz).
+
+| CC | Параметр |
+|----|----------|
+| 74 | Cutoff MSB → `fcut14[13:7]` |
+| 106 | Cutoff LSB → `fcut14[6:0]` (14-bit индекс, CC74+106) |
+| 71 | Resonance / Q (`127 − CC`, 0 = мягко, 127 = резко) |
+| 22 | Режим (старшие биты CC): **0–31**=LP, **32–63**=HP, **64–95**=BP, **96–127**=notch |
+
+Пример в Reaper/FL: saw (CC 48 = 0) + длинная нота + automation CC 74/106 (sweep cutoff) при LP (CC 22 = 0).
+
+**Sample rate:** RTL `mono_synth` — **AUDIO_HZ=44100**. В FL Studio: Settings → Audio → **44100 Hz**. Engine: `./scripts/run_mono_synth.sh` (дефолт 44100). VST Hello должен показывать `sr=44100` в логе engine.
 
 В Reaper: piano roll → lane **MIDI CC 16** (и 17–19, 48) → нарисовать envelope перед/во время ноты. Insert → MIDI CC/OSC control item — альтернатива.
 
@@ -98,7 +111,9 @@ Reaper → VitaSound Remote Synth (VST3) ──UDP :5004/:5005──► MonoSynt
 
 | Файл | Назначение |
 |------|------------|
-| `top.sv` | Top: `io/midi_in`, note_mono, reg7/reg14, mono_voice |
+| `top.sv` | Top: `io/midi_in`, note_mono, reg7/reg14, mono_voice + SVF |
 | `../../io/midi_in.v` | Byte FSM MIDI (без UART) |
+| `svf_cutoff14_to_f.v` / `svf_cc_to_q.v` | MIDI CC → Chamberlin `f` / `q` (LUT, cutoff 10 Hz–20 kHz @ CLK 1 MHz) |
+| `../../svf/svf.v` | Chamberlin SVF (внутри mono_voice при USE_SVF=1) |
 | `../../common/note_mono.v` | Bitmap клавиш, highest note |
 | `../../common/lin2exp_t.v` | CC → exponential rate (fpga-synth) |

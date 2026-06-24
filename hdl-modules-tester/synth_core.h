@@ -19,5 +19,6 @@ struct SynthCore {
 };
 
 bool synthInit(SynthCore& core, uint32_t sampleRate);
+void synthOnSessionStart(SynthCore& core);
 void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames);
 void synthDestroy(SynthCore& core);

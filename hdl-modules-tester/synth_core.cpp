@@ -79,6 +79,13 @@ void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
     core.pendingMidiBytes.insert(core.pendingMidiBytes.end(), data, data + len);
 }
 
+void synthOnSessionStart(SynthCore& core) {
+    SharedState dummy{};
+    drainPendingMidi(core, dummy);
+    g_pressed.fill(false);
+    core.fractional = 0;
+}
+
 bool synthDrainMidiOut(SynthCore& /*core*/, std::vector<uint8_t>& /*out*/) {
     return false;
 }

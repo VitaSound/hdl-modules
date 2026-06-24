@@ -29,7 +29,7 @@ void printUsage() {
         << "MonoSynth UDP engine (synths/mono_synth, pull mode for VST bridge)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
-        << "  --sample-rate R (default 44100, must match mono_synth AUDIO_HZ; overridden by Hello)\n"
+        << "  --sample-rate R (default 44100, must match mono_synth AUDIO_HZ and DAW; overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
         << "  --midi-log           print MIDI bytes/events from host to stderr\n"
         << "  --help\n";

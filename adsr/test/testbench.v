@@ -13,6 +13,7 @@ module testbench();
     reg rst;
     reg tick;
     reg gate;
+    reg note_on;
     reg [31:0] attack_rate;
     reg [31:0] decay_rate;
     reg [31:0] sustain_level;
@@ -34,6 +35,7 @@ module testbench();
         .rst(rst),
         .tick(tick),
         .gate(gate),
+        .note_on(note_on),
         .attack_rate(attack_rate),
         .decay_rate(decay_rate),
         .sustain_level(sustain_level),
@@ -64,6 +66,7 @@ module testbench();
     task env_reset;
         begin
             gate = 0;
+            note_on = 0;
             tick = 0;
             rst = 1;
             repeat (2) @(posedge clk);
@@ -342,6 +345,55 @@ module testbench();
         end
     endtask
 
+    task check_trigger_staccato;
+        begin
+            env_reset();
+            attack_rate  = 32'd800_000;
+            decay_rate   = 32'd800_000;
+            sustain_level = {7'd127, 25'b0};
+            release_rate = 32'd800_000;
+
+            gate = 1;
+            wait_state(SUSTAIN, 500_000);
+
+            tick = 1'b0;
+            repeat (2) @(posedge clk);
+            note_on = 1;
+            @(posedge clk);
+            #0;
+            note_on = 0;
+            wait_state(ATTACK, 100);
+
+            if (env.state != ATTACK || signal_out != 32'd0) begin
+                $display("FAIL adsr trigger_staccato: state=%0d out=%0h",
+                         env.state, signal_out);
+                errors = errors + 1;
+            end else begin
+                $display("OK adsr trigger_staccato");
+            end
+        end
+    endtask
+
+    task check_min_rate_attack;
+        begin
+            env_reset();
+            attack_rate  = 32'hFFFF_FFFF;
+            decay_rate   = 32'd100_000;
+            sustain_level = {7'd64, 25'b0};
+            release_rate = 32'd100_000;
+
+            gate = 1;
+            wait_state(DECAY, 200);
+
+            if (env.state != DECAY && env.state != SUSTAIN) begin
+                $display("FAIL adsr min_rate_attack: state=%0d", env.state);
+                errors = errors + 1;
+            end else begin
+                $display("OK adsr min_rate_attack (fast attack)");
+            end
+        end
+    endtask
+
     initial begin
         $dumpfile("out.vcd");
         $dumpvars(0, testbench);
@@ -350,6 +402,7 @@ module testbench();
         rst = 1;
         tick = 0;
         gate = 0;
+        note_on = 0;
         attack_rate = 32'd10000;
         decay_rate = 32'd10000;
         sustain_level = {7'd64, 25'b0};
@@ -365,6 +418,8 @@ module testbench();
         check_release_to_idle();
         check_gate_off_in_attack();
         check_retrigger_resets();
+        check_trigger_staccato();
+        check_min_rate_attack();
         check_cv8_high_sustain_quantized();
 
         if (errors)
