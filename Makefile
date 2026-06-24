@@ -1,4 +1,4 @@
-.PHONY: test sim images docs all wave list
+.PHONY: test sim images docs all wave list svf-demo
 
 ID ?=
 
@@ -31,3 +31,6 @@ endif
 
 list:
 	python3 tools/run_tests.py --list
+
+svf-demo:
+	python3 tools/gen_svf_demo_wav.py

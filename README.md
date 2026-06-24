@@ -40,6 +40,12 @@
 | 6 | [vca](vca/README.md) | Модули VCA. 8 и 32 битные. Формат данных целочисленный без знака. То есть от 0 до N с центром в N/2. <br><br> [svca.v](vca/svca.v) - vca 8bit cv, in, out <br> [svca_wide.v](vca/svca_wide.v) - vca 8bit cv, in, 16bit out <br> [svca32.v](vca/svca32.v) - vca 32 bit cv, in, out <br> | ![vca](vca/test/test.png) |
 | 7 | [rnd](rnd/README.md) | Модули генерации псевдослучайных чисел 1, 8, n бит. <br><br> [rnd1.v](rnd/rnd1.v) - rnd 1bit <br> [rnd8.v](rnd/rnd8.v) - rnd 8 bit <br> [rndx.v](rnd/rndx.v) - rnd x bit (1..32) <br> | ![rnd](rnd/test/test.png) |
 | 8 | [adsr](adsr/README.md) | Генератор огибающей ADSR | ![adsr](adsr/test/test.png) |
+| 9 | [svf](svf/README.md) | Цифровой state-variable фильтр Chamberlin: HP, BP, LP, BR за один `tick`.
+Коэффициенты: `f = 2·sin(π·Fc/Fs)`, `q = 1/Q` (signed 18-bit, Q17 в умножениях).
+Вход 12-bit signed; выходы 18-bit. Рекомендуется `Fc < Fs/6` при высоком Q.
+Теория резонанса: [Katjaas — Complex Resonator](https://www.katjaas.nl/complexintegrator/complexresonator.html).
+Демо на слух (~20 с, LP/HP/BP/BR, разные Fc и Q): `make svf-demo` → `svf/test/demo.wav`.
+ | ![svf](svf/test/test.png) |
 
 # окружение
 

@@ -16,6 +16,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 EXPORT_TCL = ROOT / "tools" / "export_wave.tcl"
 GTKWAVERC = ROOT / "tools" / "gtkwaverc.render"
+PLOT_SVF_ACHH = ROOT / "tools" / "plot_svf_achh.py"
 XVFB_SCREEN = "1920x1080x24"
 
 
@@ -75,7 +76,33 @@ def postprocess_png(path: Path, *, crop_margins: bool) -> None:
     img.save(path, optimize=True)
 
 
-def render_module(module: dict, root: Path) -> None:
+def render_achh_fft(module: dict, root: Path) -> None:
+    module_id = module["id"]
+    test_dir = root / module["test_dir"]
+    vcd = test_dir / "out.vcd"
+    image = root / module["image"]
+
+    if not vcd.is_file():
+        raise FileNotFoundError(f"{module_id}: missing {vcd}, run tests first")
+
+    print(f"[image] {module_id}: FFT ACHH plot")
+    image.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [
+            sys.executable,
+            str(PLOT_SVF_ACHH),
+            "--vcd",
+            str(vcd),
+            "--image",
+            str(image),
+        ],
+        cwd=root,
+        check=True,
+    )
+    print(f"[image] {module_id}: saved {image.relative_to(root)}")
+
+
+def render_gtkwave(module: dict, root: Path) -> None:
     module_id = module["id"]
     test_dir = root / module["test_dir"]
     vcd = test_dir / "out.vcd"
@@ -126,13 +153,18 @@ def render_module(module: dict, root: Path) -> None:
         print(f"[image] {module_id}: saved {image.relative_to(root)}")
 
 
+def render_module(module: dict, root: Path) -> None:
+    renderer = module.get("image_renderer", "gtkwave")
+    if renderer == "achh_fft":
+        render_achh_fft(module, root)
+    else:
+        render_gtkwave(module, root)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--id", help="Render a single module by id")
     args = parser.parse_args()
-
-    for tool in ("xvfb-run", "gtkwave"):
-        require_tool(tool)
 
     modules = load_modules()
     if args.id:
@@ -140,6 +172,11 @@ def main() -> int:
         if not modules:
             print(f"Unknown module id: {args.id}", file=sys.stderr)
             return 1
+
+    needs_gtkwave = any(m.get("image_renderer", "gtkwave") != "achh_fft" for m in modules)
+    if needs_gtkwave:
+        for tool in ("xvfb-run", "gtkwave"):
+            require_tool(tool)
 
     failed = 0
     for module in modules:

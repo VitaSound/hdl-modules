@@ -1,0 +1,35 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*]
+[dumpfile] "out.vcd"
+[timestart] 0
+[size] 1280 720
+[pos] -1 -1
+*-1.0 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 250
+[signals_width] 300
+[sst_expanded] 1
+[sst_vpaned_height] 200
+@8022
+testbench.noise_in[11:0]
+@20000
+-
+@8022
+testbench.hp[17:0]
+@20000
+-
+@8022
+testbench.bp[17:0]
+@20000
+-
+@8022
+testbench.lp[17:0]
+@20000
+-
+@8022
+testbench.br[17:0]
+@20000
+-
+[pattern_trace] 0
+[pattern_trace] 0

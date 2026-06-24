@@ -34,3 +34,4 @@ testbench
 out.vcd
 wave.ps
 *.png.tmp
+svf/test/demo.wav

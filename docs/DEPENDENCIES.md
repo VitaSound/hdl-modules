@@ -12,7 +12,9 @@ sudo apt install -y \
   xvfb \
   python3-yaml \
   python3-jinja2 \
-  python3-pil
+  python3-pil \
+  python3-numpy \
+  python3-matplotlib
 ```
 
 Или через pip в виртуальном окружении:
