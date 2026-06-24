@@ -21,6 +21,7 @@ vst_bridge/build/
 vst_bridge/build-win/
 vst_bridge/dist/
 vst_bridge/.toolchains/
+vst_bridge/toolchain/
 vst_bridge/_deps/
 
 # Release staging (local)
@@ -31,7 +32,14 @@ verilator_tests/*.wav
 
 # Icarus Verilog simulation
 testbench
+a.out
 out.vcd
 wave.ps
 *.png.tmp
 svf/test/demo.wav
+# Ad-hoc iverilog -o names in test/sandbox dirs
+**/test/dbg
+**/*_test/a.out
+**/*_test/cx
+**/*_test/t2
+sandbox/**/qqq
