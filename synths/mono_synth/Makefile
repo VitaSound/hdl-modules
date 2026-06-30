@@ -29,6 +29,10 @@ RTL_SRCS = \
 	../../common/prio_encoder.v \
 	../../common/lin2exp_t.v \
 	../../svf/svf.v \
+	../../svf/svf_fcut_mix.v \
+	../../svf/note_fcut_lut.v \
+	../../lfo/lfo.v \
+	../../lfo/lfo_rate_lut.v \
 	svf_cutoff14_to_f.v \
 	svf_cc_to_q.v \
 	../../vca/svca16.v \

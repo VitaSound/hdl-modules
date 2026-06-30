@@ -237,6 +237,30 @@ categories:
         gtkw: adsr/test/test.gtkw
         image: adsr/test/test.png
 
+      - id: lfo
+        title: LFO
+        description_ru: "Низкочастотный осциллятор (DDS+sine); rate7 → 0.1–30 Hz @ 1 MHz; выход 0..255 центр 128"
+        source: lfo/lfo.v
+        test_dir: lfo/test
+        sources:
+          - lfo/lfo.v
+          - lfo/lfo_rate_lut.v
+          - dds/dds.v
+          - dds_transform/dds2sin.v
+        gtkw: lfo/test/test.gtkw
+        image: lfo/test/test.png
+
+      - id: svf_fcut_mix
+        title: svf_fcut_mix
+        description_ru: "Сумматор cutoff SVF: manual + key follow + LFO + filter env; clamp 14-bit"
+        source: svf/svf_fcut_mix.v
+        test_dir: svf/svf_fcut_mix_test
+        sources:
+          - svf/svf_fcut_mix.v
+          - svf/note_fcut_lut.v
+        gtkw: svf/svf_fcut_mix_test/test.gtkw
+        image: svf/svf_fcut_mix_test/test.png
+
       - id: svf
         title: SVF
         description_ru: |

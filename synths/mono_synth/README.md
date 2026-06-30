@@ -1,6 +1,8 @@
 # mono_synth
 
-Моно-синт для отладки RTL «на слух»: `note_mono` + MIDI-регистры (ADSR CC 16–19, wave CC 48) + [`mono_voice`](../mono_voice/mono_voice.v) через UDP + VST.
+Моно-синт для отладки RTL «на слух»: `note_mono` + MIDI-регистры + [`mono_voice`](../mono_voice/mono_voice.v) через UDP + VST.
+
+**Полный справочник CC и опорных точек:** [docs/MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
 
 Wiring по образцу fpga-synth `VitaPolySimple`: gate/note из `note_mono`, A/D/R через `reg14` + `lin2exp_t`, sustain/wave через `reg7`.
 
@@ -68,7 +70,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | Piano roll | Нарисовать ноты (A4 = 69) |
 | Virtual MIDI keyboard | View → Virtual MIDI keyboard |
 
-### ADSR и waveform (MIDI CC)
+### ADSR VCA (громкость)
 
 | CC | Параметр |
 |----|----------|
@@ -76,11 +78,26 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | 17 | Decay |
 | 18 | Sustain |
 | 19 | Release |
+
+### ADSR фильтра (cutoff, независимо от VCA)
+
+| CC | Параметр |
+|----|----------|
+| 24 | Filter attack |
+| 25 | Filter decay |
+| 26 | Filter sustain |
+| 27 | Filter release |
+| 28 | Filter env amount (0=выкл; аддитивно к cutoff) |
+
+### Waveform
+
+| CC | Параметр |
+|----|----------|
 | 48 | Waveform (старшие биты CC): **0–15**=saw, **16–31**=square, **32–47**=triangle, **48–63**=sine, **64–79**=ramp, **80–127**=PWM |
 
-### SVF-фильтр (MIDI CC, не зависит от ноты)
+### SVF-фильтр (MIDI CC)
 
-Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff LUT: **10 Hz … 20 kHz** (лог., @ CLK 1 MHz).
+Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff = `manual (CC74/106)` + **key follow (CC51, pivot C4)** + **LFO (CC49/50)** + **filter env (CC24–28)** → LUT 10 Hz…20 kHz. Подробно: [MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
 
 | CC | Параметр |
 |----|----------|
@@ -88,6 +105,9 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | 106 | Cutoff LSB → `fcut14[6:0]` (14-bit fine, после CC74) |
 | 71 | Resonance / Q (`127 − CC`, 0 = мягко, 127 = резко) |
 | 22 | Режим (старшие биты CC): **0–31**=LP, **32–63**=HP, **64–95**=BP, **96–127**=notch |
+| 49 | LFO rate (0.1–30 Hz) |
+| 50 | LFO depth → filter cutoff (bipolar) |
+| 51 | Key follow amount 0…127 (0 = одна Hz на всех нотах; pivot **C4**) |
 
 Пример в Reaper/FL: saw (CC 48 = 0) + длинная нота + automation CC 74/106 (sweep cutoff) при LP (CC 22 = 0).
 

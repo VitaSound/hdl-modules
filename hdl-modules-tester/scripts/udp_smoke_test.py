@@ -104,6 +104,11 @@ def main() -> int:
     parser.add_argument("--wav", type=Path, default=Path("udp_test_out.wav"))
     parser.add_argument("--cc-attack", type=int, default=None, help="Send MIDI CC 16 before note-on")
     parser.add_argument(
+        "--filter-pluck",
+        action="store_true",
+        help="Send filter-env CC preset (28=127,74=0,71=100,24=0,26=0) before note-on",
+    )
+    parser.add_argument(
         "--sample-rate",
         type=int,
         default=44100,
@@ -141,10 +146,30 @@ def main() -> int:
     print("ACK received (protocol v3 pull)")
 
     seq = 2
-    if args.cc_attack is not None:
-        cc = bytes([0xB0, 16, args.cc_attack & 0x7F])
-        ctrl.sendto(encode_midi(seq, cc), (args.engine_host, args.control_port))
+
+    def send_cc(cc: int, val: int) -> None:
+        nonlocal seq
+        ctrl.sendto(
+            encode_midi(seq, bytes([0xB0, cc & 0x7F, val & 0x7F])),
+            (args.engine_host, args.control_port),
+        )
         seq += 1
+
+    if args.filter_pluck:
+        for cc, val in (
+            (28, 127),  # filter env amount (required)
+            (74, 0),    # cutoff closed
+            (71, 100),  # resonance
+            (22, 0),    # LP
+            (24, 0),    # fast filter attack
+            (26, 0),    # filter sustain off
+            (50, 0),    # LFO depth off
+            (51, 0),    # key follow off
+        ):
+            send_cc(cc, val)
+
+    if args.cc_attack is not None:
+        send_cc(16, args.cc_attack)
 
     note_on = bytes([0x90, args.note & 0x7F, 100])
     ctrl.sendto(encode_midi(seq, note_on), (args.engine_host, args.control_port))

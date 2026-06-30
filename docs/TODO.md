@@ -18,3 +18,4 @@ _(пусто — `frqdivmod` odd DIV исправлен в `common/frqdivmod.v`,
 - **DDS phase sync** — legato: скачок частоты без sync фазы ([`mono_voice/mono_voice.v`](../mono_voice/mono_voice.v)).
 - **VCF matrix** — fc 10–15 Hz в LUT ([`tools/gen_svf_cc_lut.py`](../tools/gen_svf_cc_lut.py), [`mono_voice/test/vcf_matrix_tb.v`](../mono_voice/test/vcf_matrix_tb.v)).
 - **MIDI log** — `--midi-log` не печатает sys realtime (`0xFC` Stop); DAW transport stop часто шлёт pitch center, не CC123.
+- **LFO → pitch** — отдельный CC depth на `note_pitch2dds` (сейчас LFO только на filter).
