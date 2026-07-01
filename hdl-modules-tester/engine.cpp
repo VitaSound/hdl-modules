@@ -5,14 +5,40 @@
 #include "protocol/hdl_net.h"
 #include "synth_core.h"
 
+#include <algorithm>
 #include <array>
 #include <chrono>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace {
 constexpr size_t kRecvBufferSize = 2048;
 constexpr size_t kAudioInRingCapacity = 48000 * 4;
+
+uint32_t fnv1a32(const std::string& text) {
+    uint32_t hash = 2166136261u;
+    for (const unsigned char c : text) {
+        hash ^= c;
+        hash *= 16777619u;
+    }
+    return hash;
+}
+
+std::string readTextFile(const std::string& path) {
+    if (path.empty()) {
+        return {};
+    }
+    std::ifstream in(path);
+    if (!in) {
+        return {};
+    }
+    std::ostringstream ss;
+    ss << in.rdbuf();
+    return ss.str();
+}
 
 struct AudioInRing {
     std::vector<int16_t> buf;
@@ -155,10 +181,23 @@ std::thread startEngine(const EngineConfig& cfg,
                   << " (pull mode, packet_frames=" << packet_frames << ")\n";
 
         std::array<uint8_t, kRecvBufferSize> buffer{};
+        std::array<uint8_t, hdlnet::kMaxParamSchemaBytes + 64> schema_packet{};
         uint32_t ack_seq = 0;
+        uint32_t schema_seq = 0;
         uint32_t audio_seq = 0;
         uint64_t sample_index = 0;
         UdpEndpoint last_plugin{};
+        const std::string param_schema = readTextFile(cfg.paramsYamlPath);
+        const uint32_t param_schema_hash = fnv1a32(param_schema);
+        if (!cfg.paramsYamlPath.empty()) {
+            if (param_schema.empty()) {
+                std::cerr << "[schema] unable to read params YAML: " << cfg.paramsYamlPath << "\n";
+            } else {
+                std::cerr << "[schema] loaded " << cfg.paramsYamlPath << " ("
+                          << param_schema.size() << " bytes, hash=0x" << std::hex
+                          << param_schema_hash << std::dec << ")\n";
+            }
+        }
 
         std::vector<int16_t> mono(packet_frames);
         std::vector<int16_t> input_mono(packet_frames);
@@ -185,6 +224,21 @@ std::thread startEngine(const EngineConfig& cfg,
             last_plugin = src;
 
             switch (type) {
+            case hdlnet::PacketType::ParamSchemaRequest: {
+                const uint32_t schema_len =
+                    static_cast<uint32_t>(std::min(param_schema.size(),
+                                                   static_cast<size_t>(hdlnet::kMaxParamSchemaBytes)));
+                const size_t out_len = hdlnet::encodeParamSchema(
+                    schema_packet.data(),
+                    ++schema_seq,
+                    param_schema_hash,
+                    reinterpret_cast<const uint8_t*>(param_schema.data()),
+                    schema_len);
+                ctrlSock.sendTo(schema_packet.data(), out_len, src);
+                std::cerr << "[schema] request from " << src.host << ":" << src.port
+                          << " -> " << schema_len << " bytes\n";
+                break;
+            }
             case hdlnet::PacketType::Hello: {
                 hdlnet::HelloPayload hello{};
                 if (!hdlnet::decodeHello(payload, hello)) {

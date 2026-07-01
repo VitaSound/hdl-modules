@@ -94,10 +94,11 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | CC | Параметр |
 |----|----------|
 | 48 | Waveform (старшие биты CC): **0–15**=saw, **16–31**=square, **32–47**=triangle, **48–63**=sine, **64–79**=ramp, **80–127**=PWM |
+| 57 | PWM duty 0…127 (`64` = 50%) |
 
 ### SVF-фильтр (MIDI CC)
 
-Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff = `manual (CC74/106)` + **key follow (CC51, pivot C4)** + **LFO (CC49/50)** + **filter env (CC24–28)** → LUT 10 Hz…20 kHz. Подробно: [MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
+Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff = `manual (CC74/106)` + **key follow (CC51, pivot C4)** + **VCF-LFO3 (CC49/50/52)** + **filter env (CC24–28)** → LUT 10 Hz…20 kHz. Подробно: [MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
 
 | CC | Параметр |
 |----|----------|
@@ -105,9 +106,22 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 | 106 | Cutoff LSB → `fcut14[6:0]` (14-bit fine, после CC74) |
 | 71 | Resonance / Q (`127 − CC`, 0 = мягко, 127 = резко) |
 | 22 | Режим (старшие биты CC): **0–31**=LP, **32–63**=HP, **64–95**=BP, **96–127**=notch |
-| 49 | LFO rate (0.1–30 Hz) |
-| 50 | LFO depth → filter cutoff (bipolar) |
+| 49 | VCF-LFO3 rate (0.1–30 Hz) |
+| 50 | VCF-LFO3 depth → filter cutoff (bipolar) |
 | 51 | Key follow amount 0…127 (0 = одна Hz на всех нотах; pivot **C4**) |
+| 52 | VCF-LFO3 shape |
+
+### LFO
+
+| CC | Параметр |
+|----|----------|
+| 53 | VCO-LFO rate |
+| 54 | VCO-LFO coarse depth → pitch |
+| 55 | VCO-LFO fine depth → pitch |
+| 56 | VCO-LFO shape |
+| 58 | VCA-LFO2 rate |
+| 59 | VCA-LFO2 depth → tremolo |
+| 60 | VCA-LFO2 shape |
 
 Пример в Reaper/FL: saw (CC 48 = 0) + длинная нота + automation CC 74/106 (sweep cutoff) при LP (CC 22 = 0).
 
@@ -125,7 +139,7 @@ Pitch bend пересылается как обычный MIDI (status `0xE0` + 
 Reaper → VitaSound Remote Synth (VST3) ──UDP :5004/:5005──► MonoSynth (Verilator)
 ```
 
-Протокол v3: [`hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h) — `MidiHostToEngine` (raw bytes), `AudioPull`.
+Протокол v5: [`hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h) — `MidiHostToEngine` (raw bytes), `AudioPull`, `AudioPush`, runtime parameter schema из `mono_synth.params.yaml`.
 
 ## RTL
 

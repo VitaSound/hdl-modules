@@ -239,13 +239,17 @@ categories:
 
       - id: lfo
         title: LFO
-        description_ru: "Низкочастотный осциллятор (DDS+sine); rate7 → 0.1–30 Hz @ 1 MHz; выход 0..255 центр 128"
+        description_ru: "Низкочастотный осциллятор (DDS + выбираемая форма); rate7 → 0.1–30 Hz @ 1 MHz; выход 0..255 центр 128"
         source: lfo/lfo.v
         test_dir: lfo/test
         sources:
           - lfo/lfo.v
           - lfo/lfo_rate_lut.v
           - dds/dds.v
+          - dds_transform/dds2tria.v
+          - dds_transform/dds2saw.v
+          - dds_transform/dds2revsaw.v
+          - dds_transform/dds2square.v
           - dds_transform/dds2sin.v
         gtkw: lfo/test/test.gtkw
         image: lfo/test/test.png

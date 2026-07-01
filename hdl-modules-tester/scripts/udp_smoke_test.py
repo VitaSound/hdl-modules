@@ -13,7 +13,7 @@ from pathlib import Path
 
 HDLM = 0x48444C4D
 HDLA = 0x48444C41
-VER = 3
+VER = 5
 
 PT_HELLO = 1
 PT_ACK = 2
@@ -143,7 +143,7 @@ def main() -> int:
     if ack is None:
         print("No ACK from engine", file=sys.stderr)
         return 1
-    print("ACK received (protocol v3 pull)")
+    print(f"ACK received (protocol v{VER} pull)")
 
     seq = 2
 

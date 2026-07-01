@@ -18,6 +18,7 @@ struct EngineConfig {
     uint8_t audioChannels = 2;
     uint16_t maxFramesPerPull = hdlnet::kDefaultMaxFramesPerPull;
     uint16_t caps = 0;
+    std::string paramsYamlPath;
 };
 
 std::thread startEngine(const EngineConfig& cfg,

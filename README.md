@@ -40,8 +40,8 @@
 | 6 | [vca](vca/README.md) | Модули VCA. 8 и 32 битные. Формат данных целочисленный без знака. То есть от 0 до N с центром в N/2. <br><br> [svca.v](vca/svca.v) - vca 8bit cv, in, out <br> [svca_wide.v](vca/svca_wide.v) - vca 8bit cv, in, 16bit out <br> [svca16.v](vca/svca16.v) - vca 16bit signed in/cv, uint16 out <br> [svca32.v](vca/svca32.v) - vca 32 bit cv, in, out <br> | ![vca](vca/test/test.png) |
 | 7 | [rnd](rnd/README.md) | Модули генерации псевдослучайных чисел 1, 8, n бит. <br><br> [rnd1.v](rnd/rnd1.v) - rnd 1bit <br> [rnd8.v](rnd/rnd8.v) - rnd 8 bit <br> [rndx.v](rnd/rndx.v) - rnd x bit (1..32) <br> | ![rnd](rnd/test/test.png) |
 | 8 | [adsr](adsr/README.md) | Генератор огибающей ADSR | ![adsr](adsr/test/test.png) |
-| 9 | [lfo]() | Низкочастотный осциллятор (DDS+sine); rate7 → 0.1–30 Hz @ 1 MHz; выход 0..255 центр 128 | ![lfo](lfo/test/test.png) |
-| 10 | [svf_fcut_mix]() | Сумматор cutoff SVF: manual fcut14 + key follow + LFO; clamp 14-bit | ![svf_fcut_mix](svf/svf_fcut_mix_test/test.png) |
+| 9 | [lfo]() | Низкочастотный осциллятор (DDS + выбираемая форма); rate7 → 0.1–30 Hz @ 1 MHz; выход 0..255 центр 128 | ![lfo](lfo/test/test.png) |
+| 10 | [svf_fcut_mix]() | Сумматор cutoff SVF: manual + key follow + LFO + filter env; clamp 14-bit | ![svf_fcut_mix](svf/svf_fcut_mix_test/test.png) |
 | 11 | [svf](svf/README.md) | Цифровой state-variable фильтр Chamberlin: HP, BP, LP, notch за один `tick`.
 Коэффициенты: `f = 2·sin(π·Fc/Fs)`, `q = 1/Q` (signed 18-bit, Q17 в умножениях).
 Вход/выходы 16-bit signed (`IN_SHIFT=14` внутри). Рекомендуется `Fc < Fs/6` при высоком Q.

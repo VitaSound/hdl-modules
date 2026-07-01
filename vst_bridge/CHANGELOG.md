@@ -2,6 +2,25 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
+## [0.7.0] — 2026-07-02
+
+### Runtime параметры
+
+- Wire-протокол **hdl_net v5**: добавлены `ParamSchemaRequest` / `ParamSchemaData`.
+- Engine читает `*.params.yaml` при старте и отдаёт schema параметров VST.
+- VST строит named APVTS параметры из server schema, а при недоступном engine использует локальный cache последней schema.
+- Убран compile-time APVTS generation из сборки VST: YAML-only изменения параметров больше не требуют пересборки VST, но требуют reload/rescan instance в DAW.
+
+## [0.6.0] — 2026-07-02
+
+### MonoSynth параметры
+
+- Исправлен mapping choice-параметров через явные `midi_values`: waveform и filter mode теперь отправляют CC-значения, которые ожидает RTL.
+- Добавлен **PWM Duty** (CC57) для формы PWM.
+- LFO расширен выбором формы: sine, triangle, saw, ramp, square.
+- Добавлены отдельные **VCO-LFO** (pitch), **VCA-LFO2** (tremolo) и **VCF-LFO3** (cutoff).
+- APVTS и CtrlrX panel генерируются из обновлённого `mono_synth.params.yaml`.
+
 ## [0.5.0] — 2026-06-30
 
 ### Протокол hdl_net v4

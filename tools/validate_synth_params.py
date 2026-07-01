@@ -30,6 +30,15 @@ MONO_SYNTH_EXPECTED_CC = {
     106,
     71,
     51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
     49,
     50,
 }
@@ -96,6 +105,14 @@ def validate_file(path: Path, expected_cc: set[int]) -> list[str]:
             errors.append(f"{path}: param {pid}: cc14_log needs cc_lsb and cc_msb")
         if ptype == "choice" and not param.get("choices"):
             errors.append(f"{path}: param {pid}: choice needs choices")
+        if ptype == "choice" and "midi_values" in param:
+            choices = param.get("choices", [])
+            midi_values = param.get("midi_values", [])
+            if not isinstance(midi_values, list) or len(midi_values) != len(choices):
+                errors.append(f"{path}: param {pid}: midi_values length must match choices")
+            for value in midi_values:
+                if not isinstance(value, int) or value < 0 or value > 127:
+                    errors.append(f"{path}: param {pid}: midi_values must be CC bytes 0..127")
 
     try:
         found = collect_cc(params)

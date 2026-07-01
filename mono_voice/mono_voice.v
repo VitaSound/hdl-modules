@@ -6,10 +6,10 @@ module mono_voice #(
     parameter ADSR_RATE_BITS   = 32,
     parameter LEGACY_ADSR_CLK_HZ = 50_000_000,
     parameter LEGACY_RATE_INPUT  = 0,
-    parameter PWM_DUTY         = 7'd64,
     parameter USE_SVF          = 0
 )(clk, rst, gate, note_on, sound_off,
   note, pitch, lfo_sig, lfo_depth, lfo_depth_fine, wave_form,
+  pwm_duty, vca_lfo_sig, vca_lfo_depth,
   attack_rate, decay_rate, sustain_level, release_rate,
   svf_f, svf_q, svf_mode,
   audio_valid,
@@ -22,6 +22,9 @@ module mono_voice #(
     input  wire [6:0] lfo_depth;
     input  wire [6:0] lfo_depth_fine;
     input  wire [2:0] wave_form;
+    input  wire [6:0] pwm_duty;
+    input  wire [7:0] vca_lfo_sig;
+    input  wire [6:0] vca_lfo_depth;
     input  wire [ADSR_RATE_BITS - 1:0] attack_rate;
     input  wire [ADSR_RATE_BITS - 1:0] decay_rate;
     input  wire [ADSR_RATE_BITS - 1:0] sustain_level;
@@ -76,7 +79,7 @@ module mono_voice #(
     dds2saw    #(.WIDTH(DDS_WIDTH)) u_saw(.signal_in(vco_out), .signal_out(saw_phase));
     dds2tria   #(.WIDTH(DDS_WIDTH)) u_tri(.signal_in(vco_out), .signal_out(tri_phase));
     dds2square #(.WIDTH(DDS_WIDTH)) u_sq(.signal_in(vco_out), .signal_out(square_phase));
-    dds2pwm    #(.WIDTH(DDS_WIDTH)) u_pwm(.signal_in(vco_out), .pwm(PWM_DUTY), .signal_out(pwm_phase));
+    dds2pwm    #(.WIDTH(DDS_WIDTH)) u_pwm(.signal_in(vco_out), .pwm(pwm_duty), .signal_out(pwm_phase));
     dds2sin    #(.WIDTH(DDS_WIDTH)) u_sin(.signal_in(vco_out), .signal_out(sin_phase));
     dds2revsaw #(.WIDTH(DDS_WIDTH)) u_rev(.signal_in(vco_out), .signal_out(ramp_phase));
 
@@ -155,6 +158,13 @@ module mono_voice #(
     wire signed [15:0] adsr_cv =
         $signed(($unsigned(adsr_env[31:16]) * 32'd32767) >> 16);
 
+    wire [15:0] vca_lfo_reduction_wide = vca_lfo_depth * (8'd255 - vca_lfo_sig);
+    wire [14:0] vca_lfo_reduction =
+        (vca_lfo_reduction_wide > 16'd32767) ? 15'd32767 : vca_lfo_reduction_wide[14:0];
+    wire [14:0] vca_lfo_gain = 15'd32767 - vca_lfo_reduction;
+    wire signed [31:0] vca_lfo_cv_wide = adsr_cv * $signed({1'b0, vca_lfo_gain});
+    wire signed [15:0] adsr_lfo_cv = vca_lfo_cv_wide >>> 15;
+
     wire signed [15:0] vca_in_s16;
 
     generate
@@ -221,7 +231,7 @@ module mono_voice #(
     wire [15:0] vca_out;
     svca16 u_vca(
         .in(vca_in_s16),
-        .cv(adsr_cv),
+        .cv(adsr_lfo_cv),
         .signal_out(vca_out)
     );
 

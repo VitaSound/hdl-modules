@@ -5,49 +5,28 @@ HdlVerilatorAudioProcessor::HdlVerilatorAudioProcessor()
     : juce::AudioProcessor(BusesProperties()
                                .withInput("Input", juce::AudioChannelSet::stereo(), true)
                                .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts_(*this, nullptr, "Parameters", synthparams::createParameterLayout()) {
-    apvts_.addParameterListener(synthparams::ParamIds::vca_attack, this);
-    apvts_.addParameterListener(synthparams::ParamIds::vca_decay, this);
-    apvts_.addParameterListener(synthparams::ParamIds::vca_sustain, this);
-    apvts_.addParameterListener(synthparams::ParamIds::vca_release, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_attack, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_decay, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_sustain, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_release, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_env_amount, this);
-    apvts_.addParameterListener(synthparams::ParamIds::waveform, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_mode, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_cutoff, this);
-    apvts_.addParameterListener(synthparams::ParamIds::filter_resonance, this);
-    apvts_.addParameterListener(synthparams::ParamIds::key_follow, this);
-    apvts_.addParameterListener(synthparams::ParamIds::lfo_rate, this);
-    apvts_.addParameterListener(synthparams::ParamIds::lfo_depth, this);
+      netBridge_(),
+      schema_(loadRuntimeSynthParamSchema(loadCachedSynthParamHost(), hdlnet::kDefaultControlPort)),
+      apvts_(*this, nullptr, "Parameters", createParameterLayout(schema_)) {
+    engineHost_ = loadCachedSynthParamHost();
+    netBridge_.setEngineHost(engineHost_);
+    for (const auto& param : schema_.params) {
+        apvts_.addParameterListener(param.id, this);
+    }
 }
 
 HdlVerilatorAudioProcessor::~HdlVerilatorAudioProcessor() {
-    apvts_.removeParameterListener(synthparams::ParamIds::vca_attack, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::vca_decay, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::vca_sustain, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::vca_release, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_attack, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_decay, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_sustain, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_release, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_env_amount, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::waveform, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_mode, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_cutoff, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::filter_resonance, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::key_follow, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::lfo_rate, this);
-    apvts_.removeParameterListener(synthparams::ParamIds::lfo_depth, this);
+    for (const auto& param : schema_.params) {
+        apvts_.removeParameterListener(param.id, this);
+    }
 }
 
 void HdlVerilatorAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) {
     if (suppressParamMidi_) {
         return;
     }
-    synthparams::sendParamAsMidi(
+    sendParamAsMidi(
+        schema_,
         apvts_,
         parameterID,
         newValue,
@@ -59,33 +38,15 @@ void HdlVerilatorAudioProcessor::parameterChanged(const juce::String& parameterI
 }
 
 void HdlVerilatorAudioProcessor::sendAllApvtsAsMidi() {
-    const char* paramIds[] = {
-        synthparams::ParamIds::vca_attack,
-        synthparams::ParamIds::vca_decay,
-        synthparams::ParamIds::vca_sustain,
-        synthparams::ParamIds::vca_release,
-        synthparams::ParamIds::filter_attack,
-        synthparams::ParamIds::filter_decay,
-        synthparams::ParamIds::filter_sustain,
-        synthparams::ParamIds::filter_release,
-        synthparams::ParamIds::filter_env_amount,
-        synthparams::ParamIds::waveform,
-        synthparams::ParamIds::filter_mode,
-        synthparams::ParamIds::filter_cutoff,
-        synthparams::ParamIds::filter_resonance,
-        synthparams::ParamIds::key_follow,
-        synthparams::ParamIds::lfo_rate,
-        synthparams::ParamIds::lfo_depth,
-    };
-
-    for (const auto* paramId : paramIds) {
-        auto* param = apvts_.getParameter(paramId);
+    for (const auto& schemaParam : schema_.params) {
+        auto* param = apvts_.getParameter(schemaParam.id);
         if (param == nullptr) {
             continue;
         }
-        synthparams::sendParamAsMidi(
+        sendParamAsMidi(
+            schema_,
             apvts_,
-            paramId,
+            schemaParam.id,
             param->getValue(),
             [this](const std::vector<uint8_t>& bytes) {
                 PendingMidiEvent event{};
@@ -119,6 +80,7 @@ void HdlVerilatorAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
 
 void HdlVerilatorAudioProcessor::setEngineHost(const juce::String& host) {
     engineHost_ = host;
+    saveCachedSynthParamHost(host);
     netBridge_.setEngineHost(host);
 }
 
@@ -234,6 +196,8 @@ void HdlVerilatorAudioProcessor::getStateInformation(juce::MemoryBlock& destData
     state.setProperty("initialWarmupPackets", netBridge_.getInitialWarmupPackets(), nullptr);
     state.setProperty("autoTune", netBridge_.getAutoTune(), nullptr);
     state.setProperty("networkProfile", static_cast<int>(netBridge_.getNetworkProfile()), nullptr);
+    state.setProperty("paramSchemaSource", schema_.source, nullptr);
+    state.setProperty("paramSchemaHash", static_cast<int>(schema_.hash), nullptr);
 
     if (auto xml = state.createXml()) {
         copyXmlToBinary(*xml, destData);
@@ -250,6 +214,7 @@ void HdlVerilatorAudioProcessor::setStateInformation(const void* data, int sizeI
         engineHost_ = state.getProperty("engineHost", engineHost_).toString();
         controlPort_ = static_cast<uint16_t>(static_cast<int>(state.getProperty("controlPort", static_cast<int>(controlPort_))));
         audioPort_ = static_cast<uint16_t>(static_cast<int>(state.getProperty("audioPort", static_cast<int>(audioPort_))));
+        saveCachedSynthParamHost(engineHost_);
         netBridge_.setEngineHost(engineHost_);
         netBridge_.setMinReservePackets(static_cast<int>(state.getProperty("minReservePackets", netBridge_.getMinReservePackets())));
         netBridge_.setTargetReservePackets(static_cast<int>(state.getProperty("targetReservePackets", netBridge_.getTargetReservePackets())));

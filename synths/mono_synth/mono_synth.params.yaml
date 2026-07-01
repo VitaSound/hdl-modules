@@ -89,6 +89,15 @@ params:
       - Sine
       - Ramp
       - PWM
+    midi_values: [0, 16, 32, 48, 64, 80]
+  - id: pwm_duty
+    name: PWM Duty
+    group: Oscillator
+    type: cc7
+    cc: 57
+    default: 64
+    min: 0
+    max: 127
   - id: filter_mode
     name: Filter Mode
     group: Filter
@@ -100,6 +109,7 @@ params:
       - HP
       - BP
       - Notch
+    midi_values: [0, 32, 64, 96]
   - id: filter_cutoff
     name: Filter Cutoff
     group: Filter
@@ -125,19 +135,98 @@ params:
     default: 0
     min: 0
     max: 127
-  - id: lfo_rate
-    name: LFO Rate
-    group: LFO
+  - id: vco_lfo_rate
+    name: VCO-LFO Rate
+    group: VCO-LFO
+    type: cc7
+    cc: 53
+    default: 0
+    min: 0
+    max: 127
+  - id: vco_lfo_depth
+    name: VCO-LFO Depth
+    group: VCO-LFO
+    type: cc7
+    cc: 54
+    default: 0
+    min: 0
+    max: 127
+  - id: vco_lfo_fine
+    name: VCO-LFO Fine Depth
+    group: VCO-LFO
+    type: cc7
+    cc: 55
+    default: 0
+    min: 0
+    max: 127
+  - id: vco_lfo_shape
+    name: VCO-LFO Shape
+    group: VCO-LFO
+    type: choice
+    cc: 56
+    default: 0
+    choices:
+      - Sine
+      - Triangle
+      - Saw
+      - Ramp
+      - Square
+    midi_values: [0, 16, 32, 48, 64]
+  - id: vca_lfo_rate
+    name: VCA-LFO2 Rate
+    group: VCA-LFO2
+    type: cc7
+    cc: 58
+    default: 0
+    min: 0
+    max: 127
+  - id: vca_lfo_depth
+    name: VCA-LFO2 Depth
+    group: VCA-LFO2
+    type: cc7
+    cc: 59
+    default: 0
+    min: 0
+    max: 127
+  - id: vca_lfo_shape
+    name: VCA-LFO2 Shape
+    group: VCA-LFO2
+    type: choice
+    cc: 60
+    default: 0
+    choices:
+      - Sine
+      - Triangle
+      - Saw
+      - Ramp
+      - Square
+    midi_values: [0, 16, 32, 48, 64]
+  - id: vcf_lfo_rate
+    name: VCF-LFO3 Rate
+    group: VCF-LFO3
     type: cc7
     cc: 49
     default: 0
     min: 0
     max: 127
-  - id: lfo_depth
-    name: LFO Depth
-    group: LFO
+  - id: vcf_lfo_depth
+    name: VCF-LFO3 Depth
+    group: VCF-LFO3
     type: cc7
     cc: 50
     default: 0
     min: 0
     max: 127
+  - id: vcf_lfo_shape
+    name: VCF-LFO3 Shape
+    group: VCF-LFO3
+    type: choice
+    cc: 52
+    default: 0
+    choices:
+      - Sine
+      - Triangle
+      - Saw
+      - Ramp
+      - Square
+    midi_values: [0, 16, 32, 48, 64]

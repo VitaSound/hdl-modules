@@ -2,7 +2,7 @@
 
 VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
 
-**Версия:** 0.5.0 — см. [CHANGELOG.md](CHANGELOG.md).
+**Версия:** 0.7.0 — см. [CHANGELOG.md](CHANGELOG.md).
 
 В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
@@ -20,19 +20,15 @@ VitaSound Remote Synth  ──UDP :5004──►  Vgenerator (engine)
   └──UDP :5005 PCM (on pull)───────────────┘
 ```
 
-Протокол **v4 (pull + optional push)**: хост запрашивает PCM через `AudioPull`; при `kCapAudioPush` (MiniFX) хост шлёт dry через **AudioPush**.
+Протокол **v5 (pull + optional push + runtime params)**: хост запрашивает PCM через `AudioPull`; при `kCapAudioPush` (MiniFX) хост шлёт dry через **AudioPush**. При создании VST запрашивает у engine YAML-derived schema параметров.
 
-## APVTS parameters (mono_synth)
+## Runtime APVTS parameters
 
-Источник: [`synths/mono_synth/mono_synth.params.yaml`](../synths/mono_synth/mono_synth.params.yaml) → `tools/gen_vst_apvts.py` → `generated/SynthParams.{h,cpp}`.
+Источник: engine/server читает [`synths/mono_synth/mono_synth.params.yaml`](../synths/mono_synth/mono_synth.params.yaml) и отдаёт schema по `ParamSchemaRequest`.
 
-Плагин регистрирует именованные параметры для automation/presets. Изменение → MIDI CC → UDP engine (dual path с CtrlrX panel).
+Плагин регистрирует именованные параметры для automation/presets из server schema. Изменение → MIDI CC → UDP engine (dual path с CtrlrX panel).
 
-Regenerate:
-
-```bash
-python3 tools/gen_vst_apvts.py
-```
+Если engine недоступен при загрузке VST, плагин использует локальный cache последней schema. Если cache ещё нет, используется минимальный fallback; после первого успешного подключения к engine нужно создать новый instance/rescan, чтобы DAW увидела полный список параметров.
 
 UI: верх панели — **GenericAudioProcessorEditor** (Synth params); ниже — Network/transport.
 
@@ -145,7 +141,7 @@ vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-windows-x86_64.zip
 
 Linux-сборка требует `./scripts/install_linux_deps.sh` (один раз). На **Ubuntu 24.04** пакет WebKit: `libwebkit2gtk-4.1-dev` (скрипт выбирает автоматически).
 
-MIDI CC из DAW: **16–19** (ADSR), **48** (waveform) — engine [`../synths/mono_synth/`](../synths/mono_synth/). Legacy MIDI без DAW: [`../verilator_tests/README.md`](../verilator_tests/README.md) (`VgeneratorFull`).
+MIDI CC из DAW: параметры приходят из runtime schema engine; базовые CC — **16–19** (ADSR), **48** (waveform), **49–60** (LFO/PWM) — engine [`../synths/mono_synth/`](../synths/mono_synth/). Legacy MIDI без DAW: [`../verilator_tests/README.md`](../verilator_tests/README.md) (`VgeneratorFull`).
 
 ### GitHub Actions
 
@@ -154,15 +150,15 @@ Workflow [`.github/workflows/vst-release.yml`](../.github/workflows/vst-release.
 | Триггер | Результат |
 |---------|-----------|
 | **Actions → vst-release → Run workflow** | Артефакты zip (90 дней) |
-| Тег `v0.5.0` (версия = [`VERSION`](../VERSION)) | GitHub Release: VST3 + UDP engine + legacy engine |
+| Тег `v0.7.0` (версия = [`VERSION`](../VERSION)) | GitHub Release: VST3 + UDP engine + legacy engine |
 
 Опубликовать релиз:
 
 ```bash
 # 1. Поднять VERSION в корне репо и vst_bridge/CMakeLists.txt
 # 2. Закоммитить и запушить
-git tag v0.5.0
-git push origin v0.5.0
+git tag v0.7.0
+git push origin v0.7.0
 ```
 
 Без тега — ручной запуск workflow: zip появятся в **Artifacts** на странице run.

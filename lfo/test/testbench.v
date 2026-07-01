@@ -25,6 +25,7 @@ module testbench();
         .clk(clk),
         .rst(rst),
         .rate7(rate7),
+        .shape(3'd0),
         .sig_out(sig_out)
     );
 

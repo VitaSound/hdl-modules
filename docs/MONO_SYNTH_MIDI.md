@@ -13,7 +13,7 @@ fcut14_eff = clamp( manual + track + lfo_mod + env_mod )
 |-----------|----------|---------|
 | `manual` | CC74 / CC106 | 14-bit индекс на log-кривой 10 Hz…20 kHz |
 | `track` | CC51 + нота | `(LUT(note) − LUT(60)) × CC51 / 128` |
-| `lfo_mod` | CC49, CC50 | `(lfo_sig − 128) × CC50 / 128` (bipolar) |
+| `lfo_mod` | CC49, CC50, CC52 | `(vcf_lfo_sig − 128) × CC50 / 128` (bipolar) |
 | `env_mod` | CC24–27, CC28 | `adsr_filt[31:16] × CC28 / 128` (unipolar, аддитивно) |
 
 Громкость (VCA) — **отдельный** ADSR (CC16–19) внутри `mono_voice`; на cutoff не влияет.
@@ -57,6 +57,7 @@ fcut14_eff = clamp( manual + track + lfo_mod + env_mod )
 | CC / сообщение | Параметр |
 |----------------|----------|
 | 48 | Waveform: 0–15 saw, 16–31 square, 32–47 triangle, 48–63 sine, 64–79 ramp, 80–127 PWM |
+| 57 | PWM duty 0…127 (`64` = 50%) |
 | Pitch bend | 14-bit, центр 8192 → `note_pitch2dds` |
 
 ### Фильтр SVF
@@ -68,15 +69,28 @@ fcut14_eff = clamp( manual + track + lfo_mod + env_mod )
 | 71 | Resonance: `Q = 127 − CC` |
 | 22 | Mode: 0–31 LP, 32–63 HP, 64–95 BP, 96–127 notch |
 | 51 | Key follow amount 0…127 (0 = фикс. Hz на всех нотах) |
-| 49 | LFO rate 0.1…30 Hz |
-| 50 | LFO depth → cutoff (bipolar) |
+| 49 | VCF-LFO3 rate 0.1…30 Hz |
+| 50 | VCF-LFO3 depth → cutoff (bipolar) |
+| 52 | VCF-LFO3 shape: 0–15 sine, 16–31 triangle, 32–47 saw, 48–63 ramp, 64–127 square |
+
+### LFO
+
+| CC | Параметр |
+|----|----------|
+| 53 | VCO-LFO rate 0.1…30 Hz |
+| 54 | VCO-LFO coarse depth → pitch |
+| 55 | VCO-LFO fine depth → pitch |
+| 56 | VCO-LFO shape: 0–15 sine, 16–31 triangle, 32–47 saw, 48–63 ramp, 64–127 square |
+| 58 | VCA-LFO2 rate 0.1…30 Hz |
+| 59 | VCA-LFO2 depth → tremolo |
+| 60 | VCA-LFO2 shape: 0–15 sine, 16–31 triangle, 32–47 saw, 48–63 ramp, 64–127 square |
 
 ### Служебные
 
 | CC / байт | Действие |
 |-----------|----------|
 | 120 | All Sound Off → ADSR release (не сброс ручек) |
-| 121 | Reset controllers → дефолты ADSR/wave/pitch/filter/LFO/key follow; CC74 → 8192 |
+| 121 | Reset controllers → дефолты ADSR/wave/pitch/filter/LFO/PWM/key follow; CC74 → 8192 |
 | 123 | All Notes Off |
 | `0xFC` | MIDI Stop → all notes off |
 

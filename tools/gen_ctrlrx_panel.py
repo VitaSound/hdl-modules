@@ -133,10 +133,23 @@ def cutoff14_modulator(x: int, y: int) -> str:
   </modulator>"""
 
 
-def choice_modulator(name: str, cc: int, x: int, y: int, label: str, choices: list[str]) -> str:
+def choice_modulator(
+    name: str, cc: int, x: int, y: int, label: str, choices: list[str], midi_values: list[int] | None = None
+) -> str:
     layer_uid = uid()
+    max_idx = max(len(choices) - 1, 0)
+    lua = "-- None"
+    if midi_values:
+        values = ", ".join(str(v) for v in midi_values)
+        lua = (
+            "function(mod, value)\\n"
+            f"  local values = {{{values}}}\\n"
+            f"  local idx = math.max(0, math.min({max_idx}, math.floor(value + 0.5)))\\n"
+            f"  panel:sendMidiMessageNow(CtrlrMidiMessage({{0xB0, {cc}, values[idx + 1]}}))\\n"
+            "end"
+        )
     return f"""
-  <modulator modulatorVstExported="0" modulatorMax="{max(len(choices) - 1, 0)}"
+  <modulator modulatorVstExported="0" modulatorMax="{max_idx}"
              modulatorIsStatic="0" modulatorGlobalVariable="-1" modulatorMuteOnStart="0"
              modulatorMute="0" modulatorExcludeFromSnapshot="0"
              modulatorValueExpression="modulatorValue"
@@ -148,7 +161,7 @@ def choice_modulator(name: str, cc: int, x: int, y: int, label: str, choices: li
              modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
              modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
              modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
-             luaModulatorValueChange="-- None" name="{html.escape(name, quote=True)}"
+             luaModulatorValueChange="{html.escape(lua, quote=True)}" name="{html.escape(name, quote=True)}"
              modulatorMin="0" modulatorValue="0">
     <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
           midiMessageCtrlrNumber="{cc}" midiMessageCtrlrValue="0" midiMessageMultiList=""
@@ -164,7 +177,7 @@ def choice_modulator(name: str, cc: int, x: int, y: int, label: str, choices: li
                  componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
                  componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
                  componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
-                 uiSliderStyle="LinearHorizontal" uiSliderMin="0" uiSliderMax="{max(len(choices) - 1, 0)}"
+                 uiSliderStyle="LinearHorizontal" uiSliderMin="0" uiSliderMax="{max_idx}"
                  uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
                  uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="72"
                  uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
@@ -198,7 +211,18 @@ def generate_panel(data: dict) -> str:
         if ptype == "cc14_log":
             mod_blocks.append(cutoff14_modulator(x, y))
         elif ptype == "choice":
-            mod_blocks.append(choice_modulator(pid, int(param["cc"]), x, y, label, param["choices"]))
+            midi_values = param.get("midi_values")
+            mod_blocks.append(
+                choice_modulator(
+                    pid,
+                    int(param["cc"]),
+                    x,
+                    y,
+                    label,
+                    param["choices"],
+                    [int(v) for v in midi_values] if midi_values else None,
+                )
+            )
         else:
             mod_blocks.append(slider_modulator(pid, int(param["cc"]), x, y, label))
         col += 1

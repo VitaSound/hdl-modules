@@ -384,7 +384,10 @@ void HdlVerilatorAudioProcessorEditor::timerCallback() {
                                  deliveryQualityLabel(bridge.getDeliveryQuality()) + " | p95 " +
                                  juce::String(bridge.getP95JitterMs(), 1) + " ms | Underruns " +
                                  juce::String(bridge.getUnderruns()) + " | Pulls " +
-                                 juce::String(bridge.getPullCount()) + (bridge.isMuted() ? " | muted" : ""),
+                                 juce::String(bridge.getPullCount()) + " | schema " +
+                                 processor_.getParamSchemaStatus() + " 0x" +
+                                 juce::String::toHexString(static_cast<int>(processor_.getParamSchemaHash())) +
+                                 (bridge.isMuted() ? " | muted" : ""),
                              juce::dontSendNotification);
 
     updateTransportControls();

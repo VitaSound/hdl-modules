@@ -29,14 +29,14 @@
        luaPanelRestoreState="-- None" luaPanelMidiSnapshotPost="-- None"
        luaPanelMidiSnapshotPre="-- None" luaAudioProcessBlock="-- None"
        luaPanelOSCReceived="-- None"
-       panelUID="1dd0b49b8130468a9cb7e0b9dda6ddbe" panelInstanceUID="0613"
+       panelUID="79f14fd1f1b04242932892fe0ec979d7" panelInstanceUID="8bf4"
        panelInstanceManufacturerID="Vtsn" panelModulatorListColumns="-- None"
        panelModulatorListCsvDelimiter="," panelModulatorListXmlRoot="ctrlrModulatorList"
        panelModulatorListXmlModulator="ctrlrModulator" panelModulatorListSortOption="1"
        panelGlobalVariables="64:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1:-1"
        panelResources="-- None" panelPropertyDisplayIDs="0"
        ctrlrUseEditorWrapper="0" panelIndex="1">
-  <midiLibrary uuid="ff27fa8d28324cef9c9bef1f4824d354" luaTransInfo="-- None"
+  <midiLibrary uuid="6a4b461aa4d34d238ad5e0f099ac6ce6" luaTransInfo="-- None"
                midiLibraryParameterIndexProperty="modulatorCustomIndex"
                midiLibraryMidiProgramChangeControl="0"
                midiLibrarySendSnapAfterPChg="0"
@@ -49,7 +49,7 @@
   </midiLibrary>
   <luaManager>
     <luaManagerMethods>
-      <luaMethodGroup name="Built-In" uuid="1f84b0d32a9747a0ac0d00c793b6ce98"/>
+      <luaMethodGroup name="Built-In" uuid="2a80d8cb5ecc4905a648e200b6262fc2"/>
     </luaManagerMethods>
   </luaManager>
   <panelResources/>
@@ -95,7 +95,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="4c9daa11a63e46e2b7ba8be31abd7157"
+                 componentLayerUid="1da5ed3ca6674282891d6dabe8bfe40b"
                  componentRectangle="16 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -140,7 +140,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="9c20b3762b3848e18adb7e5e6fe9fc9b"
+                 componentLayerUid="c15884fb70fa4d1b8172d96a309e7b71"
                  componentRectangle="104 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -185,7 +185,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="79553e8aa96146638d7d9e024776e5bb"
+                 componentLayerUid="66f8330449e842d7a95e1bc11bf0b8e4"
                  componentRectangle="192 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -230,7 +230,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="a0686180ff9d4079ac807f05ac58f948"
+                 componentLayerUid="d9a872f115e04da6bc96f5de786e52d7"
                  componentRectangle="280 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -275,7 +275,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="de7f2519c7154f72b1506a7912944284"
+                 componentLayerUid="868515da44c6468f85d15cf835b3c15d"
                  componentRectangle="368 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -320,7 +320,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="f718a94342864414bf68a6b8adf200bf"
+                 componentLayerUid="cf9c8166461648438bedbaa313b55e19"
                  componentRectangle="456 16 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -365,7 +365,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="7711bc1600b04a47b959ca52d1f556b0"
+                 componentLayerUid="881b65824c5f4eecb2fe3e0fbb301477"
                  componentRectangle="16 116 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -410,7 +410,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="14860425541b4c4abb69e2ed26773440"
+                 componentLayerUid="dd8e31fe03ce4e73b7ea9aa11e9c605f"
                  componentRectangle="104 116 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -455,7 +455,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="2af1f5c8a7d54111bc3d480e7d4b8561"
+                 componentLayerUid="474178c908404289bf6f8c2256be0e04"
                  componentRectangle="192 116 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -471,7 +471,7 @@
              modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
              modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
              modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
-             luaModulatorValueChange="-- None" name="waveform"
+             luaModulatorValueChange="function(mod, value)\n  local values = {0, 16, 32, 48, 64, 80}\n  local idx = math.max(0, math.min(5, math.floor(value + 0.5)))\n  panel:sendMidiMessageNow(CtrlrMidiMessage({0xB0, 48, values[idx + 1]}))\nend" name="waveform"
              modulatorMin="0" modulatorValue="0">
     <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
           midiMessageCtrlrNumber="48" midiMessageCtrlrValue="0" midiMessageMultiList=""
@@ -503,8 +503,53 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="89c7d482a1fa4951915255c499c36d67"
+                 componentLayerUid="c1c69c10ba01412db086d4d1b8706e4e"
                  componentRectangle="280 116 120 40" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="pwm_duty"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="57" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="PWM Duty" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="PWM Duty"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="06d1d41af2934a48b6ddb984bf603443"
+                 componentRectangle="368 116 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
   <modulator modulatorVstExported="0" modulatorMax="3"
@@ -519,7 +564,7 @@
              modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
              modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
              modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
-             luaModulatorValueChange="-- None" name="filter_mode"
+             luaModulatorValueChange="function(mod, value)\n  local values = {0, 32, 64, 96}\n  local idx = math.max(0, math.min(3, math.floor(value + 0.5)))\n  panel:sendMidiMessageNow(CtrlrMidiMessage({0xB0, 22, values[idx + 1]}))\nend" name="filter_mode"
              modulatorMin="0" modulatorValue="0">
     <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
           midiMessageCtrlrNumber="22" midiMessageCtrlrValue="0" midiMessageMultiList=""
@@ -551,8 +596,8 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="084be829cd834587aa760cffc250f119"
-                 componentRectangle="368 116 120 40" uiType="uiSlider"/>
+                 componentLayerUid="ea10d1f6ca0e4407935ef4ddf3bbd832"
+                 componentRectangle="456 116 120 40" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
   <modulator modulatorVstExported="0" modulatorMax="16383" modulatorIsStatic="0"
@@ -596,8 +641,8 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="95f9bc754c0747ea8a6eff44bc8d3136"
-                 componentRectangle="456 116 72 88" uiType="uiSlider"/>
+                 componentLayerUid="aafaf0e93a864277b96b7c31efc72039"
+                 componentRectangle="16 216 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
   <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
@@ -641,8 +686,8 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="805e3897b6e148309fa71769711d624b"
-                 componentRectangle="16 216 72 88" uiType="uiSlider"/>
+                 componentLayerUid="8edf07f565554943a05e74ddc58f7055"
+                 componentRectangle="104 216 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
   <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
@@ -686,52 +731,7 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="a49337e48bf84ccab6288c65f7c22280"
-                 componentRectangle="104 216 72 88" uiType="uiSlider"/>
-    </componentProperties>
-  </modulator>
-  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
-             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
-             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
-             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
-             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
-             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
-             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
-             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
-             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
-             luaModulatorValueChange="-- None" name="lfo_rate"
-             modulatorMin="0" modulatorValue="0">
-    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
-          midiMessageCtrlrNumber="49" midiMessageCtrlrValue="0" midiMessageMultiList=""
-          midiMessageSysExFormula=""/>
-    <componentProperties>
-      <component componentName="LFO Rate" componentVisible="1"
-                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
-                 componentBackgroundColour="0x00000000" componentLabelText="LFO Rate"
-                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
-                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
-                 componentLabelJustification="centred" componentLabelHeight="18"
-                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
-                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
-                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
-                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
-                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
-                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
-                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
-                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
-                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
-                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
-                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
-                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
-                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
-                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
-                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
-                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
-                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
-                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
-                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
-                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="234eb06de8a74682b0e64bc36238f3f4"
+                 componentLayerUid="fa94173f57a44fadabeecd948a524abe"
                  componentRectangle="192 216 72 88" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
@@ -744,15 +744,15 @@
              modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
              modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
              modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
-             luaModulatorValueChange="-- None" name="lfo_depth"
+             luaModulatorValueChange="-- None" name="vco_lfo_rate"
              modulatorMin="0" modulatorValue="0">
     <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
-          midiMessageCtrlrNumber="50" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageCtrlrNumber="53" midiMessageCtrlrValue="0" midiMessageMultiList=""
           midiMessageSysExFormula=""/>
     <componentProperties>
-      <component componentName="LFO Depth" componentVisible="1"
+      <component componentName="VCO-LFO Rate" componentVisible="1"
                  componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
-                 componentBackgroundColour="0x00000000" componentLabelText="LFO Depth"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCO-LFO Rate"
                  componentLabelPlacement="2" componentLabelColour="0xffffffff"
                  componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
                  componentLabelJustification="centred" componentLabelHeight="18"
@@ -776,8 +776,422 @@
                  uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
                  uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
                  uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
-                 componentLayerUid="a8f089a0390845a4a559cf69588c6348"
+                 componentLayerUid="1c94884b7bf348218d94e26f48a3b17c"
                  componentRectangle="280 216 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vco_lfo_depth"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="54" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCO-LFO Depth" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCO-LFO Depth"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="0f96bdd5040342f7af23428dc9f561f9"
+                 componentRectangle="368 216 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vco_lfo_fine"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="55" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCO-LFO Fine Depth" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCO-LFO Fine Depth"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="c6f5f93245724202b4b232bcae79ecb9"
+                 componentRectangle="456 216 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="4"
+             modulatorIsStatic="0" modulatorGlobalVariable="-1" modulatorMuteOnStart="0"
+             modulatorMute="0" modulatorExcludeFromSnapshot="0"
+             modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue"
+             modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None"
+             modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="function(mod, value)\n  local values = {0, 16, 32, 48, 64}\n  local idx = math.max(0, math.min(4, math.floor(value + 0.5)))\n  panel:sendMidiMessageNow(CtrlrMidiMessage({0xB0, 56, values[idx + 1]}))\nend" name="vco_lfo_shape"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="56" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCO-LFO Shape" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCO-LFO Shape"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="LinearHorizontal" uiSliderMin="0" uiSliderMax="4"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="72"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff888888" uiSliderRotaryFillColour="0xff888888"
+                 uiSliderThumbColour="0xffcccccc" uiSliderValueHighlightColour="0xff888888"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff303030"
+                 uiSliderIncDecButtonColour="0xff888888" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="03791e8249634adbb5cdd2f0c3bc4029"
+                 componentRectangle="16 316 120 40" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vca_lfo_rate"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="58" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCA-LFO2 Rate" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCA-LFO2 Rate"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="cbd56e70ad224b9aabc168ae78fbafd3"
+                 componentRectangle="104 316 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vca_lfo_depth"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="59" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCA-LFO2 Depth" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCA-LFO2 Depth"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="a4947131d53d40909fe49127f330fd6d"
+                 componentRectangle="192 316 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="4"
+             modulatorIsStatic="0" modulatorGlobalVariable="-1" modulatorMuteOnStart="0"
+             modulatorMute="0" modulatorExcludeFromSnapshot="0"
+             modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue"
+             modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None"
+             modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="function(mod, value)\n  local values = {0, 16, 32, 48, 64}\n  local idx = math.max(0, math.min(4, math.floor(value + 0.5)))\n  panel:sendMidiMessageNow(CtrlrMidiMessage({0xB0, 60, values[idx + 1]}))\nend" name="vca_lfo_shape"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="60" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCA-LFO2 Shape" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCA-LFO2 Shape"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="LinearHorizontal" uiSliderMin="0" uiSliderMax="4"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="72"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff888888" uiSliderRotaryFillColour="0xff888888"
+                 uiSliderThumbColour="0xffcccccc" uiSliderValueHighlightColour="0xff888888"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff303030"
+                 uiSliderIncDecButtonColour="0xff888888" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="df98b2f884944073b139566ebc110a8c"
+                 componentRectangle="280 316 120 40" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vcf_lfo_rate"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="49" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCF-LFO3 Rate" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCF-LFO3 Rate"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="b7d895ee78804cc8be56c6a69a26c5c0"
+                 componentRectangle="368 316 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="127" modulatorIsStatic="0"
+             modulatorGlobalVariable="-1" modulatorMuteOnStart="0" modulatorMute="0"
+             modulatorExcludeFromSnapshot="0" modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue" modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None" modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="-- None" name="vcf_lfo_depth"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="50" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCF-LFO3 Depth" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCF-LFO3 Depth"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="RotaryVerticalDrag" uiSliderMin="0" uiSliderMax="127"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="48"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff4488ff" uiSliderRotaryFillColour="0xff4488ff"
+                 uiSliderThumbColour="0xffff8800" uiSliderValueHighlightColour="0xff4488ff"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff202020"
+                 uiSliderIncDecButtonColour="0xff4488ff" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="794feaef21514109aa15a9d2111f6e61"
+                 componentRectangle="456 316 72 88" uiType="uiSlider"/>
+    </componentProperties>
+  </modulator>
+  <modulator modulatorVstExported="0" modulatorMax="4"
+             modulatorIsStatic="0" modulatorGlobalVariable="-1" modulatorMuteOnStart="0"
+             modulatorMute="0" modulatorExcludeFromSnapshot="0"
+             modulatorValueExpression="modulatorValue"
+             modulatorValueExpressionReverse="midiValue"
+             modulatorControllerExpression="value"
+             modulatorLinkedToPanelProperty="-- None"
+             modulatorLinkedToModulatorProperty="-- None"
+             modulatorLinkedToModulator="-- None" modulatorLinkedToModulatorSource="1"
+             modulatorLinkedToComponent="-- None" modulatorBaseValue="0"
+             modulatorCustomIndex="0" modulatorCustomName="" modulatorCustomIndexGroup="0"
+             modulatorCustomNameGroup="" modulatorVstNameFormat="%n"
+             luaModulatorValueChange="function(mod, value)\n  local values = {0, 16, 32, 48, 64}\n  local idx = math.max(0, math.min(4, math.floor(value + 0.5)))\n  panel:sendMidiMessageNow(CtrlrMidiMessage({0xB0, 52, values[idx + 1]}))\nend" name="vcf_lfo_shape"
+             modulatorMin="0" modulatorValue="0">
+    <midi midiMessageType="0" midiMessageChannelOverride="0" midiMessageChannel="1"
+          midiMessageCtrlrNumber="52" midiMessageCtrlrValue="0" midiMessageMultiList=""
+          midiMessageSysExFormula=""/>
+    <componentProperties>
+      <component componentName="VCF-LFO3 Shape" componentVisible="1"
+                 componentAlwaysOnTop="0" componentSnapSize="8" componentIsActive="1"
+                 componentBackgroundColour="0x00000000" componentLabelText="VCF-LFO3 Shape"
+                 componentLabelPlacement="2" componentLabelColour="0xffffffff"
+                 componentLabelFont="&lt;Sans-Serif&gt;;12;0;0;0;0;1;0"
+                 componentLabelJustification="centred" componentLabelHeight="18"
+                 componentLabelWidth="96" componentLabelOffsetX="0" componentLabelOffsetY="0"
+                 componentHandleMouseEvents="1" componentHandleKeyboardEvents="0"
+                 componentLuaMouseDown="-- None" componentLuaMouseUp="-- None"
+                 componentLuaMouseDrag="-- None" componentLuaMouseDoubleClick="-- None"
+                 uiSliderStyle="LinearHorizontal" uiSliderMin="0" uiSliderMax="4"
+                 uiSliderInterval="1" uiSliderDoubleClickEnabled="1" uiSliderDoubleClickValue="0"
+                 uiSliderValuePosition="4" uiSliderValueHeight="12" uiSliderValueWidth="72"
+                 uiSliderTrackCornerSize="5" uiSliderThumbCornerSize="3" uiSliderThumbWidth="0"
+                 uiSliderThumbHeight="0" uiSliderThumbFlatOnLeft="0" uiSliderThumbFlatOnRight="0"
+                 uiSliderThumbFlatOnTop="0" uiSliderThumbFlatOnBottom="0"
+                 uiSliderValueTextColour="0xff000000" uiSliderValueBgColour="0xffffffff"
+                 uiSliderRotaryOutlineColour="0xff888888" uiSliderRotaryFillColour="0xff888888"
+                 uiSliderThumbColour="0xffcccccc" uiSliderValueHighlightColour="0xff888888"
+                 uiSliderValueOutlineColour="0xffffffff" uiSliderTrackColour="0xff303030"
+                 uiSliderIncDecButtonColour="0xff888888" uiSliderIncDecTextColour="0xffffffff"
+                 uiSliderValueFont="&lt;Sans-Serif&gt;;11;0;0;0;0;1;0"
+                 uiSliderValueTextJustification="centred" uiSliderVelocitySensitivity="1"
+                 uiSliderVelocityThreshold="1" uiSliderVelocityOffset="0" uiSliderVelocityMode="0"
+                 uiSliderVelocityModeKeyTrigger="1" uiSliderSpringMode="0" uiSliderSpringValue="0"
+                 uiSliderMouseWheelInterval="1" uiSliderPopupBubble="0"
+                 componentLayerUid="3370cffda42b4fd8aa6e707d7db9e6e8"
+                 componentRectangle="16 416 120 40" uiType="uiSlider"/>
     </componentProperties>
   </modulator>
 </panel>

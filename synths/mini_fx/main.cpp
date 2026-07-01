@@ -17,6 +17,7 @@ namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
 constexpr uint32_t DEFAULT_SAMPLE_RATE = 44100;
+constexpr const char* DEFAULT_PARAMS_YAML = "synths/mini_fx/mini_fx.params.yaml";
 
 void onSignal(int) {
     if (g_running_ptr != nullptr) {
@@ -31,6 +32,7 @@ void printUsage() {
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
         << "  --sample-rate R (default 44100)\n"
         << "  --udp-block-frames N (default 256)\n"
+        << "  --params-yaml PATH (default synths/mini_fx/mini_fx.params.yaml)\n"
         << "  --midi-log           print MIDI bytes/events to stderr\n"
         << "  --help\n";
 }
@@ -49,6 +51,7 @@ int main(int argc, char** argv) {
     uint32_t sampleRate = DEFAULT_SAMPLE_RATE;
     std::string udpBind = "0.0.0.0:5004";
     uint16_t udpBlockFrames = 256;
+    std::string paramsYamlPath = DEFAULT_PARAMS_YAML;
     bool midiLog = false;
 
     for (int i = 1; i < argc; ++i) {
@@ -59,6 +62,8 @@ int main(int argc, char** argv) {
             sampleRate = static_cast<uint32_t>(std::stoul(argv[++i]));
         } else if (arg == "--udp-block-frames" && i + 1 < argc) {
             udpBlockFrames = static_cast<uint16_t>(std::stoul(argv[++i]));
+        } else if (arg == "--params-yaml" && i + 1 < argc) {
+            paramsYamlPath = argv[++i];
         } else if (arg == "--midi-log") {
             midiLog = true;
         } else if (arg == "--help" || arg == "-h") {
@@ -89,6 +94,7 @@ int main(int argc, char** argv) {
     cfg.controlPort = bindEp.port;
     cfg.packetFrames = udpBlockFrames;
     cfg.caps = hdlnet::kCapAudioPush;
+    cfg.paramsYamlPath = paramsYamlPath;
 
     std::thread engineThread = startEngine(cfg, state, session, synth);
 

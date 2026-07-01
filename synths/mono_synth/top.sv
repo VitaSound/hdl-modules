@@ -90,6 +90,15 @@ module mono_synth (
     wire        fmode_wr = cc_evt && (lsb == 7'd22);
     wire        lfo_rate_wr = cc_evt && (lsb == 7'd49);
     wire        lfo_depth_wr = cc_evt && (lsb == 7'd50);
+    wire        vcf_lfo_shape_wr = cc_evt && (lsb == 7'd52);
+    wire        vco_lfo_rate_wr = cc_evt && (lsb == 7'd53);
+    wire        vco_lfo_depth_wr = cc_evt && (lsb == 7'd54);
+    wire        vco_lfo_fine_wr = cc_evt && (lsb == 7'd55);
+    wire        vco_lfo_shape_wr = cc_evt && (lsb == 7'd56);
+    wire        pwm_duty_wr = cc_evt && (lsb == 7'd57);
+    wire        vca_lfo_rate_wr = cc_evt && (lsb == 7'd58);
+    wire        vca_lfo_depth_wr = cc_evt && (lsb == 7'd59);
+    wire        vca_lfo_shape_wr = cc_evt && (lsb == 7'd60);
     wire        kfollow_wr = cc_evt && (lsb == 7'd51);
     wire        fa_wr = cc_evt && (lsb == 7'd24);
     wire        fd_wr = cc_evt && (lsb == 7'd25);
@@ -115,6 +124,15 @@ module mono_synth (
     wire        fmode_wr_eff = fmode_wr | cc121;
     wire        lfo_rate_wr_eff = lfo_rate_wr | cc121;
     wire        lfo_depth_wr_eff = lfo_depth_wr | cc121;
+    wire        vcf_lfo_shape_wr_eff = vcf_lfo_shape_wr | cc121;
+    wire        vco_lfo_rate_wr_eff = vco_lfo_rate_wr | cc121;
+    wire        vco_lfo_depth_wr_eff = vco_lfo_depth_wr | cc121;
+    wire        vco_lfo_fine_wr_eff = vco_lfo_fine_wr | cc121;
+    wire        vco_lfo_shape_wr_eff = vco_lfo_shape_wr | cc121;
+    wire        pwm_duty_wr_eff = pwm_duty_wr | cc121;
+    wire        vca_lfo_rate_wr_eff = vca_lfo_rate_wr | cc121;
+    wire        vca_lfo_depth_wr_eff = vca_lfo_depth_wr | cc121;
+    wire        vca_lfo_shape_wr_eff = vca_lfo_shape_wr | cc121;
     wire        kfollow_wr_eff = kfollow_wr | cc121;
     wire        fa_wr_eff = fa_wr | cc121;
     wire        fd_wr_eff = fd_wr | cc121;
@@ -132,6 +150,15 @@ module mono_synth (
     wire [6:0]  fmode_data_eff = cc121 ? 7'd0 : msb;
     wire [6:0]  lfo_rate_data_eff = cc121 ? 7'd0 : msb;
     wire [6:0]  lfo_depth_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vcf_lfo_shape_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vco_lfo_rate_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vco_lfo_depth_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vco_lfo_fine_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vco_lfo_shape_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  pwm_duty_data_eff = cc121 ? 7'd64 : msb;
+    wire [6:0]  vca_lfo_rate_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vca_lfo_depth_data_eff = cc121 ? 7'd0 : msb;
+    wire [6:0]  vca_lfo_shape_data_eff = cc121 ? 7'd0 : msb;
     wire [6:0]  kfollow_data_eff = cc121 ? 7'd0 : msb;
     wire [13:0] fa_data_eff = cc121 ? 14'd7540 : fa_value;
     wire [13:0] fd_data_eff = cc121 ? 14'd7540 : fd_value;
@@ -150,6 +177,15 @@ module mono_synth (
     wire [6:0]  fmode7;
     wire [6:0]  lfo_rate7;
     wire [6:0]  lfo_depth7;
+    wire [6:0]  vcf_lfo_shape7;
+    wire [6:0]  vco_lfo_rate7;
+    wire [6:0]  vco_lfo_depth7;
+    wire [6:0]  vco_lfo_fine7;
+    wire [6:0]  vco_lfo_shape7;
+    wire [6:0]  pwm_duty7;
+    wire [6:0]  vca_lfo_rate7;
+    wire [6:0]  vca_lfo_depth7;
+    wire [6:0]  vca_lfo_shape7;
     wire [6:0]  kfollow7;
     wire [13:0] f_attack14;
     wire [13:0] f_decay14;
@@ -184,6 +220,15 @@ module mono_synth (
     reg7  #(.INIT(7'd0))     u_fmode_reg(.clk(clk), .rst(1'b0), .wr(fmode_wr_eff), .data(fmode_data_eff), .data_out(fmode7));
     reg7  #(.INIT(7'd0))     u_lfo_rate_reg(.clk(clk), .rst(1'b0), .wr(lfo_rate_wr_eff), .data(lfo_rate_data_eff), .data_out(lfo_rate7));
     reg7  #(.INIT(7'd0))     u_lfo_depth_reg(.clk(clk), .rst(1'b0), .wr(lfo_depth_wr_eff), .data(lfo_depth_data_eff), .data_out(lfo_depth7));
+    reg7  #(.INIT(7'd0))     u_vcf_lfo_shape_reg(.clk(clk), .rst(1'b0), .wr(vcf_lfo_shape_wr_eff), .data(vcf_lfo_shape_data_eff), .data_out(vcf_lfo_shape7));
+    reg7  #(.INIT(7'd0))     u_vco_lfo_rate_reg(.clk(clk), .rst(1'b0), .wr(vco_lfo_rate_wr_eff), .data(vco_lfo_rate_data_eff), .data_out(vco_lfo_rate7));
+    reg7  #(.INIT(7'd0))     u_vco_lfo_depth_reg(.clk(clk), .rst(1'b0), .wr(vco_lfo_depth_wr_eff), .data(vco_lfo_depth_data_eff), .data_out(vco_lfo_depth7));
+    reg7  #(.INIT(7'd0))     u_vco_lfo_fine_reg(.clk(clk), .rst(1'b0), .wr(vco_lfo_fine_wr_eff), .data(vco_lfo_fine_data_eff), .data_out(vco_lfo_fine7));
+    reg7  #(.INIT(7'd0))     u_vco_lfo_shape_reg(.clk(clk), .rst(1'b0), .wr(vco_lfo_shape_wr_eff), .data(vco_lfo_shape_data_eff), .data_out(vco_lfo_shape7));
+    reg7  #(.INIT(7'd64))    u_pwm_duty_reg(.clk(clk), .rst(1'b0), .wr(pwm_duty_wr_eff), .data(pwm_duty_data_eff), .data_out(pwm_duty7));
+    reg7  #(.INIT(7'd0))     u_vca_lfo_rate_reg(.clk(clk), .rst(1'b0), .wr(vca_lfo_rate_wr_eff), .data(vca_lfo_rate_data_eff), .data_out(vca_lfo_rate7));
+    reg7  #(.INIT(7'd0))     u_vca_lfo_depth_reg(.clk(clk), .rst(1'b0), .wr(vca_lfo_depth_wr_eff), .data(vca_lfo_depth_data_eff), .data_out(vca_lfo_depth7));
+    reg7  #(.INIT(7'd0))     u_vca_lfo_shape_reg(.clk(clk), .rst(1'b0), .wr(vca_lfo_shape_wr_eff), .data(vca_lfo_shape_data_eff), .data_out(vca_lfo_shape7));
     reg7  #(.INIT(7'd0))     u_kfollow_reg(.clk(clk), .rst(1'b0), .wr(kfollow_wr_eff), .data(kfollow_data_eff), .data_out(kfollow7));
     reg14 #(.INIT(14'd7540)) u_fa_reg(.clk(clk), .rst(1'b0), .wr(fa_wr_eff), .data(fa_data_eff), .data_out(f_attack14));
     reg14 #(.INIT(14'd7540)) u_fd_reg(.clk(clk), .rst(1'b0), .wr(fd_wr_eff), .data(fd_data_eff), .data_out(f_decay14));
@@ -240,23 +285,46 @@ module mono_synth (
         .signal_out(filt_adsr)
     );
 
-    wire [7:0] lfo_sig;
+    wire [7:0] vcf_lfo_sig;
+    wire [7:0] vco_lfo_sig;
+    wire [7:0] vca_lfo_sig;
     wire [13:0] fcut14_eff;
 
     lfo #(
         .CLK_HZ(CLK_HZ)
-    ) u_lfo(
+    ) u_vcf_lfo(
         .clk(clk),
         .rst(rst),
         .rate7(lfo_rate7),
-        .sig_out(lfo_sig)
+        .shape(vcf_lfo_shape7[6:4]),
+        .sig_out(vcf_lfo_sig)
+    );
+
+    lfo #(
+        .CLK_HZ(CLK_HZ)
+    ) u_vco_lfo(
+        .clk(clk),
+        .rst(rst),
+        .rate7(vco_lfo_rate7),
+        .shape(vco_lfo_shape7[6:4]),
+        .sig_out(vco_lfo_sig)
+    );
+
+    lfo #(
+        .CLK_HZ(CLK_HZ)
+    ) u_vca_lfo(
+        .clk(clk),
+        .rst(rst),
+        .rate7(vca_lfo_rate7),
+        .shape(vca_lfo_shape7[6:4]),
+        .sig_out(vca_lfo_sig)
     );
 
     svf_fcut_mix u_fcut_mix(
         .manual14(fcut14),
         .note(active_note),
         .keyfollow7(kfollow7),
-        .lfo_sig(lfo_sig),
+        .lfo_sig(vcf_lfo_sig),
         .lfo_depth7(lfo_depth7),
         .env_u16(filt_adsr[31:16]),
         .env_amount7(f_env_amt7),
@@ -293,10 +361,13 @@ module mono_synth (
         .sound_off(cc_all_sound_off),
         .note(active_note),
         .pitch(pitch14),
-        .lfo_sig(8'd128),
-        .lfo_depth(7'd0),
-        .lfo_depth_fine(7'd0),
+        .lfo_sig(vco_lfo_sig),
+        .lfo_depth(vco_lfo_depth7),
+        .lfo_depth_fine(vco_lfo_fine7),
         .wave_form(wave_form),
+        .pwm_duty(pwm_duty7),
+        .vca_lfo_sig(vca_lfo_sig),
+        .vca_lfo_depth(vca_lfo_depth7),
         .attack_rate(attack_rate),
         .decay_rate(decay_rate),
         .sustain_level(sustain_level),

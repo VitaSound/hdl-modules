@@ -47,6 +47,15 @@ def gen_header(channel: int, params: list[dict], yaml_path: Path) -> str:
         [
             "};",
             "",
+            "inline constexpr const char* kParamIds[] = {",
+        ]
+    )
+    for param in params:
+        lines.append(f"    ParamIds::{param['id']},")
+    lines.extend(
+        [
+            "};",
+            "",
             "juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();",
             "void sendParamAsMidi(juce::AudioProcessorValueTreeState& apvts,",
             "                       const juce::String& paramId,",
@@ -154,6 +163,21 @@ def gen_cpp(channel: int, params: list[dict], yaml_path: Path) -> str:
         elif ptype == "choice":
             cc = int(param["cc"])
             n = len(param["choices"])
+            midi_values = [int(v) for v in param.get("midi_values", [])]
+            if midi_values:
+                values = ", ".join(str(v) for v in midi_values)
+                send_cases.extend(
+                    [
+                        f"        static constexpr uint8_t values[] = {{{values}}};",
+                        f"        const int idx = juce::jlimit(0, {n - 1}, juce::roundToInt(clamped * {max(n - 1, 0)}.0f));",
+                        "        sendBytes({status, "
+                        f"{cc}, values[static_cast<std::size_t>(idx)]"
+                        "});",
+                        "        return;",
+                        "    }",
+                    ]
+                )
+                continue
             denominator = max(n - 1, 1)
             send_cases.extend(
                 [

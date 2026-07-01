@@ -4,7 +4,7 @@
 
 #include <JuceHeader.h>
 #include "NetBridge.h"
-#include "SynthParams.h"
+#include "SynthParamSchema.h"
 
 class HdlVerilatorAudioProcessor : public juce::AudioProcessor,
                                    private juce::AudioProcessorValueTreeState::Listener {
@@ -50,6 +50,8 @@ public:
 
     NetBridge& getNetBridge() { return netBridge_; }
     juce::AudioProcessorValueTreeState& getApvts() { return apvts_; }
+    juce::String getParamSchemaStatus() const { return schema_.source; }
+    uint32_t getParamSchemaHash() const { return schema_.hash; }
 
 private:
     void fullReconnect(bool enterStopMode);
@@ -57,6 +59,7 @@ private:
     void sendAllApvtsAsMidi();
 
     NetBridge netBridge_;
+    SynthParamSchema schema_;
     juce::AudioProcessorValueTreeState apvts_;
     juce::String engineHost_{"127.0.0.1"};
     uint16_t controlPort_ = hdlnet::kDefaultControlPort;

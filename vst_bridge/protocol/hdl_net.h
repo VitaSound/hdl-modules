@@ -8,7 +8,7 @@ namespace hdlnet {
 
 constexpr uint32_t kMagicControl = 0x48444C4Du; // "HDLM"
 constexpr uint32_t kMagicAudio = 0x48444C41u;   // "HDLA"
-constexpr uint8_t kVersion = 4;
+constexpr uint8_t kVersion = 5;
 
 constexpr uint16_t kDefaultControlPort = 5004;
 constexpr uint16_t kDefaultAudioPort = 5005;
@@ -21,6 +21,8 @@ constexpr size_t kMaxAudioPacketBytes =
 
 constexpr uint16_t kMaxMidiBytes = 1024;
 constexpr size_t kMidiHeaderPayloadSize = sizeof(uint64_t) + sizeof(uint16_t);
+constexpr uint16_t kMaxParamSchemaBytes = 60000;
+constexpr size_t kParamSchemaHeaderSize = sizeof(uint32_t) + sizeof(uint32_t);
 
 constexpr uint8_t kSessionModePull = 1;
 constexpr uint16_t kDefaultMaxFramesPerPull = 2048;
@@ -36,6 +38,8 @@ enum class PacketType : uint8_t {
     MidiEngineToHost = 6,
     AudioPull = 8,
     AudioPush = 9,
+    ParamSchemaRequest = 10,
+    ParamSchemaData = 11,
 };
 
 #pragma pack(push, 1)
@@ -83,6 +87,11 @@ struct TimestampPayload {
 struct MidiPayloadHeader {
     uint64_t timestamp_us;
     uint16_t length;
+};
+
+struct ParamSchemaPayloadHeader {
+    uint32_t hash;
+    uint32_t length;
 };
 
 struct AudioHeader {
@@ -216,6 +225,41 @@ inline bool decodeMidi(const uint8_t* payload,
         return false;
     }
     data = payload + kMidiHeaderPayloadSize;
+    return true;
+}
+
+inline size_t encodeParamSchema(uint8_t* out,
+                                uint32_t seq,
+                                uint32_t hash,
+                                const uint8_t* data,
+                                uint32_t length) {
+    const uint16_t payload_len = static_cast<uint16_t>(kParamSchemaHeaderSize + length);
+    writeControlHeader(out, PacketType::ParamSchemaData, seq, payload_len);
+    auto* hdr = reinterpret_cast<ParamSchemaPayloadHeader*>(out + sizeof(ControlHeader));
+    hdr->hash = hostToBe32(hash);
+    hdr->length = hostToBe32(length);
+    if (length > 0 && data != nullptr) {
+        std::memcpy(out + sizeof(ControlHeader) + kParamSchemaHeaderSize, data, length);
+    }
+    return sizeof(ControlHeader) + payload_len;
+}
+
+inline bool decodeParamSchema(const uint8_t* payload,
+                              size_t payload_len,
+                              uint32_t& hash,
+                              const uint8_t*& data,
+                              uint32_t& length) {
+    if (payload_len < kParamSchemaHeaderSize) {
+        return false;
+    }
+    ParamSchemaPayloadHeader raw{};
+    std::memcpy(&raw, payload, sizeof(ParamSchemaPayloadHeader));
+    hash = beToHost32(raw.hash);
+    length = beToHost32(raw.length);
+    if (length > kMaxParamSchemaBytes || payload_len < kParamSchemaHeaderSize + length) {
+        return false;
+    }
+    data = payload + kParamSchemaHeaderSize;
     return true;
 }
 
