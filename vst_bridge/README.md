@@ -2,7 +2,7 @@
 
 VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
 
-**Версия:** 0.4.0 — см. [CHANGELOG.md](CHANGELOG.md).
+**Версия:** 0.5.0 — см. [CHANGELOG.md](CHANGELOG.md).
 
 В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
@@ -20,7 +20,29 @@ VitaSound Remote Synth  ──UDP :5004──►  Vgenerator (engine)
   └──UDP :5005 PCM (on pull)───────────────┘
 ```
 
-Протокол **v2 (pull)**: хост запрашивает PCM через `AudioPull`; engine не шлёт audio по таймеру.
+Протокол **v4 (pull + optional push)**: хост запрашивает PCM через `AudioPull`; при `kCapAudioPush` (MiniFX) хост шлёт dry через **AudioPush**.
+
+## APVTS parameters (mono_synth)
+
+Источник: [`synths/mono_synth/mono_synth.params.yaml`](../synths/mono_synth/mono_synth.params.yaml) → `tools/gen_vst_apvts.py` → `generated/SynthParams.{h,cpp}`.
+
+Плагин регистрирует именованные параметры для automation/presets. Изменение → MIDI CC → UDP engine (dual path с CtrlrX panel).
+
+Regenerate:
+
+```bash
+python3 tools/gen_vst_apvts.py
+```
+
+UI: верх панели — **GenericAudioProcessorEditor** (Synth params); ниже — Network/transport.
+
+## CtrlrX panel
+
+См. [`docs/CTRLRX_PANEL.md`](../docs/CTRLRX_PANEL.md). Patcher: CtrlrX → VitaSound.
+
+## MiniFX (AudioPush test)
+
+[`synths/mini_fx/`](../synths/mini_fx/) + [`scripts/run_mini_fx.sh`](../scripts/run_mini_fx.sh). Insert on track; VitaSound pushes input when engine advertises `kCapAudioPush`.
 
 ## Скрипты сборки
 
@@ -132,15 +154,15 @@ Workflow [`.github/workflows/vst-release.yml`](../.github/workflows/vst-release.
 | Триггер | Результат |
 |---------|-----------|
 | **Actions → vst-release → Run workflow** | Артефакты zip (90 дней) |
-| Тег `v0.4.0` (версия = [`VERSION`](../VERSION)) | GitHub Release: VST3 + UDP engine + legacy engine |
+| Тег `v0.5.0` (версия = [`VERSION`](../VERSION)) | GitHub Release: VST3 + UDP engine + legacy engine |
 
 Опубликовать релиз:
 
 ```bash
 # 1. Поднять VERSION в корне репо и vst_bridge/CMakeLists.txt
 # 2. Закоммитить и запушить
-git tag v0.4.0
-git push origin v0.4.0
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 Без тега — ручной запуск workflow: zip появятся в **Artifacts** на странице run.

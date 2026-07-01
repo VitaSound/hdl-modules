@@ -17,6 +17,7 @@ struct EngineConfig {
     uint16_t packetFrames = hdlnet::kMaxAudioFrames;
     uint8_t audioChannels = 2;
     uint16_t maxFramesPerPull = hdlnet::kDefaultMaxFramesPerPull;
+    uint16_t caps = 0;
 };
 
 std::thread startEngine(const EngineConfig& cfg,

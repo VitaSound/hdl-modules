@@ -8,7 +8,7 @@ namespace hdlnet {
 
 constexpr uint32_t kMagicControl = 0x48444C4Du; // "HDLM"
 constexpr uint32_t kMagicAudio = 0x48444C41u;   // "HDLA"
-constexpr uint8_t kVersion = 3;
+constexpr uint8_t kVersion = 4;
 
 constexpr uint16_t kDefaultControlPort = 5004;
 constexpr uint16_t kDefaultAudioPort = 5005;
@@ -300,6 +300,27 @@ inline bool decodeAudioHeader(const uint8_t* in, size_t len, AudioHeader& hdr, s
     payload_bytes = static_cast<size_t>(hdr.frame_count) * hdr.channels * sizeof(int16_t);
     return len >= sizeof(AudioHeader) + payload_bytes &&
            hdr.frame_count <= kMaxAudioFrames && hdr.channels <= kMaxAudioChannels;
+}
+
+inline size_t encodeAudioPush(uint8_t* out,
+                              uint32_t seq,
+                              uint64_t timestamp_us,
+                              uint16_t frame_count,
+                              uint8_t channels,
+                              const int16_t* samples) {
+    const size_t audio_bytes =
+        sizeof(AudioHeader) + static_cast<size_t>(frame_count) * channels * sizeof(int16_t);
+    writeControlHeader(out, PacketType::AudioPush, seq, static_cast<uint16_t>(audio_bytes));
+    return sizeof(ControlHeader) +
+           encodeAudio(out + sizeof(ControlHeader), seq, timestamp_us, frame_count, channels,
+                       samples);
+}
+
+inline bool decodeAudioPushPayload(const uint8_t* payload,
+                                   size_t payload_len,
+                                   AudioHeader& hdr,
+                                   size_t& payload_bytes) {
+    return decodeAudioHeader(payload, payload_len, hdr, payload_bytes);
 }
 
 } // namespace hdlnet

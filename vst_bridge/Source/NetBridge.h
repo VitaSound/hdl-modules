@@ -44,6 +44,9 @@ public:
 
     void queueMidi(const PendingMidiEvent& event);
     void readAudio(float* left, float* right, int numSamples);
+    void pushInputAudio(const float* left, const float* right, int numSamples);
+
+    bool supportsAudioPush() const { return engineCaps_.load() & hdlnet::kCapAudioPush; }
 
     bool isConnected() const { return connected_.load(); }
     bool isPrimed() const { return primed_; }
@@ -73,6 +76,7 @@ private:
     void applyProfileDefaults();
     void handleControlPacket(const uint8_t* data, int size);
     void pushAudioSamples(const int16_t* interleaved, int frames, int channels);
+    void sendAudioPush(juce::DatagramSocket& socket, const int16_t* interleaved, int frames, int channels);
     void noteActivity(uint64_t nowUs);
     void checkConnectionTimeout(uint64_t nowUs);
     void markDisconnected();
@@ -106,8 +110,10 @@ private:
     std::atomic<int> pulls_{0};
     std::atomic<uint32_t> seq_{0};
     std::atomic<uint32_t> pullRequestId_{0};
+    std::atomic<uint16_t> engineCaps_{0};
 
     juce::WaitableEvent settingsChanged_;
+    juce::WaitableEvent pushAudioEvent_;
 
     static constexpr int kMaxMidiQueue = 4096;
     juce::AbstractFifo midiFifo_{kMaxMidiQueue};
@@ -117,6 +123,11 @@ private:
     juce::AbstractFifo audioFifo_{kMaxAudioSamples};
     std::vector<float> audioLeft_;
     std::vector<float> audioRight_;
+
+    static constexpr int kMaxPushQueue = 48000;
+    juce::AbstractFifo pushAudioFifo_{kMaxPushQueue};
+    std::vector<float> pushLeft_;
+    std::vector<float> pushRight_;
 
     float lastLeft_ = 0.0f;
     float lastRight_ = 0.0f;

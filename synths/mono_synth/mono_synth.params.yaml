@@ -1,0 +1,143 @@
+schema_version: 1
+id: mono_synth
+title: Mono Synth
+description_ru: Параметры mono_synth для APVTS, CtrlrX panel и CI validate
+midi_channel: 1
+params:
+  - id: vca_attack
+    name: VCA Attack
+    group: VCA
+    type: cc7
+    cc: 16
+    default: 64
+    min: 0
+    max: 127
+  - id: vca_decay
+    name: VCA Decay
+    group: VCA
+    type: cc7
+    cc: 17
+    default: 64
+    min: 0
+    max: 127
+  - id: vca_sustain
+    name: VCA Sustain
+    group: VCA
+    type: cc7
+    cc: 18
+    default: 127
+    min: 0
+    max: 127
+  - id: vca_release
+    name: VCA Release
+    group: VCA
+    type: cc7
+    cc: 19
+    default: 64
+    min: 0
+    max: 127
+  - id: filter_attack
+    name: Filter Attack
+    group: Filter Env
+    type: cc7
+    cc: 24
+    default: 64
+    min: 0
+    max: 127
+  - id: filter_decay
+    name: Filter Decay
+    group: Filter Env
+    type: cc7
+    cc: 25
+    default: 64
+    min: 0
+    max: 127
+  - id: filter_sustain
+    name: Filter Sustain
+    group: Filter Env
+    type: cc7
+    cc: 26
+    default: 127
+    min: 0
+    max: 127
+  - id: filter_release
+    name: Filter Release
+    group: Filter Env
+    type: cc7
+    cc: 27
+    default: 64
+    min: 0
+    max: 127
+  - id: filter_env_amount
+    name: Filter Env Amount
+    group: Filter Env
+    type: cc7
+    cc: 28
+    default: 0
+    min: 0
+    max: 127
+  - id: waveform
+    name: Waveform
+    group: Oscillator
+    type: choice
+    cc: 48
+    default: 0
+    choices:
+      - Saw
+      - Square
+      - Triangle
+      - Sine
+      - Ramp
+      - PWM
+  - id: filter_mode
+    name: Filter Mode
+    group: Filter
+    type: choice
+    cc: 22
+    default: 0
+    choices:
+      - LP
+      - HP
+      - BP
+      - Notch
+  - id: filter_cutoff
+    name: Filter Cutoff
+    group: Filter
+    type: cc14_log
+    cc_lsb: 74
+    cc_msb: 106
+    default: 8192
+    min: 0
+    max: 16383
+  - id: filter_resonance
+    name: Filter Resonance
+    group: Filter
+    type: cc7
+    cc: 71
+    default: 0
+    min: 0
+    max: 127
+  - id: key_follow
+    name: Key Follow
+    group: Filter
+    type: cc7
+    cc: 51
+    default: 0
+    min: 0
+    max: 127
+  - id: lfo_rate
+    name: LFO Rate
+    group: LFO
+    type: cc7
+    cc: 49
+    default: 0
+    min: 0
+    max: 127
+  - id: lfo_depth
+    name: LFO Depth
+    group: LFO
+    type: cc7
+    cc: 50
+    default: 0
+    min: 0
+    max: 127

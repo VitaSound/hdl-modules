@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(HdlVerilator VERSION 0.4.0 LANGUAGES C CXX)
+project(HdlVerilator VERSION 0.5.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,6 +46,20 @@ juce_add_plugin(HdlVerilator
     VST3_AUTO_MANIFEST ${_HDL_VST3_AUTO_MANIFEST}
 )
 
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_LIST_DIR}/generated/SynthParams.h"
+           "${CMAKE_CURRENT_LIST_DIR}/generated/SynthParams.cpp"
+    COMMAND python3 "${CMAKE_CURRENT_LIST_DIR}/../tools/gen_vst_apvts.py"
+            --out-dir "${CMAKE_CURRENT_LIST_DIR}/generated"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../tools/gen_vst_apvts.py"
+            "${CMAKE_CURRENT_LIST_DIR}/../synths/mono_synth/mono_synth.params.yaml"
+    COMMENT "Generating APVTS params from mono_synth.params.yaml"
+)
+
+add_custom_target(HdlVerilatorGeneratedParams
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generated/SynthParams.h"
+            "${CMAKE_CURRENT_LIST_DIR}/generated/SynthParams.cpp")
+
 juce_generate_juce_header(HdlVerilator)
 
 target_sources(HdlVerilator
@@ -53,9 +67,12 @@ target_sources(HdlVerilator
         Source/PluginProcessor.cpp
         Source/PluginEditor.cpp
         Source/NetBridge.cpp
+        generated/SynthParams.cpp
 )
 
-target_include_directories(HdlVerilator PRIVATE protocol Source)
+add_dependencies(HdlVerilator HdlVerilatorGeneratedParams)
+
+target_include_directories(HdlVerilator PRIVATE protocol Source generated)
 
 string(TIMESTAMP HDL_BUILD_TIMESTAMP UTC)
 execute_process(

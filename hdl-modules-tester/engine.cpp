@@ -12,16 +12,60 @@
 
 namespace {
 constexpr size_t kRecvBufferSize = 2048;
+constexpr size_t kAudioInRingCapacity = 48000 * 4;
+
+struct AudioInRing {
+    std::vector<int16_t> buf;
+    size_t write_pos = 0;
+    size_t read_pos = 0;
+    size_t count = 0;
+
+    AudioInRing() { buf.resize(kAudioInRingCapacity); }
+
+    void reset() {
+        write_pos = 0;
+        read_pos = 0;
+        count = 0;
+    }
+
+    void push(const int16_t* samples, uint32_t frames, uint8_t channels) {
+        for (uint32_t i = 0; i < frames; ++i) {
+            const int16_t sample = samples[static_cast<size_t>(i) * channels];
+            if (count >= kAudioInRingCapacity) {
+                read_pos = (read_pos + 1) % kAudioInRingCapacity;
+                --count;
+            }
+            buf[write_pos] = sample;
+            write_pos = (write_pos + 1) % kAudioInRingCapacity;
+            ++count;
+        }
+    }
+
+    void pop(int16_t* out, uint32_t frames) {
+        for (uint32_t i = 0; i < frames; ++i) {
+            if (count == 0) {
+                out[i] = 0;
+                continue;
+            }
+            out[i] = buf[read_pos];
+            read_pos = (read_pos + 1) % kAudioInRingCapacity;
+            --count;
+        }
+    }
+};
 
 bool generateAndSendAudio(UdpSocket& audioSock,
                           SynthCore& synth,
                           SharedState& state,
+                          AudioInRing& audio_in_ring,
+                          bool use_audio_push,
                           const std::string& plugin_host,
                           uint16_t plugin_port,
                           uint32_t total_frames,
                           uint16_t packet_frames,
                           uint8_t channels,
                           std::vector<int16_t>& mono,
+                          std::vector<int16_t>& input_mono,
                           std::vector<int16_t>& interleaved,
                           std::array<uint8_t, hdlnet::kMaxAudioPacketBytes>& packet,
                           uint32_t& audio_seq,
@@ -32,7 +76,15 @@ bool generateAndSendAudio(UdpSocket& audioSock,
         const uint16_t block_frames =
             static_cast<uint16_t>(remaining > packet_frames ? packet_frames : remaining);
 
-        synthGeneratePull(synth, state, mono.data(), block_frames);
+        if (use_audio_push) {
+            audio_in_ring.pop(input_mono.data(), block_frames);
+        }
+
+        synthGeneratePull(synth,
+                          state,
+                          mono.data(),
+                          block_frames,
+                          use_audio_push ? input_mono.data() : nullptr);
 
         for (uint16_t i = 0; i < block_frames; ++i) {
             for (uint8_t ch = 0; ch < channels; ++ch) {
@@ -109,8 +161,11 @@ std::thread startEngine(const EngineConfig& cfg,
         UdpEndpoint last_plugin{};
 
         std::vector<int16_t> mono(packet_frames);
+        std::vector<int16_t> input_mono(packet_frames);
         std::vector<int16_t> interleaved(packet_frames * channels);
         std::array<uint8_t, hdlnet::kMaxAudioPacketBytes> packet{};
+        AudioInRing audio_in_ring;
+        const bool use_audio_push = (cfg.caps & hdlnet::kCapAudioPush) != 0;
 
         while (state.running.load(std::memory_order_relaxed)) {
             UdpEndpoint src;
@@ -145,7 +200,8 @@ std::thread startEngine(const EngineConfig& cfg,
                 state.note.store(-1, std::memory_order_relaxed);
                 audio_seq = 0;
                 sample_index = 0;
-                synth.fractional = 0;
+                synthResetPullTiming(synth);
+                audio_in_ring.reset();
 
                 synthOnSessionStart(synth);
 
@@ -154,6 +210,7 @@ std::thread startEngine(const EngineConfig& cfg,
                 ack.engine_ssrc = cfg.engineSsrc;
                 ack.packet_frames = packet_frames;
                 ack.max_frames_per_pull = cfg.maxFramesPerPull;
+                ack.caps = cfg.caps;
                 std::array<uint8_t, 64> out{};
                 const size_t out_len = hdlnet::encodeAck(out.data(), ++ack_seq, ack);
                 UdpEndpoint dest{src.host, src.port};
@@ -181,9 +238,9 @@ std::thread startEngine(const EngineConfig& cfg,
 
                 const uint32_t stream_rate = session.sample_rate.load(std::memory_order_relaxed);
                 if (stream_rate > 0) {
-                    synth.sampleRate = stream_rate;
+                    synthSetSampleRate(synth, stream_rate);
                 }
-                const uint32_t effective_rate = stream_rate > 0 ? stream_rate : synth.sampleRate;
+                const uint32_t effective_rate = stream_rate > 0 ? stream_rate : synthGetSampleRate(synth);
 
                 uint32_t frame_count = pull.frame_count;
                 if (frame_count == 0) {
@@ -196,18 +253,38 @@ std::thread startEngine(const EngineConfig& cfg,
                 generateAndSendAudio(audioSock,
                                      synth,
                                      state,
+                                     audio_in_ring,
+                                     use_audio_push,
                                      plugin_host,
                                      plugin_port,
                                      frame_count,
                                      packet_frames,
                                      channels,
                                      mono,
+                                     input_mono,
                                      interleaved,
                                      packet,
                                      audio_seq,
                                      sample_index,
                                      effective_rate);
                 sendMidiOutIfAny(ctrlSock, synth, last_plugin);
+                break;
+            }
+            case hdlnet::PacketType::AudioPush: {
+                if (!use_audio_push) {
+                    break;
+                }
+                hdlnet::AudioHeader push_hdr{};
+                size_t push_payload_bytes = 0;
+                if (!hdlnet::decodeAudioPushPayload(payload,
+                                                    hdr.payload_len,
+                                                    push_hdr,
+                                                    push_payload_bytes)) {
+                    break;
+                }
+                const auto* push_samples =
+                    reinterpret_cast<const int16_t*>(payload + sizeof(hdlnet::AudioHeader));
+                audio_in_ring.push(push_samples, push_hdr.frame_count, push_hdr.channels);
                 break;
             }
             case hdlnet::PacketType::Ping: {

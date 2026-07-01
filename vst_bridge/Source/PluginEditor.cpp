@@ -3,13 +3,17 @@
 #include "BuildInfo.h"
 
 namespace {
-constexpr int kEditorWidth = 480;
-constexpr int kEditorHeight = 580;
+constexpr int kEditorWidth = 520;
+constexpr int kEditorHeight = 920;
+constexpr int kSynthPanelHeight = 340;
 } // namespace
 
 HdlVerilatorAudioProcessorEditor::HdlVerilatorAudioProcessorEditor(HdlVerilatorAudioProcessor& p)
-    : juce::AudioProcessorEditor(&p), processor_(p) {
+    : juce::AudioProcessorEditor(&p),
+      processor_(p),
+      synthEditor_(std::make_unique<juce::GenericAudioProcessorEditor>(p)) {
     setSize(kEditorWidth, kEditorHeight);
+    addAndMakeVisible(*synthEditor_);
 
     titleLabel_.setText("VitaSound Remote Synth", juce::dontSendNotification);
     titleLabel_.setFont(juce::FontOptions(18.0f, juce::Font::bold));
@@ -174,6 +178,8 @@ juce::Colour HdlVerilatorAudioProcessorEditor::linkColour() const {
 
 void HdlVerilatorAudioProcessorEditor::resized() {
     auto area = getLocalBounds().reduced(14);
+    synthEditor_->setBounds(area.removeFromTop(kSynthPanelHeight));
+    area.removeFromTop(8);
 
     auto header = area.removeFromTop(28);
     titleLabel_.setBounds(header.removeFromLeft(header.getWidth() * 2 / 5));

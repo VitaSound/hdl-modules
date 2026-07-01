@@ -18,6 +18,8 @@ NetBridge::NetBridge() : juce::Thread("HdlNetBridge") {
     midiBuffer_.resize(static_cast<size_t>(kMaxMidiQueue));
     audioLeft_.resize(static_cast<size_t>(kMaxAudioSamples));
     audioRight_.resize(static_cast<size_t>(kMaxAudioSamples));
+    pushLeft_.resize(static_cast<size_t>(kMaxPushQueue));
+    pushRight_.resize(static_cast<size_t>(kMaxPushQueue));
     applyProfileDefaults();
 }
 
@@ -94,6 +96,7 @@ void NetBridge::prepare(double sampleRate, int blockSize) {
     underruns_.store(0);
     pulls_.store(0);
     connected_.store(false);
+    engineCaps_.store(0);
     primed_ = false;
     pullInFlight_ = false;
     lastLeft_ = 0.0f;
@@ -513,6 +516,14 @@ void NetBridge::handleControlPacket(const uint8_t* data, int size) {
         return;
     }
 
+    if (type == hdlnet::PacketType::Ack) {
+        const uint8_t* payload = data + sizeof(hdlnet::ControlHeader);
+        hdlnet::AckPayload ack{};
+        if (hdlnet::decodeAck(payload, ack)) {
+            engineCaps_.store(ack.caps);
+        }
+    }
+
     if (type == hdlnet::PacketType::Ack || type == hdlnet::PacketType::Pong) {
         const uint64_t t = nowUs();
         noteActivity(t);
@@ -568,6 +579,61 @@ void NetBridge::pushAudioSamples(const int16_t* interleaved, int frames, int cha
     }
 }
 
+void NetBridge::pushInputAudio(const float* left, const float* right, int numSamples) {
+    if (!supportsAudioPush() || numSamples <= 0) {
+        return;
+    }
+
+    int start1 = 0;
+    int size1 = 0;
+    int start2 = 0;
+    int size2 = 0;
+    pushAudioFifo_.prepareToWrite(numSamples, start1, size1, start2, size2);
+    const int canWrite = size1 + size2;
+    if (canWrite <= 0) {
+        return;
+    }
+
+    int written = 0;
+    for (int i = 0; i < size1; ++i) {
+        pushLeft_[static_cast<size_t>(start1 + i)] = left[written];
+        pushRight_[static_cast<size_t>(start1 + i)] = right[written];
+        ++written;
+    }
+    for (int i = 0; i < size2; ++i) {
+        pushLeft_[static_cast<size_t>(start2 + i)] = left[written];
+        pushRight_[static_cast<size_t>(start2 + i)] = right[written];
+        ++written;
+    }
+    pushAudioFifo_.finishedWrite(canWrite);
+    pushAudioEvent_.signal();
+}
+
+void NetBridge::sendAudioPush(juce::DatagramSocket& socket,
+                              const int16_t* interleaved,
+                              int frames,
+                              int channels) {
+    juce::String host;
+    uint16_t ctrlPort = controlPort_;
+    {
+        juce::ScopedLock lock(settingsLock_);
+        host = engineHost_;
+    }
+    if (host.isEmpty() || frames <= 0) {
+        return;
+    }
+
+    std::array<uint8_t, hdlnet::kMaxAudioPacketBytes + 64> out{};
+    const uint32_t seq = seq_.fetch_add(1) + 1;
+    const size_t len = hdlnet::encodeAudioPush(out.data(),
+                                               seq,
+                                               nowUs(),
+                                               static_cast<uint16_t>(frames),
+                                               static_cast<uint8_t>(channels),
+                                               interleaved);
+    socket.write(host, static_cast<int>(ctrlPort), out.data(), static_cast<int>(len));
+}
+
 void NetBridge::run() {
     juce::DatagramSocket controlSocket;
     juce::DatagramSocket audioSocket;
@@ -588,6 +654,7 @@ void NetBridge::run() {
     lastHelloUs_ = nowUs();
 
     std::array<uint8_t, hdlnet::kMaxAudioPacketBytes> buffer{};
+    std::array<int16_t, hdlnet::kMaxAudioFrames * hdlnet::kMaxAudioChannels> pushInterleaved{};
     uint64_t lastQualityTickUs = nowUs();
 
     while (running_.load() && !threadShouldExit()) {
@@ -611,6 +678,35 @@ void NetBridge::run() {
         }
 
         maybeRequestAudio(controlSocket);
+
+        if (supportsAudioPush() && pushAudioFifo_.getNumReady() > 0) {
+            const int available = pushAudioFifo_.getNumReady();
+            const int frames = juce::jmin(available, static_cast<int>(hdlnet::kMaxAudioFrames));
+            int start1 = 0;
+            int size1 = 0;
+            int start2 = 0;
+            int size2 = 0;
+            pushAudioFifo_.prepareToRead(frames, start1, size1, start2, size2);
+            int outIdx = 0;
+            for (int i = 0; i < size1; ++i) {
+                pushInterleaved[static_cast<size_t>(outIdx) * 2] = static_cast<int16_t>(
+                    juce::jlimit(-1.0f, 1.0f, pushLeft_[static_cast<size_t>(start1 + i)]) * 32767.0f);
+                pushInterleaved[static_cast<size_t>(outIdx) * 2 + 1] = static_cast<int16_t>(
+                    juce::jlimit(-1.0f, 1.0f, pushRight_[static_cast<size_t>(start1 + i)]) * 32767.0f);
+                ++outIdx;
+            }
+            for (int i = 0; i < size2; ++i) {
+                pushInterleaved[static_cast<size_t>(outIdx) * 2] = static_cast<int16_t>(
+                    juce::jlimit(-1.0f, 1.0f, pushLeft_[static_cast<size_t>(start2 + i)]) * 32767.0f);
+                pushInterleaved[static_cast<size_t>(outIdx) * 2 + 1] = static_cast<int16_t>(
+                    juce::jlimit(-1.0f, 1.0f, pushRight_[static_cast<size_t>(start2 + i)]) * 32767.0f);
+                ++outIdx;
+            }
+            pushAudioFifo_.finishedRead(outIdx);
+            if (outIdx > 0) {
+                sendAudioPush(controlSocket, pushInterleaved.data(), outIdx, 2);
+            }
+        }
 
         while (midiFifo_.getNumReady() > 0) {
             int start1 = 0;

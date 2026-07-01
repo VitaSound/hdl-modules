@@ -2,6 +2,34 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
+## [0.5.0] — 2026-06-30
+
+### Протокол hdl_net v4
+
+- Версия wire-протокола **3 → 4** (несовместимо с v3: строгая проверка `version` в заголовке).
+- **AudioPush**: host → engine (stereo int16, payload как HDLA).
+- **Ack `kCapAudioPush`**: engine объявляет поддержку push (MiniFX).
+
+### VST 0.5.0
+
+- **Stereo input** bus для insert/FX path.
+- **NetBridge**: отправка AudioPush при `kCapAudioPush`; приём PCM по pull без изменений.
+- **APVTS**: именованные параметры mono_synth из `mono_synth.params.yaml` → MIDI CC → engine.
+- UI: **GenericAudioProcessorEditor** (параметры) + существующая панель Network/transport.
+- State/presets: APVTS + network settings в project state.
+
+### Engine / mini_fx
+
+- `synths/mini_fx/`: insert SVF (`audio_in → filter → audio_out`), `scripts/run_mini_fx.sh`.
+- Smoke: `hdl-modules-tester/scripts/mini_fx_smoke_test.py`.
+
+### Tooling
+
+- `tools/validate_synth_params.py`, `tools/gen_vst_apvts.py`, `tools/gen_ctrlrx_panel.py`.
+- `docs/CTRLRX_PANEL.md`, `synths/mini_fx/README.md`.
+
+**Совместимость:** VST **0.5.0** требует engine с **hdl_net v4**. Pull-only с MonoSynth/NoiseBox на v4 — OK; VST **0.4.x** с engine v4 — **не** подключится.
+
 ## [0.4.0] — 2026-06-16
 
 ### Репозиторий
@@ -53,5 +81,6 @@
 
 - Переименование в **VitaSound Remote Synth**, GitHub release workflow, cross-build Windows из WSL.
 
+[0.5.0]: https://github.com/VitaSound/hdl-modules/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/VitaSound/hdl-modules/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/UA3MQJ/hdl-modules/compare/vst-v0.2.5...vst-v0.3.1

@@ -1,0 +1,23 @@
+schema_version: 1
+id: mini_fx
+title: Mini FX
+description_ru: SVF insert FX — cutoff и resonance для APVTS и теста AudioPush
+midi_channel: 1
+params:
+  - id: filter_cutoff
+    name: Filter Cutoff
+    group: Filter
+    type: cc14_log
+    cc_lsb: 74
+    cc_msb: 106
+    default: 8192
+    min: 0
+    max: 16383
+  - id: filter_resonance
+    name: Filter Resonance
+    group: Filter
+    type: cc7
+    cc: 71
+    default: 0
+    min: 0
+    max: 127

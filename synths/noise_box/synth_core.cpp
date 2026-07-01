@@ -83,11 +83,24 @@ void synthOnSessionStart(SynthCore& core) {
     core.fractional = 0;
 }
 
+void synthResetPullTiming(SynthCore& core) {
+    core.fractional = 0;
+}
+
+void synthSetSampleRate(SynthCore& core, uint32_t sampleRate) {
+    core.sampleRate = sampleRate;
+}
+
+uint32_t synthGetSampleRate(const SynthCore& core) {
+    return core.sampleRate;
+}
+
 bool synthDrainMidiOut(SynthCore& /*core*/, std::vector<uint8_t>& /*out*/) {
     return false;
 }
 
-void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames) {
+void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames,
+                       const int16_t* /*mono_in*/) {
     drainPendingMidi(core, const_cast<SharedState&>(state));
 
     core.top->enable = state.gate.load(std::memory_order_relaxed) ? 1 : 0;

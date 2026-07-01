@@ -52,6 +52,7 @@ private:
     juce::Label statsLine1Label_;
     juce::Label statsLine2Label_;
     juce::TextButton resetStatsLink_{"Reset stats"};
+    std::unique_ptr<juce::GenericAudioProcessorEditor> synthEditor_;
 
     juce::String lastHost_;
     int lastProfileId_ = -1;

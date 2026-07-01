@@ -4,8 +4,10 @@
 
 #include <JuceHeader.h>
 #include "NetBridge.h"
+#include "SynthParams.h"
 
-class HdlVerilatorAudioProcessor : public juce::AudioProcessor {
+class HdlVerilatorAudioProcessor : public juce::AudioProcessor,
+                                   private juce::AudioProcessorValueTreeState::Listener {
 public:
     HdlVerilatorAudioProcessor();
     ~HdlVerilatorAudioProcessor() override;
@@ -13,6 +15,8 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
@@ -45,16 +49,21 @@ public:
     bool isTestNoteOn() const { return testNoteOn_; }
 
     NetBridge& getNetBridge() { return netBridge_; }
+    juce::AudioProcessorValueTreeState& getApvts() { return apvts_; }
 
 private:
     void fullReconnect(bool enterStopMode);
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
+    void sendAllApvtsAsMidi();
 
     NetBridge netBridge_;
+    juce::AudioProcessorValueTreeState apvts_;
     juce::String engineHost_{"127.0.0.1"};
     uint16_t controlPort_ = hdlnet::kDefaultControlPort;
     uint16_t audioPort_ = hdlnet::kDefaultAudioPort;
     bool testNoteOn_ = false;
     bool suppressDisconnectStop_ = false;
+    bool suppressParamMidi_ = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HdlVerilatorAudioProcessor)
 };

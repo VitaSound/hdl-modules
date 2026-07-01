@@ -21,5 +21,8 @@ struct SynthCore {
 
 bool synthInit(SynthCore& core, uint32_t sampleRate);
 void synthOnSessionStart(SynthCore& core);
-void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono, unsigned long frames);
+void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono,
+                       unsigned long frames, const int16_t* mono_in = nullptr);
+void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len);
+bool synthDrainMidiOut(SynthCore& core, std::vector<uint8_t>& out);
 void synthDestroy(SynthCore& core);
