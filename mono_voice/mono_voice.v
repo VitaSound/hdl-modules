@@ -174,21 +174,12 @@ module mono_voice #(
             wire signed [15:0] svf_lp;
             wire signed [15:0] svf_notch;
 
-            // Scale Q down at high Fc (fixed-point stability @ max resonance).
-            localparam [17:0] SVF_Q_F_KNEE = 18'd6500;
-            localparam [31:0] SVF_Q_CAP_NUM = 32'd851_961_500; // F_KNEE * 131071
-            wire [31:0] svf_q_cap_div = SVF_Q_CAP_NUM / {14'd0, svf_f};
-            wire [17:0] svf_q_cap =
-                (svf_q_cap_div > 32'd131071) ? 18'd131071 : svf_q_cap_div[17:0];
-            wire [17:0] svf_q_eff =
-                (svf_f <= SVF_Q_F_KNEE || svf_q <= svf_q_cap) ? svf_q : svf_q_cap;
-
             svf u_svf(
                 .clk(clk),
                 .rst(rst),
                 .tick(1'b1),
                 .f(svf_f),
-                .q(svf_q_eff),
+                .q(svf_q),
                 .in(osc_hi),
                 .hp(svf_hp),
                 .bp(svf_bp),

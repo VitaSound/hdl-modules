@@ -29,6 +29,8 @@ module testbench();
   real sum_lp_sq;
   integer peak_bp;
   integer peak_late;
+  integer peak_recovery;
+  integer saturated_recovery;
 
     function [17:0] svf_f_coeff;
         input real fc_hz;
@@ -171,6 +173,55 @@ module testbench();
             errors = errors + 1;
         end else begin
             $display("PASS svf noise RMS: lp_sq=%0d in_sq=%0d", sum_lp_sq, sum_in_sq);
+        end
+
+        // --- Extreme Fc/Q recovery: high resonance must not leave latched state ---
+        rst <= 1'b1;
+        #(CLK_PERIOD_NS * 2);
+        rst <= 1'b0;
+
+        f_coeff <= svf_f_coeff(20000.0, CLK_HZ);
+        q_coeff <= svf_q_coeff(16.0);
+
+        for (n = 0; n < 8192; n = n + 1) begin
+            noise_in <= n[0] ? 16'sd32767 : -16'sd32768;
+            @(posedge clk);
+            tick <= 1'b1;
+            @(posedge clk);
+            tick <= 1'b0;
+        end
+
+        f_coeff <= svf_f_coeff(FC_HZ, CLK_HZ);
+        q_coeff <= svf_q_coeff(Q_VAL);
+        noise_in <= 16'sd0;
+        peak_recovery = 0;
+        saturated_recovery = 0;
+
+        for (n = 0; n < 8192; n = n + 1) begin
+            @(posedge clk);
+            tick <= 1'b1;
+            @(posedge clk);
+            tick <= 1'b0;
+
+            if (n > 4096) begin
+                abs_val = lp;
+                if (abs_val < 0) abs_val = -abs_val;
+                if (abs_val > peak_recovery)
+                    peak_recovery = abs_val;
+                if (lp == 16'sd32767 || lp == -16'sd32768 ||
+                    bp == 16'sd32767 || bp == -16'sd32768 ||
+                    hp == 16'sd32767 || hp == -16'sd32768)
+                    saturated_recovery = saturated_recovery + 1;
+            end
+        end
+
+        if (saturated_recovery != 0 || peak_recovery > 4096) begin
+            $display("FAIL svf recovery: saturated=%0d peak_lp=%0d",
+                     saturated_recovery, peak_recovery);
+            errors = errors + 1;
+        end else begin
+            $display("PASS svf recovery: saturated=%0d peak_lp=%0d",
+                     saturated_recovery, peak_recovery);
         end
 
         if (errors != 0) begin

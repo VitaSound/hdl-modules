@@ -17,6 +17,11 @@ module svf #(
 );
 
     localparam signed [35:0] STATE_FLUSH_THRESH = 36'sd1;
+    localparam integer STATE_HEADROOM_SHIFT = 1;
+    localparam signed [35:0] STATE_MAX =
+        36'sd32767 <<< (IN_SHIFT + STATE_HEADROOM_SHIFT);
+    localparam signed [35:0] STATE_MIN =
+        -36'sd32768 <<< (IN_SHIFT + STATE_HEADROOM_SHIFT);
 
     reg signed [35:0] z1;
     reg signed [35:0] z2;
@@ -45,6 +50,20 @@ module svf #(
         end
     endfunction
 
+    function signed [35:0] limit_state;
+        input signed [35:0] v;
+        begin
+            if (v > STATE_MAX)
+                limit_state = STATE_MAX;
+            else if (v < STATE_MIN)
+                limit_state = STATE_MIN;
+            else if (v < STATE_FLUSH_THRESH && v > -STATE_FLUSH_THRESH)
+                limit_state = 36'sd0;
+            else
+                limit_state = v;
+        end
+    endfunction
+
     wire signed [35:0] bp_scaled = z1 >>> 17;
     wire signed [35:0] multq    = bp_scaled * q;
     wire signed [35:0] in36     = {{(20 - IN_SHIFT){in[15]}}, in, {IN_SHIFT{1'b0}}};
@@ -52,8 +71,10 @@ module svf #(
     wire signed [17:0] hp_int    = sat18(hp_full >>> 17);
     wire signed [35:0] f_hp      = f * hp_int;
     wire signed [35:0] f_bp      = f * bp_scaled;
-    wire signed [35:0] z1_next   = f_hp + z1;
-    wire signed [35:0] z2_next   = f_bp + z2;
+    wire signed [35:0] z1_next_raw = f_hp + z1;
+    wire signed [35:0] z2_next_raw = f_bp + z2;
+    wire signed [35:0] z1_next = limit_state(z1_next_raw);
+    wire signed [35:0] z2_next = limit_state(z2_next_raw);
 
     wire signed [15:0] hp_next = sat16(hp_full >>> IN_SHIFT);
     wire signed [15:0] lp_next = sat16(z2_next >>> IN_SHIFT);
@@ -64,17 +85,6 @@ module svf #(
         (notch_sum < -37'sd32768) ? -16'sd32768 :
         notch_sum[15:0];
 
-    wire signed [35:0] z1_flush =
-        (z1_next > 36'sh7FFFFFFFF) ? 36'sh7FFFFFFFF :
-        (z1_next < -36'sh800000000) ? -36'sh800000000 :
-        (z1_next < STATE_FLUSH_THRESH && z1_next > -STATE_FLUSH_THRESH)
-            ? 36'sd0 : z1_next;
-    wire signed [35:0] z2_flush =
-        (z2_next > 36'sh7FFFFFFFF) ? 36'sh7FFFFFFFF :
-        (z2_next < -36'sh800000000) ? -36'sh800000000 :
-        (z2_next < STATE_FLUSH_THRESH && z2_next > -STATE_FLUSH_THRESH)
-            ? 36'sd0 : z2_next;
-
     always @(posedge clk) begin
         if (rst) begin
             z1 <= 36'sd0;
@@ -84,8 +94,8 @@ module svf #(
             lp  <= 16'sd0;
             notch <= 16'sd0;
         end else if (tick) begin
-            z1 <= z1_flush;
-            z2 <= z2_flush;
+            z1 <= z1_next;
+            z2 <= z2_next;
             hp  <= hp_next;
             bp  <= bp_next;
             lp  <= lp_next;
