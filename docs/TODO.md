@@ -22,3 +22,5 @@ _(пусто — `frqdivmod` odd DIV исправлен в `common/frqdivmod.v`,
 - [ ] **mono-006 MIDI log** — `--midi-log` не печатает sys realtime (`0xFC` Stop); DAW transport stop часто шлёт pitch center, не CC123; edge case: [`EC-032`](../synths/mono_synth/docs/edge-cases.md#ec-032-daw-transport-stop).
 - [ ] **mono-007 LFO → pitch** — backlog item требует сверки с текущим RTL (`top.sv` уже передаёт VCO-LFO в `mono_voice`); edge case: [`EC-040`](../synths/mono_synth/docs/edge-cases.md#ec-040-lfo-pitch-backlog-freshness).
 - [x] **mono-doc-001 Agent documentation suite** — создать [`synths/mono_synth/docs/`](../synths/mono_synth/docs/) и сократить README до index + runbook.
+- [ ] выполнить ручное тестирование mini_fx
+- [ ] проверить генерацию panels и разобраться, как их подключать параллельно с ctrlr и панель вместе с vsti
