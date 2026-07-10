@@ -1,10 +1,83 @@
 # mono_synth
 
-Моно-синт для отладки RTL «на слух»: `note_mono` + MIDI-регистры + [`mono_voice`](../mono_voice/mono_voice.v) через UDP + VST.
+Моно-синт для отладки RTL «на слух»: `note_mono` + MIDI-регистры + [`mono_voice`](../../mono_voice/mono_voice.v) через UDP + VST.
 
-**Полный справочник CC и опорных точек:** [docs/MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
+**Полный справочник CC и опорных точек:** [`docs/MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md).
 
 Wiring по образцу fpga-synth `VitaPolySimple`: gate/note из `note_mono`, A/D/R через `reg14` + `lin2exp_t`, sustain/wave через `reg7`.
+
+## Для ИИ-агента
+
+`synths/mono_synth/` — отдельный Verilator/UDP/VST подпроект внутри `hdl-modules`, а не модуль из основного Icarus-пайплайна `modules.yaml` → `make all`. Его цель — быстро слушать RTL-голос в DAW: MIDI из VitaSound Remote Synth приходит в engine по UDP, `top.sv` клокает RTL, C++-обвязка отдаёт PCM обратно в VST.
+
+Текущий статус: рабочий monophonic synth engine `MonoSynth` с `mono_voice`, ADSR, waveform/PWM, pitch bend, SVF-фильтром, filter envelope, key follow и LFO/CC-схемой. Активный backlog фиксируется в [`docs/TODO.md`](../../docs/TODO.md), а MIDI/CC-контракт — в [`docs/MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md).
+
+При разработке держать diff минимальным: RTL менять в стиле соседних `.v`, engine/VST-протокол сверять с [`hdl-modules-tester/`](../../hdl-modules-tester/) и [`vst_bridge/`](../../vst_bridge/), `obj_dir/` не коммитить. `mono_synth.params.yaml` — источник runtime-параметров для VST/CtrlrX, сгенерированную панель руками не править.
+
+## Стек
+
+| Слой | Что используется | Где смотреть |
+|------|------------------|--------------|
+| RTL top | SystemVerilog `mono_synth`, `CLK_HZ=1_000_000`, `AUDIO_HZ=44100` | `top.sv` |
+| Голос | `note_mono` → `mono_voice` → DDS/ADSR/VCA/SVF/LFO | `../../mono_voice/`, `../../dds/`, `../../adsr/`, `../../svf/`, `../../lfo/` |
+| MIDI/CC | `io/midi_in`, `reg7`, `reg14`, `lin2exp_t`, raw MIDI bytes | `../../io/`, `../../common/`, [`docs/MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md) |
+| Verilator engine | C++ adapter, MIDI queue, session reset, PCM pull | `synth_core.cpp`, `synth_core.h`, `main.cpp` |
+| UDP protocol | `hdl_net` v5: Hello/Ack, `MidiHostToEngine`, `AudioPull`, `AudioPush`, param schema | [`../../hdl-modules-tester/protocol/hdl_net.h`](../../hdl-modules-tester/protocol/hdl_net.h) |
+| VST host | VitaSound Remote Synth, JUCE/VST3, runtime params from engine | [`../../vst_bridge/README.md`](../../vst_bridge/README.md) |
+| Params/UI | YAML schema for APVTS and CtrlrX panel | `mono_synth.params.yaml`, `panels/mono_synth.panel`, [`docs/CTRLRX_PANEL.md`](../../docs/CTRLRX_PANEL.md) |
+| Build/smoke | Verilator, `g++`, `make`, UDP smoke scripts | `Makefile`, `../../scripts/run_mono_synth.sh`, `../../scripts/e2e_mono_synth.sh` |
+
+## Структура каталога
+
+```text
+synths/mono_synth/
+  top.sv                    # Verilator top: MIDI, CC-регистры, LFO, filter env, mono_voice
+  synth_core.cpp/.h          # RTL adapter: reset, MIDI feed, PCM pull
+  main.cpp                   # CLI и UDP engine loop
+  Makefile                   # Verilator build -> obj_dir/MonoSynth
+  mono_synth.params.yaml     # machine-readable параметры для VST/CtrlrX/schema
+  panels/mono_synth.panel    # generated CtrlrX panel
+  svf_cutoff14_to_f.v        # 14-bit cutoff -> SVF f LUT
+  svf_cc_to_q.v              # resonance CC -> SVF q LUT
+  svf_cc_to_f.v              # legacy/unused helper, не в Makefile
+  adsr_regs_to_ctrl4.v       # helper, не в Makefile
+  obj_dir/                   # артефакт Verilator, не коммитить
+```
+
+## Текущее состояние
+
+Сделано:
+
+- `MonoSynth` собирается через Verilator и работает как UDP engine на `:5004`.
+- MIDI notes идут через `midi_in` и `note_mono`; pitch bend передаётся в `note_pitch2dds`.
+- VCA ADSR управляется CC 16–19, waveform CC 48, PWM duty CC 57.
+- SVF включён внутри `mono_voice`: cutoff CC 74/106, resonance CC 71, mode CC 22.
+- Filter envelope CC 24–28, key follow CC 51 и VCF-LFO3 CC 49/50/52 входят в cutoff mix.
+- `mono_synth.params.yaml` описывает параметры для runtime schema VST, APVTS cache и CtrlrX panel.
+- Есть smoke без DAW (`scripts/e2e_mono_synth.sh`) и E2E-сценарий через Reaper/FL Studio.
+
+Открыто/активно по [`docs/TODO.md`](../../docs/TODO.md). Перед началом работы сверять с RTL: backlog может отставать от текущего wiring.
+
+- Soft Hello: на reconnect того же `plugin_ssrc` не пульсировать `rst` в `synthOnSessionStart()`.
+- VST Play: уменьшить количество `fullReconnect`, если UDP-соединение уже живое.
+- 48 kHz vs 44.1 kHz: RTL фиксирован на `AUDIO_HZ=44100`, DAW/VST может прислать 48000.
+- DDS phase sync: legato-скачок частоты сейчас без синхронизации фазы.
+- VCF matrix: проверить/исправить fc 10–15 Hz в LUT и матричном тесте.
+- MIDI log: `--midi-log` не печатает sys realtime `0xFC`.
+- LFO -> pitch: пункт всё ещё есть в backlog; перед правкой проверить текущий путь `top.sv` → `mono_voice` → `note_pitch2dds`.
+
+## Источники правды
+
+| Вопрос | Документ |
+|--------|----------|
+| Общая архитектура repo / Icarus vs Verilator vs UDP | [`ARCHITECTURE.md`](../../ARCHITECTURE.md) |
+| Правила для AI-агента и пайплайн модулей | [`AGENTS.md`](../../AGENTS.md) |
+| Активные задачи и известные проблемы | [`docs/TODO.md`](../../docs/TODO.md) |
+| MIDI CC, cutoff math, опорные точки | [`docs/MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md) |
+| Общий паттерн `synths/*` | [`synths/README.md`](../README.md) |
+| UDP engine/protocol | [`hdl-modules-tester/README.md`](../../hdl-modules-tester/README.md) |
+| VST3 host | [`vst_bridge/README.md`](../../vst_bridge/README.md) |
+| CtrlrX/generated panel | [`docs/CTRLRX_PANEL.md`](../../docs/CTRLRX_PANEL.md) |
 
 ## Сборка
 
@@ -98,7 +171,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 
 ### SVF-фильтр (MIDI CC)
 
-Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff = `manual (CC74/106)` + **key follow (CC51, pivot C4)** + **VCF-LFO3 (CC49/50/52)** + **filter env (CC24–28)** → LUT 10 Hz…20 kHz. Подробно: [MONO_SYNTH_MIDI.md](../docs/MONO_SYNTH_MIDI.md).
+Цепочка: **DDS @ CLK → SVF @ CLK (oversampling) → decim → VCA**. Cutoff = `manual (CC74/106)` + **key follow (CC51, pivot C4)** + **VCF-LFO3 (CC49/50/52)** + **filter env (CC24–28)** → LUT 10 Hz…20 kHz. Подробно: [`MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md).
 
 | CC | Параметр |
 |----|----------|
@@ -139,7 +212,7 @@ Pitch bend пересылается как обычный MIDI (status `0xE0` + 
 Reaper → VitaSound Remote Synth (VST3) ──UDP :5004/:5005──► MonoSynth (Verilator)
 ```
 
-Протокол v5: [`hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h) — `MidiHostToEngine` (raw bytes), `AudioPull`, `AudioPush`, runtime parameter schema из `mono_synth.params.yaml`.
+Протокол v5: [`hdl-modules-tester/protocol/hdl_net.h`](../../hdl-modules-tester/protocol/hdl_net.h) — `MidiHostToEngine` (raw bytes), `AudioPull`, `AudioPush`, runtime parameter schema из `mono_synth.params.yaml`.
 
 ## RTL
 
