@@ -10,6 +10,7 @@
 
 - `verilator_tests/` — legacy (Verilator + C++, keyboard/MIDI → soundcard/wav). В `make all` не входит.
 - `hdl-modules-tester/` — UDP engine для VST (pull-only, только сеть). В `make all` не входит.
+- `synths/mono_synth/` — отдельный Verilator/UDP/VST synth. Перед правками начинать с [`synths/mono_synth/docs/current-sprint.md`](synths/mono_synth/docs/current-sprint.md), затем читать `architecture.md`, `schema.md`, `edge-cases.md`; контекст искать через `links.md`.
 
 ## Источник правды
 
