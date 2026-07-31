@@ -22,5 +22,14 @@ _(пусто — `frqdivmod` odd DIV исправлен в `common/frqdivmod.v`,
 - [ ] **mono-006 MIDI log** — `--midi-log` не печатает sys realtime (`0xFC` Stop); DAW transport stop часто шлёт pitch center, не CC123; edge case: [`EC-032`](../synths/mono_synth/docs/edge-cases.md#ec-032-daw-transport-stop).
 - [ ] **mono-007 LFO → pitch** — backlog item требует сверки с текущим RTL (`top.sv` уже передаёт VCO-LFO в `mono_voice`); edge case: [`EC-040`](../synths/mono_synth/docs/edge-cases.md#ec-040-lfo-pitch-backlog-freshness).
 - [x] **mono-doc-001 Agent documentation suite** — создать [`synths/mono_synth/docs/`](../synths/mono_synth/docs/) и сократить README до index + runbook.
-- [ ] выполнить ручное тестирование mini_fx
+- [x] **выполнить ручное тестирование mini_fx** — E2E OK (VST 0.7.1 effect + SVF @ CLK oversampling); см. [`vst_bridge/CHANGELOG.md`](../vst_bridge/CHANGELOG.md) 0.7.1.
+
+### Следующие шаги ручного тестирования
+
+1. **CtrlrX panels** — `python3 tools/gen_ctrlrx_panel.py`; FL/REAPER: CtrlrX (`mono_synth.panel`) → VitaSound; cutoff = CC74+CC106; dual path с APVTS OK.
+2. **SVF high-Q (mono_synth)** — LP, загнать Res/Cut в зону свиста, вернуть назад: нет залипшей генерации (state limit в `svf.v`).
+3. **Filter env pluck** — `./scripts/run_mono_synth.sh --midi-log`; CC28=127 до ноты; яркий pluck → тёмный sustain.
+4. **VST HELLO / schema** — instance 0.7.1, WSL IP, schema `server`; spot-check waveform/LFO/PWM.
+5. **Jabra / USB headset** — в REAPER Input = None (не открывать mic), иначе «голосовой» EQ маскирует тест.
+
 - [ ] проверить генерацию panels и разобраться, как их подключать параллельно с ctrlr и панель вместе с vsti

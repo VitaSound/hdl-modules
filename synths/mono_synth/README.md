@@ -75,7 +75,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 
 1. Терминал: `./scripts/run_mono_synth.sh`
 2. DAW: **44100 Hz** (FL: Settings → Audio; Reaper: Project sample rate), buffer **512–1024**
-3. MIDI-трек → FX → **VST3i: VitaSound Remote Synth**
+3. MIDI-трек → FX → **VST3: VitaSound Remote Synth** (effect; не VST3i)
 4. В UI VST: **Engine host** `127.0.0.1`, **Network profile** `Local`, **Play**
 5. **Test note** (C4) или ноты с piano roll / Virtual MIDI keyboard
 

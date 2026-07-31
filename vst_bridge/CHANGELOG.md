@@ -2,6 +2,17 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
+## [0.7.1] — 2026-07-31
+
+### Host category
+
+- `IS_SYNTH FALSE`: в REAPER плагин как **VST3** (effect), не VST3i. Insert заменяет сигнал трека вместо суммы dry+wet (нужно для MiniFX и для synth без dry bleed).
+
+### MiniFX (AudioPush insert)
+
+- SVF тикает каждый `CLK` (1 MHz) + boxcar до `AUDIO_HZ`, как в `mono_voice`: LUT `svf_cutoff14_to_f` / `svf_cc_to_q` рассчитаны на `Fs=CLK_HZ`. Раньше tick только на audio rate сжимал log-cutoff в верх слайдера («до ~0.75 почти тишина»).
+- Ручной E2E в REAPER пройден: insert обрабатывает wav (cutoff/resonance слышны). Для корректного спектра на USB-гарнитуре (Jabra) не открывать mic/input в REAPER — иначе устройство уходит в «голосовой» EQ.
+
 ## [0.7.0] — 2026-07-02
 
 ### Runtime параметры

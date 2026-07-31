@@ -2,10 +2,12 @@
 
 VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
 
-**Версия:** 0.7.0 — см. [CHANGELOG.md](CHANGELOG.md).
+**Версия:** 0.7.1 — см. [CHANGELOG.md](CHANGELOG.md).
 
-В Reaper: **`VST3i: VitaSound Remote Synth (VitaSound)`**.  
+В Reaper: **`VST3: VitaSound Remote Synth (VitaSound)`** (effect, не instrument).  
 Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
+
+Собран с `IS_SYNTH FALSE`: insert **заменяет** сигнал трека. При `IS_SYNTH TRUE` (VST3i) REAPER суммирует dry трека с выходом плагина — для UDP-engine (synth и MiniFX) это не нужно. Dry при необходимости — send/параллельный трек или Wet/Dry у FX. После пересборки сделайте **rescan** плагинов (старый кэш может ещё показывать `VST3i`).
 
 Протокол: [`protocol/hdl_net.h`](protocol/hdl_net.h) (копия [`../hdl-modules-tester/protocol/hdl_net.h`](../hdl-modules-tester/protocol/hdl_net.h)).
 

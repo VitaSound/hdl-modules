@@ -80,6 +80,16 @@ module mini_fx (
     svf_cutoff14_to_f u_svf_fc(.idx(fcut14), .f(svf_f));
     svf_cc_to_q u_svf_fq(.cc(fres_cc), .q(svf_q));
 
+    // Hold last push sample; SVF ticks every CLK (1 MHz) like mono_voice so
+    // svf_cutoff14_to_f / svf_cc_to_q (generated for Fs=CLK_HZ) stay correct.
+    reg signed [15:0] in_hold;
+    always @(posedge clk) begin
+        if (rst)
+            in_hold <= 16'sd0;
+        else if (audio_in_valid)
+            in_hold <= audio_in;
+    end
+
     reg [31:0] audio_acc;
     reg        audio_tick;
 
@@ -105,15 +115,36 @@ module mini_fx (
     svf u_svf(
         .clk(clk),
         .rst(rst),
-        .tick(audio_tick && audio_in_valid),
+        .tick(1'b1),
         .f(svf_f),
         .q(svf_q),
-        .in(audio_in),
+        .in(in_hold),
         .hp(hp_unused),
         .bp(bp_unused),
         .lp(lp_out),
         .notch(notch_unused)
     );
+
+    // Boxcar average @ audio_tick (same idea as mono_voice USE_SVF path).
+    reg signed [31:0] svf_sum;
+    reg [15:0]        svf_cnt;
+    reg signed [15:0] svf_out_hold;
+
+    always @(posedge clk) begin
+        if (rst) begin
+            svf_sum      <= 32'sd0;
+            svf_cnt      <= 16'd0;
+            svf_out_hold <= 16'sd0;
+        end else if (audio_tick) begin
+            svf_out_hold <= (svf_sum + lp_out) /
+                $signed({16'd0, svf_cnt + 16'd1});
+            svf_sum <= 32'sd0;
+            svf_cnt <= 16'd0;
+        end else begin
+            svf_sum <= svf_sum + lp_out;
+            svf_cnt <= svf_cnt + 16'd1;
+        end
+    end
 
     reg [15:0] out_sample;
     reg        out_valid;
@@ -125,7 +156,7 @@ module mini_fx (
         end else begin
             out_valid <= 1'b0;
             if (audio_tick && audio_in_valid) begin
-                out_sample <= lp_out + 16'd32768;
+                out_sample <= svf_out_hold + 16'd32768;
                 out_valid  <= 1'b1;
             end
         end

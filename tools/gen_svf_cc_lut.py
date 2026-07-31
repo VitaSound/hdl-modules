@@ -61,7 +61,13 @@ def emit_q_lut(entries: list[tuple[int, int]]) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--fs", type=float, default=FS_DEFAULT, help="SVF tick rate (CLK_Hz)")
+    parser.add_argument(
+        "--fs",
+        type=float,
+        default=FS_DEFAULT,
+        help="SVF .tick sample rate (Hz). mono_voice/mini_fx tick every CLK → use CLK_HZ "
+        "(default 1e6), not AUDIO_HZ. Wrong fs crushes the audible cutoff range.",
+    )
     parser.add_argument("--fc-min", type=float, default=FC_MIN_DEFAULT)
     parser.add_argument("--fc-max", type=float, default=FC_MAX_DEFAULT)
     parser.add_argument("--bits", type=int, default=14, choices=(7, 14))

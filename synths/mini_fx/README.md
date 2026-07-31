@@ -27,12 +27,12 @@ Ack advertises `kCapAudioPush`. Empty push ring → silence on pull.
 ## VST E2E (insert)
 
 1. `./scripts/run_mini_fx.sh`
-2. Load **VitaSound Remote Synth** as insert on a track with material.
-3. Play — dry goes **AudioPush**, wet returns via **AudioPull**.
+2. Load **VST3: VitaSound Remote Synth** (effect, not VST3i) as insert on a track with material. After rebuilding the VST, Clear cache / rescan in Reaper.
+3. Play — input goes **AudioPush**, wet returns via **AudioPull** (track dry is replaced, not summed).
 4. Move **Filter Cutoff** (APVTS) or send CC — hear LP sweep on the same source.
 
 ## RTL
 
-[`top.sv`](top.sv): `audio_in → svf → audio_out`, MIDI CC only (no oscillator).
+[`top.sv`](top.sv): `audio_in → SVF (tick every CLK @ 1 MHz, boxcar → AUDIO_HZ) → audio_out`, MIDI CC only (no oscillator). Cutoff/Q LUTs match `mono_synth` (`Fs=CLK_HZ`); do not tick SVF only at audio rate or the log curve collapses into the top of the slider.
 
 Not in `modules.yaml` / `make all` (Verilator UDP engine only).
