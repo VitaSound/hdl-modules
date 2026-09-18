@@ -6,6 +6,14 @@
 
 **Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-библиотека, Icarus-тесты, legacy `verilator_tests` (клавиатура/MIDI/звук) и `hdl-modules-tester` + VST (UDP/DAW).
 
+**Индекс модулей для ИИ-агентов:** [AI_INDEX.md](AI_INDEX.md)
+
+## Экосистема VitaSound
+
+- [MIT](https://github.com/VitaSound/MIT) — методология и декомпозиция задач (виртуальное «Министерство Инженерных Технологий»)
+- [feco](https://github.com/VitaSound/feco) — каталог Forth-инструментов (fmix, flint, fcov, fmcp)
+- [fhdlgen](https://github.com/VitaSound/fhdlgen) — генератор Verilog из Forth (будущий фронтенд для этой библиотеки)
+
 # назначение модулей
 
 ## Common

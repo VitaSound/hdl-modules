@@ -37,6 +37,6 @@ jobs:
 
       - name: Verify README and modules.yaml are up to date
         run: |
-          git diff --stat -- README.md modules.yaml '**/README.md'
-          git diff --exit-code -- README.md modules.yaml '**/README.md'
-          test -z "$(git status --porcelain -- README.md modules.yaml '**/README.md')"
+          git diff --stat -- README.md AI_INDEX.md modules.yaml '**/README.md'
+          git diff --exit-code -- README.md AI_INDEX.md modules.yaml '**/README.md'
+          test -z "$(git status --porcelain -- README.md AI_INDEX.md modules.yaml '**/README.md')"

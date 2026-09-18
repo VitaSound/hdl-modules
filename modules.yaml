@@ -6,6 +6,18 @@ repo:
   branch: master
   iverilog_guide: https://iverilog.fandom.com/wiki/Installation_Guide#Ubuntu_Linux
   sandbox_link: https://sites.google.com/site/analogsynthdiy/sobstvennye-razrabotki/sintezator-na-baze-plis/z---ssylki
+  ecosystem:
+    ai_index: AI_INDEX.md
+    links:
+      - name: MIT
+        url: https://github.com/VitaSound/MIT
+        role_ru: методология и декомпозиция задач (виртуальное «Министерство Инженерных Технологий»)
+      - name: feco
+        url: https://github.com/VitaSound/feco
+        role_ru: каталог Forth-инструментов (fmix, flint, fcov, fmcp)
+      - name: fhdlgen
+        url: https://github.com/VitaSound/fhdlgen
+        role_ru: генератор Verilog из Forth (будущий фронтенд для этой библиотеки)
   daw:
     title_ru: VitaSound Remote Synth (DAW ↔ Verilator)
     intro_ru: Плагин VST3 и UDP-engine для Reaper / других DAW

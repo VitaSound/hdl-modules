@@ -18,6 +18,12 @@ def load_data() -> dict:
         return yaml.safe_load(fh)
 
 
+def summary(value: str) -> str:
+    """First line of a description, safe for a markdown table cell."""
+    first_line = next((line for line in str(value).splitlines() if line.strip()), "")
+    return " ".join(first_line.split()).replace("|", "\\|")
+
+
 def render_template(name: str, **context) -> str:
     env = Environment(
         loader=FileSystemLoader(TEMPLATES),
@@ -26,6 +32,7 @@ def render_template(name: str, **context) -> str:
         lstrip_blocks=True,
     )
     env.filters["basename"] = lambda value: Path(value).name
+    env.filters["summary"] = summary
     template = env.get_template(name)
     return template.render(**context) + "\n"
 
@@ -50,6 +57,16 @@ def main() -> int:
         generation=generation,
     )
     write_readme(ROOT / "README.md", root_content)
+
+    if data["repo"].get("ecosystem"):
+        ai_index_content = render_template(
+            "ai_index.md.j2",
+            repo=data["repo"],
+            common=common,
+            io=io_cat,
+            generation=generation,
+        )
+        write_readme(ROOT / data["repo"]["ecosystem"]["ai_index"], ai_index_content)
 
     common_modules = []
     for module in common["modules"]:

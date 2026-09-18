@@ -6,6 +6,16 @@
 
 **Схема проекта:** [ARCHITECTURE.md](ARCHITECTURE.md) — RTL-библиотека, Icarus-тесты, legacy `verilator_tests` (клавиатура/MIDI/звук) и `hdl-modules-tester` + VST (UDP/DAW).
 
+{% if repo.ecosystem %}
+**Индекс модулей для ИИ-агентов:** [{{ repo.ecosystem.ai_index }}]({{ repo.ecosystem.ai_index }})
+
+## Экосистема VitaSound
+
+{% for link in repo.ecosystem.links %}
+- [{{ link.name }}]({{ link.url }}) — {{ link.role_ru }}
+{% endfor %}
+{% endif %}
+
 # назначение модулей
 
 ## {{ common.title_ru }}
