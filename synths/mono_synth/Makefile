@@ -1,7 +1,12 @@
 TESTER = ../../hdl-modules-tester
 TARGET = obj_dir/MonoSynth
 
+TRACE ?= 0
+
 VERILATOR_FLAGS = --cc --exe -Wno-WIDTH -Wno-INITIALDLY -Wno-CASEINCOMPLETE -Wno-IMPLICIT
+ifeq ($(TRACE),1)
+VERILATOR_FLAGS += --trace
+endif
 LDFLAGS = -lpthread
 VT_CFLAGS = -I.. -I../../../hdl-modules-tester
 
@@ -49,7 +54,7 @@ CPP_SRCS = \
 
 all: $(TARGET)
 
-$(TARGET): $(RTL_SRCS) $(CPP_SRCS) synth_core.h $(TESTER)/engine.h $(TESTER)/protocol/hdl_net.h $(TESTER)/midi_events.h
+$(TARGET): $(RTL_SRCS) $(CPP_SRCS) synth_core.h $(TESTER)/engine.h $(TESTER)/protocol/hdl_net.h $(TESTER)/midi_events.h ../wave_trace.h
 	verilator $(VERILATOR_FLAGS) $(RTL_SRCS) $(CPP_SRCS) \
 		--Mdir obj_dir --top-module mono_synth \
 		-CFLAGS "$(VT_CFLAGS)" \

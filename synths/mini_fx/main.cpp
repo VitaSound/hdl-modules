@@ -12,12 +12,14 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
 constexpr uint32_t DEFAULT_SAMPLE_RATE = 44100;
 constexpr const char* DEFAULT_PARAMS_YAML = "synths/mini_fx/mini_fx.params.yaml";
+constexpr uint64_t DEFAULT_DUMP_FRAMES = 1024;
 
 void onSignal(int) {
     if (g_running_ptr != nullptr) {
@@ -34,7 +36,32 @@ void printUsage() {
         << "  --udp-block-frames N (default 256)\n"
         << "  --params-yaml PATH (default synths/mini_fx/mini_fx.params.yaml)\n"
         << "  --midi-log           print MIDI bytes/events to stderr\n"
+        << "  --dump-vcd PATH      offline WavePeek dump (requires TRACE=1 build); skips UDP\n"
+        << "  --dump-frames N      audio frames to dump (default 1024)\n"
         << "  --help\n";
+}
+
+int runDump(SynthCore& synth, const std::string& path, uint64_t frames) {
+    if (!synthTraceOpen(synth, path, frames)) {
+        return 1;
+    }
+
+    SharedState state;
+    synthOnSessionStart(synth);
+
+    // Silence through the insert filter — enough to inspect RTL clocks/ports.
+    std::vector<int16_t> buf(256);
+    std::vector<int16_t> input(256, 0);
+    uint64_t left = frames;
+    while (left > 0 && synth.trace.active) {
+        const unsigned long n = static_cast<unsigned long>(left > buf.size() ? buf.size() : left);
+        synthGeneratePull(synth, state, buf.data(), n, input.data());
+        left -= n;
+    }
+
+    synthTraceClose(synth);
+    std::cerr << "dump: wrote " << path << "\n";
+    return 0;
 }
 } // namespace
 
@@ -53,6 +80,8 @@ int main(int argc, char** argv) {
     uint16_t udpBlockFrames = 256;
     std::string paramsYamlPath = DEFAULT_PARAMS_YAML;
     bool midiLog = false;
+    std::string dumpVcd;
+    uint64_t dumpFrames = DEFAULT_DUMP_FRAMES;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -66,6 +95,10 @@ int main(int argc, char** argv) {
             paramsYamlPath = argv[++i];
         } else if (arg == "--midi-log") {
             midiLog = true;
+        } else if (arg == "--dump-vcd" && i + 1 < argc) {
+            dumpVcd = argv[++i];
+        } else if (arg == "--dump-frames" && i + 1 < argc) {
+            dumpFrames = static_cast<uint64_t>(std::stoull(argv[++i]));
         } else if (arg == "--help" || arg == "-h") {
             printUsage();
             return 0;
@@ -81,6 +114,12 @@ int main(int argc, char** argv) {
         return 1;
     }
     synth.midiLog = midiLog;
+
+    if (!dumpVcd.empty()) {
+        const int rc = runDump(synth, dumpVcd, dumpFrames);
+        synthDestroy(synth);
+        return rc;
+    }
 
     UdpSessionState session;
     EngineConfig cfg;

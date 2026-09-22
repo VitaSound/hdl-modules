@@ -9,20 +9,21 @@
 namespace {
 constexpr uint32_t VERILOG_CLK_HZ = 1000000;
 
-void stepVerilogCycles(Vmono_synth* top, uint32_t cycles) {
+void stepVerilogCycles(SynthCore& core, uint32_t cycles) {
     for (uint32_t i = 0; i < cycles; ++i) {
-        top->clk = 0;
-        top->eval();
-        top->clk = 1;
-        top->eval();
+        core.top->clk = 0;
+        core.top->eval();
+        core.top->clk = 1;
+        core.top->eval();
+        core.trace.afterCycle();
     }
 }
 
-void feedMidiByte(Vmono_synth* top, uint8_t byte) {
-    top->byte_in = byte;
-    top->byte_valid = 1;
-    stepVerilogCycles(top, 1);
-    top->byte_valid = 0;
+void feedMidiByte(SynthCore& core, uint8_t byte) {
+    core.top->byte_in = byte;
+    core.top->byte_valid = 1;
+    stepVerilogCycles(core, 1);
+    core.top->byte_valid = 0;
 }
 
 void logMidiDecoded(const MidiDecoded& msg) {
@@ -80,7 +81,7 @@ void logMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
 
 void drainPendingMidi(SynthCore& core) {
     for (uint8_t byte : core.pendingMidiBytes) {
-        feedMidiByte(core.top, byte);
+        feedMidiByte(core, byte);
     }
     core.pendingMidiBytes.clear();
 }
@@ -112,7 +113,7 @@ void synthPostMidiBytes(SynthCore& core, const uint8_t* data, size_t len) {
 void synthOnSessionStart(SynthCore& core) {
     drainPendingMidi(core);
     core.top->rst = 1;
-    stepVerilogCycles(core.top, 4);
+    stepVerilogCycles(core, 4);
     core.top->rst = 0;
     core.fractional = 0;
 }
@@ -143,21 +144,39 @@ void synthGeneratePull(SynthCore& core, const SharedState& /*state*/, int16_t* m
     drainPendingMidi(core);
 
     for (unsigned long i = 0; i < frames; ++i) {
+        const bool tracing = core.trace.active;
         while (true) {
             core.top->clk = 0;
             core.top->eval();
             core.top->clk = 1;
             core.top->eval();
+            core.trace.afterCycle();
             if (core.top->audio_valid) {
                 const uint16_t raw = core.top->audio_sample;
                 mono[i] = static_cast<int16_t>(static_cast<int32_t>(raw) - 32768);
                 break;
             }
         }
+        core.trace.afterAudioFrame();
+        if (tracing && !core.trace.active) {
+            for (unsigned long j = i + 1; j < frames; ++j) {
+                mono[j] = 0;
+            }
+            break;
+        }
     }
 }
 
+bool synthTraceOpen(SynthCore& core, const std::string& path, uint64_t max_frames) {
+    return core.trace.open(core.top, path, max_frames);
+}
+
+void synthTraceClose(SynthCore& core) {
+    core.trace.close();
+}
+
 void synthDestroy(SynthCore& core) {
+    synthTraceClose(core);
     delete core.top;
     core.top = nullptr;
     core.pendingMidiBytes.clear();

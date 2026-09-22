@@ -47,12 +47,21 @@ From repo root:
 
 ```bash
 make -C synths/mono_synth
+make -C synths/mono_synth TRACE=1   # VCD dump support for WavePeek
 ```
 
 Output binary:
 
 ```text
 synths/mono_synth/obj_dir/MonoSynth
+```
+
+Offline WavePeek dump (no UDP):
+
+```bash
+./synths/mono_synth/obj_dir/MonoSynth \
+  --dump-vcd synths/mono_synth/out.vcd --dump-frames 1024 --dump-note 60
+make peek ID=mono_synth ARGS='info'
 ```
 
 Clean:
