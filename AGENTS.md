@@ -19,6 +19,7 @@
 | Список модулей, тесты, пути к PNG | [modules.yaml](modules.yaml) |
 | Запуск симуляций | [tools/run_tests.py](tools/run_tests.py) |
 | PNG из GTKWave | [tools/render_images.py](tools/render_images.py) |
+| Запросы к VCD (агенты) | [WavePeek](https://kleverhq.github.io/wavepeek/) + [tools/peek_wave.py](tools/peek_wave.py); skill — [`.cursor/skills/wavepeek`](.cursor/skills/wavepeek) |
 | README | [tools/gen_readme.py](tools/gen_readme.py) + `tools/templates/` |
 | Индекс модулей для ИИ | [AI_INDEX.md](AI_INDEX.md) — генерируется из `modules.yaml` |
 | CI | [.github/workflows/test-and-docs.yml](.github/workflows/test-and-docs.yml) |
@@ -37,11 +38,23 @@
 make list              # id всех модулей
 make sim ID=<id>       # симуляция одного модуля
 make wave ID=<id>      # GTKWave для настройки test.gtkw
+make peek ID=<id> ARGS='…'   # запрос к out.vcd (нужен WavePeek)
 make test              # все симуляции
 make images ID=<id>    # PNG (нужен out.vcd)
 make docs              # README из modules.yaml
 make all               # test → images → docs
 ```
+
+### Отладка waveform через WavePeek
+
+После `make sim ID=<id>` не читайте сырой VCD целиком — запрашивайте dump через WavePeek (или `make peek`):
+
+1. `make peek ID=<id> ARGS='info'` / `ARGS='scope --tree'` / `ARGS='signal --scope testbench'`
+2. Конкретные вопросы: `value`, `change`, `property` (см. skill `.cursor/skills/wavepeek`)
+3. Для скриптов предпочитайте `--json` (например `ARGS='info --json'`)
+4. Визуальный zoom и `test.gtkw` по-прежнему через `make wave` / GTKWave; PNG — только `make images`
+
+Установка: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) § WavePeek.
 
 ## Стиль и ограничения
 
@@ -158,5 +171,6 @@ GitHub Actions проверяет `git diff` только для `README.md`, `A
 ## Ссылки
 
 - [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md) — подробный гайд
-- [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) — apt-пакеты
+- [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) — apt-пакеты и WavePeek
 - [AI_INDEX.md](AI_INDEX.md) — индекс модулей для ИИ-агентов и внешних репозиториев
+- [WavePeek](https://kleverhq.github.io/wavepeek/) — CLI-запросы к VCD; skill в `.cursor/skills/wavepeek`
