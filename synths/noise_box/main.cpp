@@ -12,11 +12,13 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
 constexpr uint32_t DEFAULT_SAMPLE_RATE = 48000;
+constexpr uint64_t DEFAULT_DUMP_FRAMES = 1024;
 
 void onSignal(int) {
     if (g_running_ptr != nullptr) {
@@ -31,7 +33,38 @@ void printUsage() {
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
         << "  --sample-rate R (default 48000, overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
+        << "  --dump-vcd PATH      offline WavePeek dump (requires TRACE=1 build); skips UDP\n"
+        << "  --dump-frames N      audio frames to dump (default 1024)\n"
+        << "  --dump-note N        MIDI note to key on for dump (default 60)\n"
         << "  --help\n";
+}
+
+int runDump(SynthCore& synth, const std::string& path, uint64_t frames, int note) {
+    if (!synthTraceOpen(synth, path, frames)) {
+        return 1;
+    }
+
+    SharedState state;
+    synthOnSessionStart(synth);
+
+    const uint8_t note_on[3] = {
+        0x90,
+        static_cast<uint8_t>(note & 0x7f),
+        100,
+    };
+    synthPostMidiBytes(synth, note_on, 3);
+
+    std::vector<int16_t> buf(256);
+    uint64_t left = frames;
+    while (left > 0 && synth.trace.active) {
+        const unsigned long n = static_cast<unsigned long>(left > buf.size() ? buf.size() : left);
+        synthGeneratePull(synth, state, buf.data(), n, nullptr);
+        left -= n;
+    }
+
+    synthTraceClose(synth);
+    std::cerr << "dump: wrote " << path << "\n";
+    return 0;
 }
 } // namespace
 
@@ -48,6 +81,9 @@ int main(int argc, char** argv) {
     uint32_t sampleRate = DEFAULT_SAMPLE_RATE;
     std::string udpBind = "0.0.0.0:5004";
     uint16_t udpBlockFrames = 256;
+    std::string dumpVcd;
+    uint64_t dumpFrames = DEFAULT_DUMP_FRAMES;
+    int dumpNote = 60;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -57,6 +93,12 @@ int main(int argc, char** argv) {
             sampleRate = static_cast<uint32_t>(std::stoul(argv[++i]));
         } else if (arg == "--udp-block-frames" && i + 1 < argc) {
             udpBlockFrames = static_cast<uint16_t>(std::stoul(argv[++i]));
+        } else if (arg == "--dump-vcd" && i + 1 < argc) {
+            dumpVcd = argv[++i];
+        } else if (arg == "--dump-frames" && i + 1 < argc) {
+            dumpFrames = static_cast<uint64_t>(std::stoull(argv[++i]));
+        } else if (arg == "--dump-note" && i + 1 < argc) {
+            dumpNote = std::stoi(argv[++i]);
         } else if (arg == "--help" || arg == "-h") {
             printUsage();
             return 0;
@@ -70,6 +112,12 @@ int main(int argc, char** argv) {
     SynthCore synth;
     if (!synthInit(synth, sampleRate)) {
         return 1;
+    }
+
+    if (!dumpVcd.empty()) {
+        const int rc = runDump(synth, dumpVcd, dumpFrames, dumpNote);
+        synthDestroy(synth);
+        return rc;
     }
 
     UdpSessionState session;

@@ -8,12 +8,13 @@
 namespace {
 constexpr uint32_t VERILOG_CLK_HZ = 1000000;
 
-void stepVerilogCycles(Vnoise_box* top, uint32_t cycles) {
+void stepVerilogCycles(SynthCore& core, uint32_t cycles) {
     for (uint32_t i = 0; i < cycles; ++i) {
-        top->clk = 0;
-        top->eval();
-        top->clk = 1;
-        top->eval();
+        core.top->clk = 0;
+        core.top->eval();
+        core.top->clk = 1;
+        core.top->eval();
+        core.trace.afterCycle();
     }
 }
 
@@ -106,10 +107,11 @@ void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono,
     core.top->enable = state.gate.load(std::memory_order_relaxed) ? 1 : 0;
 
     for (unsigned long i = 0; i < frames; ++i) {
+        const bool tracing = core.trace.active;
         core.fractional += VERILOG_CLK_HZ;
         const uint32_t cycles = core.fractional / core.sampleRate;
         core.fractional %= core.sampleRate;
-        stepVerilogCycles(core.top, cycles);
+        stepVerilogCycles(core, cycles);
 
         int16_t sample = 0;
         if (core.top->enable) {
@@ -117,10 +119,27 @@ void synthGeneratePull(SynthCore& core, const SharedState& state, int16_t* mono,
             sample = static_cast<int16_t>(static_cast<int32_t>(raw) - 32768);
         }
         mono[i] = sample;
+
+        core.trace.afterAudioFrame();
+        if (tracing && !core.trace.active) {
+            for (unsigned long j = i + 1; j < frames; ++j) {
+                mono[j] = 0;
+            }
+            break;
+        }
     }
 }
 
+bool synthTraceOpen(SynthCore& core, const std::string& path, uint64_t max_frames) {
+    return core.trace.open(core.top, path, max_frames);
+}
+
+void synthTraceClose(SynthCore& core) {
+    core.trace.close();
+}
+
 void synthDestroy(SynthCore& core) {
+    synthTraceClose(core);
     delete core.top;
     core.top = nullptr;
     core.pendingMidiBytes.clear();
