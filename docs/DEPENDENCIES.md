@@ -23,6 +23,30 @@ sudo apt install -y \
 pip install -r requirements.txt
 ```
 
+## WavePeek (запросы к VCD, опционально)
+
+CLI для инспекции `out.vcd` агентами и скриптами ([WavePeek](https://kleverhq.github.io/wavepeek/)). Не заменяет GTKWave для PNG.
+
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf https://kleverhq.github.io/wavepeek/install.sh | sh
+wavepeek --version
+```
+
+После установки извлечь Cursor skill (версия совпадает с бинарником):
+
+```bash
+wavepeek skill .cursor/skills/wavepeek
+```
+
+Запросы через обёртку репозитория:
+
+```bash
+make sim ID=adsr
+make peek ID=adsr ARGS='info'
+make peek ID=adsr ARGS='scope --tree'
+# или: make peek ID=adsr -- info
+```
+
 ## Verilator realtime (отдельно)
 
 **Legacy** (keyboard/MIDI → soundcard): [verilator_tests/README.md](../verilator_tests/README.md)
