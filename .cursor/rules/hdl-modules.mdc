@@ -5,7 +5,7 @@ alwaysApply: true
 
 # hdl-modules
 
-Полный гайд: [AGENTS.md](AGENTS.md). Добавление модуля (людям): [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md).
+Полный гайд: [AGENTS.md](AGENTS.md). Добавление модуля (людям): [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md). Планирование изменений — OpenSpec в `openspec/` (`/opsx-propose`).
 
 ## Пайплайн
 

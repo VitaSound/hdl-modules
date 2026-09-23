@@ -32,6 +32,10 @@
 - [feco](https://github.com/VitaSound/feco) — каталог Forth-инструментов (fmix, flint, fcov, fmcp).
 - [fhdlgen](https://github.com/VitaSound/fhdlgen) — генератор Verilog из Forth; целевой потребитель — эта библиотека. Пока не умеет `assign`/`parameter`/инстансы, генерировать модули уровня `dds`/`adsr` нельзя.
 
+## Планирование изменений: OpenSpec
+
+Нетривиальные изменения (новый модуль, смена поведения, задачи из `docs/TODO.md`) планируются через [OpenSpec](https://github.com/Fission-AI/OpenSpec) в [openspec/](openspec/): `/opsx-explore` → `/opsx-propose <name>` → `/opsx-apply` → `/opsx-archive` (Codex: `$openspec-*`). Контекст и правила — [openspec/config.yaml](openspec/config.yaml). Спеки пишутся только под реальное изменение; `modules.yaml` остаётся источником метаданных, спеки описывают поведение.
+
 ## Команды
 
 ```bash

@@ -1,0 +1,33 @@
+schema: spec-driven
+
+context: |
+  Language: Russian
+  All artifacts must be written in Russian.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  Проект: hdl-modules — библиотека Verilog-модулей для FPGA-синтезатора VitaSound.
+  Правила работы: AGENTS.md, гайд добавления модуля: docs/ADDING_MODULES.md.
+  Стек: Verilog, Icarus Verilog (make test / make sim ID=<id>), GTKWave для PNG,
+  Python-генераторы в tools/. Verilator + C++ + VST3 — только synths/, hdl-modules-tester/, vst_bridge/.
+  Источник правды о модулях — modules.yaml. README и AI_INDEX.md генерируются (make docs), руками не править.
+  Задачи synths/mono_synth начинать с synths/mono_synth/docs/current-sprint.md.
+  Бэклог — docs/TODO.md (id вида mono-00x); edge cases — synths/mono_synth/docs/edge-cases.md (EC-0xx).
+  Экосистема: MIT (методология), feco (Forth-тулчейн), fhdlgen (генератор Verilog из Forth).
+
+rules:
+  specs:
+    - Описывать наблюдаемое поведение модуля (реакция выходов на входы и такты), без списка портов и имён внутренних регистров
+    - Каждый Scenario формулировать так, чтобы его можно было проверить в testbench.v (Icarus) или в E2E-прогоне synths/
+    - Домены specs называть по id модуля из modules.yaml или по подсистеме (mono_synth, vst_bridge, hdl_net)
+  design:
+    - Ссылаться на существующие модули из AI_INDEX.md вместо разработки новых
+  tasks:
+    - Для нового модуля включать шаги RTL, testbench, test.sh, test.gtkw, запись в modules.yaml, make all
+    - Связывать задачу с id из docs/TODO.md, если он есть
+
+operations:
+  apply:
+    guidance:
+      - Минимальный diff, стиль как в соседних .v
+      - Проверять make sim ID=<id> перед полным make test
+      - Не коммитить out.vcd, testbench, obj_dir/
