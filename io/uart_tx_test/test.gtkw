@@ -1,0 +1,22 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*]
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-15.000000 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 269
+[signals_width] 120
+[sst_expanded] 1
+[sst_vpaned_height] 157
+@28
+testbench.clk
+testbench.rst
+testbench.start
+testbench.tx
+testbench.busy
+@22
+testbench.data[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

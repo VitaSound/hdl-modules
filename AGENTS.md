@@ -1,6 +1,6 @@
 # Инструкции для AI-агента (hdl-modules)
 
-Краткий контекст проекта и единый стиль доработок. Подробная пошаговая инструкция для людей: [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md).
+Краткий контекст проекта и единый стиль доработок. Подробная пошаговая инструкция для людей: [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md). Портфель устройств (где я сейчас): [docs/portfolio/NOW.md](docs/portfolio/NOW.md).
 
 ## Назначение репозитория
 
@@ -22,6 +22,7 @@
 | Запросы к VCD (агенты) | [WavePeek](https://kleverhq.github.io/wavepeek/) + [tools/peek_wave.py](tools/peek_wave.py); skill — [`.cursor/skills/wavepeek`](.cursor/skills/wavepeek) |
 | README | [tools/gen_readme.py](tools/gen_readme.py) + `tools/templates/` |
 | Индекс модулей для ИИ | [AI_INDEX.md](AI_INDEX.md) — генерируется из `modules.yaml` |
+| Портфель устройств (фаза, текущий issue) | [docs/portfolio/NOW.md](docs/portfolio/NOW.md) |
 | CI | [.github/workflows/test-and-docs.yml](.github/workflows/test-and-docs.yml) |
 
 ## Экосистема VitaSound
@@ -189,5 +190,6 @@ GitHub Actions проверяет `git diff` только для `README.md`, `A
 
 - [docs/ADDING_MODULES.md](docs/ADDING_MODULES.md) — подробный гайд
 - [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) — apt-пакеты и WavePeek
+- [docs/portfolio/NOW.md](docs/portfolio/NOW.md) — портфель устройств: фаза и текущий issue
 - [AI_INDEX.md](AI_INDEX.md) — индекс модулей для ИИ-агентов и внешних репозиториев
 - [WavePeek](https://kleverhq.github.io/wavepeek/) — CLI-запросы к VCD; skill в `.cursor/skills/wavepeek`

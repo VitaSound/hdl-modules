@@ -2,6 +2,8 @@
 
 Открытые задачи и известные проблемы репозитория (не путать с чеклистом фаз в [LEGACY_MIGRATION_PLAN.md](LEGACY_MIGRATION_PLAN.md)).
 
+Портфель устройств (фаза, текущий issue, что делать дальше): [`docs/portfolio/NOW.md`](portfolio/NOW.md).
+
 Current mono_synth sprint: [`synths/mono_synth/docs/current-sprint.md`](../synths/mono_synth/docs/current-sprint.md).
 
 ---

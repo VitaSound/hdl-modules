@@ -23,6 +23,7 @@
 | `powerup_reset` | готово | Генератор автоматического сигнала сброса и сброса по кнопке | [common/powerup_reset.v](common/powerup_reset.v) | [common/powerup_reset_test](common/powerup_reset_test) | [png](common/powerup_reset_test/test.png) |
 | `frqdivmod` | готово | Целочисленный делитель частоты на 2, 3, 4 итд | [common/frqdivmod.v](common/frqdivmod.v) | [common/frqdivmod_test](common/frqdivmod_test) | [png](common/frqdivmod_test/test.png) |
 | `strobe_gen` | готово | Формирователь строба шириной 1 clk от нч сигнала (например, от целочисленного делителя) | [common/strobe_gen.v](common/strobe_gen.v) | [common/strobe_gen_test](common/strobe_gen_test) | [png](common/strobe_gen_test/test.png) |
+| `debounce` | готово | Антидребезг GPIO с программируемым окном (WIDTH) | [common/debounce.v](common/debounce.v) | [common/debounce_test](common/debounce_test) | [png](common/debounce_test/test.png) |
 | `param_reg` | готово | Регистр параметра с записью по strobe wr (param_reg WIDTH; обёртки reg7 — MIDI CC, reg14 — ADSR A/D/R, pitch) | [common/param_reg.v](common/param_reg.v) | [common/param_reg_test](common/param_reg_test) | [png](common/param_reg_test/test.png) |
 | `reg_sr` | готово | SR-регистр gate: set (NoteOn) / reset (NoteOff); замена legacy reg_rs | [common/reg_sr.v](common/reg_sr.v) | [common/reg_sr_test](common/reg_sr_test) | [png](common/reg_sr_test/test.png) |
 
@@ -32,6 +33,7 @@
 
 | Модуль | Статус | Назначение | Исходник | Тест | Waveform |
 | ------ | ------ | ---------- | -------- | ---- | -------- |
+| `uart_tx` | готово | UART TX 8N1; по умолчанию MIDI 31250 бод (CLK_HZ/BAUD) | [io/uart_tx.v](io/uart_tx.v) | [io/uart_tx_test](io/uart_tx_test) | [png](io/uart_tx_test/test.png) |
 | `midi_in` | готово | MIDI byte parser: channel voice → ch_message/lsb/msb; SysEx skip (v1); UART — на плате | [io/midi_in.v](io/midi_in.v) | [io/midi_in_test](io/midi_in_test) | [png](io/midi_in_test/test.png) |
 
 ## Генерация
