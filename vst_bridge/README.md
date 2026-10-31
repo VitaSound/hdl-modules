@@ -1,11 +1,11 @@
-# VitaSound Remote Synth (VST3)
+# VitaSound Remote (VST3)
 
-VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine (Verilator / будущая ПЛИС) → PCM обратно в DAW.
+VST3-мост платформы **VitaSound**: DAW ↔ UDP engine (`VitaSound-Engine-<id>`). Один плагин на все sync/fx engines.
 
-**Версия:** 0.7.1 — см. [CHANGELOG.md](CHANGELOG.md).
+**Версия:** 0.7.1 — см. [CHANGELOG.md](CHANGELOG.md). Публичная модель: [`docs/ENGINES.md`](../docs/ENGINES.md).
 
-В Reaper: **`VST3: VitaSound Remote Synth (VitaSound)`** (effect, не instrument).  
-Папка на диске после сборки: **`VitaSound Remote Synth.vst3`** (не `HdlVerilator.vst3` — старый bundle удалить из `VST3/`).
+В Reaper: **`VST3: VitaSound Remote (VitaSound)`** (effect, не instrument).  
+Папка на диске: **`VitaSound Remote.vst3`** (удалить старые `VitaSound Remote Synth.vst3` / `HdlVerilator.vst3`).
 
 Собран с `IS_SYNTH FALSE`: insert **заменяет** сигнал трека. При `IS_SYNTH TRUE` (VST3i) REAPER суммирует dry трека с выходом плагина — для UDP-engine (synth и MiniFX) это не нужно. Dry при необходимости — send/параллельный трек или Wet/Dry у FX. После пересборки сделайте **rescan** плагинов (старый кэш может ещё показывать `VST3i`).
 
@@ -17,12 +17,12 @@ VST3-плагин платформы **VitaSound**: MIDI из DAW → UDP engine
 DAW (Reaper / Bitwig / FL Studio)
   │ MIDI + AudioPull
   ▼
-VitaSound Remote Synth  ──UDP :5004──►  Vgenerator (engine)
-  ▲                                        Verilator RTL
-  └──UDP :5005 PCM (on pull)───────────────┘
+VitaSound Remote  ──UDP :5004──►  VitaSound-Engine-<id>
+  ▲                                      Verilator RTL
+  └──UDP :5005 PCM (on pull)─────────────┘
 ```
 
-Протокол **v5 (pull + optional push + runtime params)**: хост запрашивает PCM через `AudioPull`; при `kCapAudioPush` (MiniFX) хост шлёт dry через **AudioPush**. При создании VST запрашивает у engine YAML-derived schema параметров.
+Протокол **v5 (pull + optional push + runtime params)**: хост запрашивает PCM через `AudioPull`; при `kCapAudioPush` (MiniFX) хост шлёт dry через **AudioPush**. При создании VST запрашивает у engine YAML-derived schema параметров. Status UI показывает `engine <id>` из schema.
 
 ## Runtime APVTS parameters
 
@@ -74,7 +74,7 @@ cd /path/to/hdl-modules/vst_bridge
 Результат (после `PRODUCT_NAME` в CMake):
 
 ```
-vst_bridge/build-win/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3
+vst_bridge/build-win/HdlVerilator_artefacts/Release/VST3/VitaSound Remote.vst3
 ```
 
 Установка (из WSL):
@@ -86,13 +86,13 @@ vst_bridge/build-win/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.
 Или вручную — **удалить старый** `HdlVerilator.vst3`, затем скопировать новый bundle:
 
 ```
-\\wsl$\...\vst_bridge\build-win\...\VitaSound Remote Synth.vst3
+\\wsl$\...\vst_bridge\build-win\...\VitaSound Remote.vst3
   → C:\Program Files\Common Files\VST3\
 ```
 
 Reaper: Clear cache / rescan plugins. В UI должно быть `v0.3.1` и строка build с git hash (например `0.3.1+abc1234+...`).
 
-**После каждой пересборки** (`cmake --build build-win`) нужно **заново скопировать** `VitaSound Remote Synth.vst3` в `C:\Program Files\Common Files\VST3\` (или `./scripts/install_windows_vst.sh`) и сделать rescan — иначе Reaper оставит старый bundle.
+**После каждой пересборки** (`cmake --build build-win`) нужно **заново скопировать** `VitaSound Remote.vst3` в `C:\Program Files\Common Files\VST3\` (или `./scripts/install_windows_vst.sh`) и сделать rescan — иначе Reaper оставит старый bundle.
 
 Первый запуск скачивает **llvm-mingw** в `vst_bridge/.toolchains/`.
 
@@ -105,10 +105,10 @@ chmod +x scripts/install_linux_deps.sh scripts/build_linux.sh
 ./scripts/build_linux.sh
 ```
 
-Результат: `vst_bridge/build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3`
+Результат: `vst_bridge/build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote.vst3`
 
 ```bash
-cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3" ~/.vst3/
+cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote.vst3" ~/.vst3/
 ```
 
 ### Windows нативно (Visual Studio)
@@ -139,7 +139,7 @@ vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-linux-x86_64.zip
 vst_bridge/dist/VitaSound-Remote-Synth-0.3.1-windows-x86_64.zip
 ```
 
-В каждом zip: `VitaSound Remote Synth.vst3` + `INSTALL.txt`.
+В каждом zip: `VitaSound Remote.vst3` + `INSTALL.txt`.
 
 Linux-сборка требует `./scripts/install_linux_deps.sh` (один раз). На **Ubuntu 24.04** пакет WebKit: `libwebkit2gtk-4.1-dev` (скрипт выбирает автоматически).
 
@@ -167,54 +167,49 @@ git push origin v0.7.0
 
 ## Запуск: Reaper (Windows) + engine
 
-**Рекомендуемая связка** — engine **native Windows**, VST **Engine host `127.0.0.1`** (без WSL NAT).
+**Рекомендуемая связка** — `VitaSound-Engine-<id>` **native Windows**, VST host `127.0.0.1`. Полный каталог: [`docs/ENGINES.md`](../docs/ENGINES.md). Demo: [`docs/DEMO_MONO_SYNTH.md`](../docs/DEMO_MONO_SYNTH.md).
 
 ### 1. Собрать engine для Windows (из WSL)
 
 ```bash
-cd hdl-modules-tester
-./scripts/build_windows_mingw.sh
+./scripts/build_synth_windows_mingw.sh mono_synth
+# → synths/mono_synth/obj_dir_win/VitaSound-Engine-mono_synth.exe
 ```
 
-Скопировать `obj_dir_win/Vgenerator.exe` на Windows и запустить:
+Запуск:
 
 ```bat
-Vgenerator.exe --udp-bind 0.0.0.0:5004 --sample-rate 48000
+VitaSound-Engine-mono_synth.exe --udp-bind 0.0.0.0:5004 --sample-rate 48000
 ```
-
-Или `hdl-modules-tester/scripts/run_udp_engine_win.bat`.
 
 ### 2. Собрать и установить VST
 
 ```bash
 cd vst_bridge
 ./scripts/build_windows_mingw.sh
+./scripts/install_windows_vst.sh   # или копировать VitaSound Remote.vst3 вручную
 ```
 
-Скопировать `.vst3` в `C:\Program Files\Common Files\VST3\`, rescan.
+Rescan plugins.
 
 ### 3. Reaper
 
-- MIDI-трек → **VitaSound Remote Synth**
+- MIDI-трек → **VitaSound Remote**
 - **Engine host:** `127.0.0.1`
-- **Network profile:** WSL для engine в WSL2; Local для native `Vgenerator.exe`
-- **Reserve packets:** auto-tune подстраивает min/target; при Bursty delivery буфер не уменьшается
-- **Play** / **Stop** — режим воспроизведения (лампочки на кнопках)
-- **Test note** — длительный тон C4 (toggle, зелёная лампа)
+- **Network profile:** Local (native .exe) или WSL
+- Status: `engine mono_synth` (из schema)
+- **Play** / **Test note**
 - Audio: WASAPI exclusive, **48000 Hz**, block **512–1024**
 
-Firewall: разрешить UDP **5004** (control) и **5005** (audio) на Windows.
-
-Подробнее о сети WSL: [docs/WSL_NETWORKING.md](../docs/WSL_NETWORKING.md).
+Firewall: UDP **5004** / **5005**.
 
 ### Альтернатива: engine в WSL2
 
 ```bash
-# из корня репо
-./scripts/run_udp_engine.sh
+./scripts/run_mono_synth.sh
 ```
 
-В VST указать IP WSL (`hostname -I` в Linux). На WSL2 UDP менее стабилен — см. mirrored networking в [docs/WSL_NETWORKING.md](../docs/WSL_NETWORKING.md).
+В VST: IP WSL или `127.0.0.1` при mirrored networking — [docs/WSL_NETWORKING.md](../docs/WSL_NETWORKING.md).
 
 ## E2E без DAW
 
@@ -225,7 +220,7 @@ Firewall: разрешить UDP **5004** (control) и **5005** (audio) на Win
 
 ## UI плагина
 
-![VitaSound Remote Synth UI](docs/ui.png)
+![VitaSound Remote UI](docs/ui.png)
 
 | Элемент | Описание |
 |---------|----------|

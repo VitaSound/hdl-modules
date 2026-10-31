@@ -1,5 +1,7 @@
 # hdl-modules-tester
 
+Публичные engines для демо: [`docs/ENGINES.md`](../docs/ENGINES.md) (`VitaSound-Engine-*`). Этот каталог — общий UDP-стек + MVP `Vgenerator`.
+
 Общий UDP-стек (pull-mode) для Verilator synths и **VitaSound Remote Synth** (VST3). HDL тактуется только на `AudioPull` от VST — без локального soundcard/MIDI в этом каталоге.
 
 | Engine | RTL | Назначение |

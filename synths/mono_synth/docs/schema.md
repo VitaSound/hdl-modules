@@ -166,7 +166,7 @@ sequenceDiagram
 | Protocol version | `5` | `hdl_net.h` strict parsing |
 | Control port | `5004` | engine bind / VST target |
 | Audio port | `5005` default | `HelloPayload.audio_port` |
-| RTL sample rate | `44100` | `top.sv AUDIO_HZ` |
+| RTL sample rate | `48000` | `top.sv AUDIO_HZ` |
 | RTL clock | `1_000_000` Hz | `top.sv CLK_HZ` |
 | Max MIDI bytes | `1024` | `kMaxMidiBytes` |
 | Max audio packet frames | `256` | `kMaxAudioFrames` |

@@ -14,8 +14,11 @@ hdl-modules-tester/obj_dir/
 hdl-modules-tester/obj_dir_win/
 hdl-modules-tester/test_hdl_net
 synths/noise_box/obj_dir/
+synths/noise_box/obj_dir_win/
 synths/mono_synth/obj_dir/
+synths/mono_synth/obj_dir_win/
 synths/mini_fx/obj_dir/
+synths/mini_fx/obj_dir_win/
 
 # VST bridge
 vst_bridge/build/

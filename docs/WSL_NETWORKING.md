@@ -60,7 +60,7 @@ New-NetFirewallRule -DisplayName "HDL UDP 5005" -Direction Inbound -Protocol UDP
 | Audio system | WASAPI |
 | Mode | Exclusive |
 | Block size | **512–1024** (не 8192) |
-| Sample rate | **48000** |
+| Sample rate | **48000** (platform default; `mono_synth` / `mini_fx` / `noise_box`) |
 | Thread priority | Time critical |
 
 ## 4. VST UI (v0.3.1 pull)

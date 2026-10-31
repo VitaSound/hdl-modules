@@ -88,39 +88,42 @@ cd verilator_tests && make full
 
 ## UDP synths (`synths/`)
 
+Публичные имена и 48000 Hz: [`docs/ENGINES.md`](docs/ENGINES.md).
+
 | Engine | RTL | Запуск |
 |--------|-----|--------|
 | [`mono_synth`](synths/mono_synth/README.md) | `mono_voice` + MIDI-регистры | `./scripts/run_mono_synth.sh` |
+| [`mini_fx`](synths/mini_fx/README.md) | SVF insert | `./scripts/run_mini_fx.sh` |
 | [`noise_box`](synths/noise_box/README.md) | `rndx` шум | `./scripts/run_noise_box.sh` |
 
-На порту **5004** одновременно один engine. Протокол v3: `MidiHostToEngine` (raw MIDI bytes), `AudioPull`.
+На порту **5004** одновременно один engine. Протокол: `MidiHostToEngine`, `AudioPull` (+ `AudioPush` для fx).
 
 ## UDP engine (`hdl-modules-tester`)
 
-Только сеть: HDL клокается **только** на `AudioPull` от VST host.
+Общий стек сокетов/протокола. MVP `Vgenerator` — только CI/smoke; для демо — `VitaSound-Engine-*`.
 
 ```bash
-./scripts/run_udp_engine.sh          # engine в WSL/Linux
-# VST: Engine host = IP WSL или 127.0.0.1 (native engine)
+./scripts/run_mono_synth.sh          # engine в WSL/Linux @ 48000
+# VST: VitaSound Remote, Engine host = IP WSL или 127.0.0.1
 ```
 
 ```mermaid
 sequenceDiagram
   participant DAW as DAW
-  participant VST as VitaSound Remote Synth
-  participant ENG as Vgenerator UDP
+  participant VST as VitaSound Remote
+  participant ENG as VitaSound-Engine-mono_synth
 
   DAW->>VST: MIDI notes
   VST->>ENG: Hello UDP 5004
   ENG->>VST: Ack
-  loop pull v2
+  loop pull
     VST->>ENG: AudioPull
     ENG->>VST: PCM UDP 5005
   end
   VST->>DAW: audio out
 ```
 
-Подробнее: [hdl-modules-tester/README.md](hdl-modules-tester/README.md), [vst_bridge/README.md](vst_bridge/README.md), [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md).
+Подробнее: [docs/ENGINES.md](docs/ENGINES.md), [vst_bridge/README.md](vst_bridge/README.md), [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md).
 
 ## Где что лежит
 
@@ -134,9 +137,11 @@ sequenceDiagram
 | `verilator_tests/` | Legacy: keyboard/MIDI → soundcard/wav |
 | `common/note_mono.v`, `lin2exp_t.v` | MIDI alloc / CC curve (fpga-synth) |
 | `hdl-modules-tester/` | Общий UDP-стек для synths |
-| `synths/mono_synth/` | MonoSynth: mono_voice + ADSR CC + VST |
-| `synths/noise_box/` | NoiseBox: rndx 16-bit |
-| `vst_bridge/` | VST3-плагин (хост в DAW) |
+| `synths/mono_synth/` | VitaSound-Engine-mono_synth |
+| `synths/mini_fx/` | VitaSound-Engine-mini_fx |
+| `synths/noise_box/` | VitaSound-Engine-noise_box |
+| `vst_bridge/` | VitaSound Remote (VST3) |
+| `docs/ENGINES.md` | Публичные имена engines / zip |
 | `hdl-modules-tester/protocol/hdl_net.h` | Протокол UDP (копия в `vst_bridge/protocol/`) |
 
 ## Связь с будущей ПЛИС

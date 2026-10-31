@@ -111,8 +111,8 @@ def main() -> int:
     parser.add_argument(
         "--sample-rate",
         type=int,
-        default=44100,
-        help="Hello sample_rate (must match engine RTL / DAW; default 44100 for mono_synth)",
+        default=48000,
+        help="Hello sample_rate (must match engine RTL / DAW; default 48000)",
     )
     args = parser.parse_args()
 

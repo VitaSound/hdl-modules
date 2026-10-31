@@ -1,6 +1,6 @@
 # mono_synth
 
-Базовая полностью цифровая mono-модель звукового устройства VitaSound: `note_mono` + MIDI-регистры + [`mono_voice`](../../mono_voice/mono_voice.v) через Verilator UDP engine и VitaSound Remote Synth VST.
+Базовая полностью цифровая mono-модель звукового устройства VitaSound: `note_mono` + MIDI-регистры + [`mono_voice`](../../mono_voice/mono_voice.v) через Verilator UDP engine и VitaSound Remote VST.
 
 **Полный справочник CC и опорных точек:** [`docs/MONO_SYNTH_MIDI.md`](../../docs/MONO_SYNTH_MIDI.md).
 
@@ -37,7 +37,7 @@ make -C synths/mono_synth
 ```bash
 ./scripts/run_mono_synth.sh
 # или вручную:
-./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 44100
+./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 48000
 ```
 
 На порту **5004** одновременно может работать только один UDP engine.
@@ -56,7 +56,7 @@ make -C synths/mono_synth
 python3 hdl-modules-tester/scripts/udp_smoke_test.py --duration 3 --cc-attack 0
 ```
 
-## FL Studio / Reaper (44100 Hz)
+## FL Studio / Reaper (48000 Hz)
 
 ### Зависимости (один раз)
 
@@ -66,7 +66,7 @@ sudo apt install -y verilator g++ make
 cd vst_bridge
 ./scripts/install_linux_deps.sh
 ./scripts/build_linux.sh
-cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3" ~/.vst3/
+cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote.vst3" ~/.vst3/
 ```
 
 Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_64). После копирования VST — rescan plugins.
@@ -74,8 +74,8 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 ### E2E в DAW
 
 1. Терминал: `./scripts/run_mono_synth.sh`
-2. DAW: **44100 Hz** (FL: Settings → Audio; Reaper: Project sample rate), buffer **512–1024**
-3. MIDI-трек → FX → **VST3: VitaSound Remote Synth** (effect; не VST3i)
+2. DAW: **48000 Hz** (FL: Settings → Audio; Reaper: Project sample rate), buffer **512–1024**
+3. MIDI-трек → FX → **VST3: VitaSound Remote** (effect; не VST3i)
 4. В UI VST: **Engine host** `127.0.0.1`, **Network profile** `Local`, **Play**
 5. **Test note** (C4) или ноты с piano roll / Virtual MIDI keyboard
 
@@ -142,7 +142,7 @@ Reaper: [reaper.fm/download.php](https://www.reaper.fm/download.php) (Linux x86_
 
 Пример в Reaper/FL: saw (CC 48 = 0) + длинная нота + automation CC 74/106 (sweep cutoff) при LP (CC 22 = 0).
 
-**Sample rate:** RTL `mono_synth` — **AUDIO_HZ=44100**. В FL Studio: Settings → Audio → **44100 Hz**. Engine: `./scripts/run_mono_synth.sh` (дефолт 44100). VST Hello должен показывать `sr=44100` в логе engine.
+**Sample rate:** RTL `mono_synth` — **AUDIO_HZ=48000**. В FL Studio: Settings → Audio → **48000 Hz**. Engine: `./scripts/run_mono_synth.sh` (дефолт 48000). VST Hello должен показывать `sr=48000` в логе engine.
 
 В Reaper: piano roll → lane **MIDI CC 16** (и 17–19, 48) → нарисовать envelope перед/во время ноты. Insert → MIDI CC/OSC control item — альтернатива.
 

@@ -2,6 +2,12 @@
 
 По 5–10 строк на сессию: дата, что сделано, что дальше. Не роман.
 
+## 2026-10-28
+
+- Закоммичен хвост P0: debounce, uart_tx, `docs/portfolio/`, `docs/FSOC.md` (`78768a4`, push).
+- `mono-001` Soft Hello — cancelled: одноголосник через VSTi уже ок, reconnect-polish не нужен.
+- Дальше: ждать явную цель (не брать polish из TODO сам).
+
 ## 2026-09-25
 
 - Создан каталог `docs/portfolio/` (P0): NOW, ROADMAP, DEVICES, JOURNAL, SESSION и девять карточек.

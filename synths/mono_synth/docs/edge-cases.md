@@ -1,6 +1,6 @@
 # mono_synth edge cases
 
-Happy path: DAW at 44100 Hz -> VST Play -> one engine on UDP `:5004` -> MIDI note -> audible sound with ADSR. Everything else is checked here.
+Happy path: DAW at 48000 Hz -> VST Play -> one engine on UDP `:5004` -> MIDI note -> audible sound with ADSR. Everything else is checked here.
 
 This file is not a duplicate of `TODO.md`. It describes expected behavior outside the happy path. Backlog items (`mono-00x`) point to these cases.
 
@@ -22,13 +22,13 @@ This file is not a duplicate of `TODO.md`. It describes expected behavior outsid
 
 ### EC-001: sample rate mismatch
 - category: errors
-- trigger: VST `HelloPayload.sample_rate` is `48000`, while RTL uses `AUDIO_HZ=44100`
+- trigger: VST `HelloPayload.sample_rate` differs from RTL `AUDIO_HZ=48000` (e.g. DAW left at 44100)
 - layers: RTL, engine, VST
-- current_behavior: timing/pitch can mismatch because RTL audio tick is fixed
-- expected_behavior: engine/VST either agree on 44100 or handle/resample/reject mismatch explicitly
+- current_behavior: timing/pitch can mismatch because RTL audio tick is fixed at 48000
+- expected_behavior: keep DAW/engine/VST on platform default 48000; warn or reject other rates
 - code: `../top.sv`, `../synth_core.cpp`, `../../../vst_bridge/`
-- task: `mono-003`
-- test: run engine at 44100, open DAW project at 48000, inspect Hello log and audio timing
+- task: `mono-003` (platform default 48000; residual if DAW ≠ 48000)
+- test: run engine at 48000, open DAW at 44100 vs 48000, inspect Hello log and pitch
 
 ### EC-002: protocol version mismatch
 - category: errors
@@ -180,11 +180,11 @@ This file is not a duplicate of `TODO.md`. It describes expected behavior outsid
 - category: atypical
 - trigger: same VST instance reconnects
 - layers: engine, RTL, VST
-- current_behavior: `synthOnSessionStart()` pulses `rst`
-- expected_behavior: reconnect of the same `plugin_ssrc` should not unnecessarily reset synth state if UDP is alive
+- current_behavior: `synthOnSessionStart()` pulses `rst` on Hello (accepted)
+- expected_behavior: wontfix — `mono-001` cancelled 2026-10-28; VSTi path already good enough
 - code: `../synth_core.cpp`, `../../../vst_bridge/Source/PluginProcessor.cpp`
-- task: `mono-001`
-- test: reconnect same VST instance and listen for click/state reset
+- task: `mono-001` (cancelled)
+- test: —
 
 ### EC-031: VST Play while UDP is already alive
 - category: atypical
@@ -240,9 +240,9 @@ This file is not a duplicate of `TODO.md`. It describes expected behavior outsid
 
 | id | Case | Status | Expected result |
 |----|------|--------|-----------------|
-| `mono-001` | EC-030 Soft Hello / same `plugin_ssrc` reconnect | open | No needless `rst` pulse on same healthy session |
+| `mono-001` | EC-030 Soft Hello / same `plugin_ssrc` reconnect | cancelled | wontfix — not worth the polish |
 | `mono-002` | EC-031 VST Play fullReconnect | open | Fewer reconnects when UDP is already alive |
-| `mono-003` | EC-001 48 kHz vs 44.1 kHz | open | Explicit handling of sample-rate mismatch |
+| `mono-003` | EC-001 sample rate | done | Platform default 48000; keep DAW matched |
 | `mono-004` | EC-033 DDS phase sync on legato | open | Defined or improved phase behavior |
 | `mono-005` | EC-024 VCF matrix low-frequency LUT | open | Correct low-frequency cutoff behavior |
 | `mono-006` | EC-032 MIDI log misses `0xFC` | open | `--midi-log` shows sys realtime Stop |

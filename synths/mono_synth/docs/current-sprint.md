@@ -12,7 +12,7 @@
 | priority | id | title | status |
 |----------|----|-------|--------|
 | P0 | `mono-doc-001` | Agent-facing documentation suite | done |
-| next | `mono-001` | Soft Hello reconnect | backlog |
+| next | `mono-001` | Soft Hello reconnect | cancelled |
 
 Допустимые статусы: `backlog`, `ready`, `in_progress`, `blocked`, `done`, `cancelled`.
 
@@ -84,8 +84,4 @@
 
 ## Next Sprint Candidate
 
-| id | title | why next |
-|----|-------|----------|
-| `mono-001` | Soft Hello reconnect | Убрать лишний `rst` при reconnect того же `plugin_ssrc` |
-
-Перед кодовым спринтом открыть [`architecture.md`](architecture.md), [`schema.md`](schema.md), [`edge-cases.md`](edge-cases.md) и [`links.md`](links.md).
+Нет. `mono-001` cancelled (2026-10-28): не актуально. Кодовый спринт только по явной цели пользователя.

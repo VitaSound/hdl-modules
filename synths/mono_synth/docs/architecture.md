@@ -87,7 +87,7 @@ DAW -> VST -> UDP(MidiHostToEngine) -> synth_core -> top.sv:midi_in
 ## Важные Ограничения
 
 - `mono_synth` не входит в `modules.yaml` и `make all`; это отдельный Verilator build.
-- RTL sample rate фиксирован: `AUDIO_HZ=44100` в `../top.sv`.
+- RTL sample rate фиксирован: `AUDIO_HZ=48000` в `../top.sv`.
 - Control port `5004`: одновременно один UDP engine.
 - Audio port по умолчанию `5005`.
 - `obj_dir/`, `out.vcd`, `testbench` и временные бинарники не коммитить.

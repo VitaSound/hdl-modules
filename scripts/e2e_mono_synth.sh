@@ -11,7 +11,7 @@ make -C hdl-modules-tester test_hdl_net
 make -C synths/mono_synth obj_dir/MonoSynth
 
 ./synths/mono_synth/obj_dir/MonoSynth \
-  --sample-rate 44100 &
+  --sample-rate 48000 &
 ENGINE_PID=$!
 trap 'kill "$ENGINE_PID" 2>/dev/null || true' EXIT
 

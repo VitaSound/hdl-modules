@@ -17,7 +17,7 @@
 namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
-constexpr uint32_t DEFAULT_SAMPLE_RATE = 44100;
+constexpr uint32_t DEFAULT_SAMPLE_RATE = 48000;
 constexpr const char* DEFAULT_PARAMS_YAML = "synths/mini_fx/mini_fx.params.yaml";
 constexpr uint64_t DEFAULT_DUMP_FRAMES = 1024;
 
@@ -32,7 +32,7 @@ void printUsage() {
         << "MiniFX UDP engine (insert SVF filter, AudioPush + AudioPull)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
-        << "  --sample-rate R (default 44100)\n"
+        << "  --sample-rate R (default 48000)\n"
         << "  --udp-block-frames N (default 256)\n"
         << "  --params-yaml PATH (default synths/mini_fx/mini_fx.params.yaml)\n"
         << "  --midi-log           print MIDI bytes/events to stderr\n"

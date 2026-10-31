@@ -80,14 +80,16 @@ make all       # test → images → docs
 
 Зависимости: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
 
-## VitaSound Remote Synth (DAW ↔ Verilator)
+## VitaSound Remote (DAW ↔ Verilator engines)
 
-Плагин VST3 и UDP-engine для Reaper / других DAW:
+Плагин VST3 и скачиваемые UDP engines (`VitaSound-Engine-*`, 48000 Hz):
 
-![VitaSound Remote Synth UI](vst_bridge/docs/ui.png)
+![VitaSound Remote UI](vst_bridge/docs/ui.png)
 
-- VST: [vst_bridge/README.md](vst_bridge/README.md) — сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
-- Engine: [hdl-modules-tester/README.md](hdl-modules-tester/README.md) — `make` или `hdl-modules-tester/scripts/build_windows_mingw.sh`
+- Модель / zip: [docs/ENGINES.md](docs/ENGINES.md)
+- VST: [vst_bridge/README.md](vst_bridge/README.md) — `build_windows_mingw.sh` / `build_linux.sh`
+- Тест трёх ядер: [docs/TEST_ENGINES.md](docs/TEST_ENGINES.md)
+- Demo mono: [docs/DEMO_MONO_SYNTH.md](docs/DEMO_MONO_SYNTH.md)
 - Сеть WSL: [docs/WSL_NETWORKING.md](docs/WSL_NETWORKING.md)
 
 # sandbox

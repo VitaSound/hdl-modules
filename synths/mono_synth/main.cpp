@@ -17,7 +17,7 @@
 namespace {
 std::atomic<bool>* g_running_ptr = nullptr;
 
-constexpr uint32_t DEFAULT_SAMPLE_RATE = 44100;
+constexpr uint32_t DEFAULT_SAMPLE_RATE = 48000;
 constexpr const char* DEFAULT_PARAMS_YAML = "synths/mono_synth/mono_synth.params.yaml";
 constexpr uint64_t DEFAULT_DUMP_FRAMES = 1024;
 
@@ -32,7 +32,7 @@ void printUsage() {
         << "MonoSynth UDP engine (synths/mono_synth, pull mode for VST bridge)\n"
         << "Options:\n"
         << "  --udp-bind HOST:PORT (default 0.0.0.0:5004)\n"
-        << "  --sample-rate R (default 44100, must match mono_synth AUDIO_HZ and DAW; overridden by Hello)\n"
+        << "  --sample-rate R (default 48000, must match mono_synth AUDIO_HZ and DAW; overridden by Hello)\n"
         << "  --udp-block-frames N (default 256)\n"
         << "  --params-yaml PATH (default synths/mono_synth/mono_synth.params.yaml)\n"
         << "  --midi-log           print MIDI bytes/events from host to stderr\n"

@@ -20,7 +20,7 @@
 | Name | Value | Source |
 |------|-------|--------|
 | RTL clock | `CLK_HZ = 1_000_000` | `../top.sv` |
-| RTL sample rate | `AUDIO_HZ = 44100` | `../top.sv` |
+| RTL sample rate | `AUDIO_HZ = 48000` | `../top.sv` |
 | Legacy ADSR rate scale | `LEGACY_ADSR_CLK_HZ = 50_000_000` | `../top.sv` |
 | UDP control port | `5004` | `hdl_net.h` default |
 | UDP audio port | `5005` | `hdl_net.h` default |
@@ -81,7 +81,7 @@ Run engine:
 Manual run:
 
 ```bash
-./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 44100
+./synths/mono_synth/obj_dir/MonoSynth --udp-bind 0.0.0.0:5004 --sample-rate 48000
 ```
 
 Smoke without DAW:
@@ -110,7 +110,7 @@ cp -r "build/HdlVerilator_artefacts/Release/VST3/VitaSound Remote Synth.vst3" ~/
 
 DAW settings for current RTL:
 
-- sample rate: `44100`
+- sample rate: `48000`
 - buffer: `512` to `1024`
 - engine host: `127.0.0.1` for native/Linux local engine
 - network profile: `Local`

@@ -51,6 +51,8 @@ public:
     NetBridge& getNetBridge() { return netBridge_; }
     juce::AudioProcessorValueTreeState& getApvts() { return apvts_; }
     juce::String getParamSchemaStatus() const { return schema_.source; }
+    juce::String getParamSchemaSynthId() const { return schema_.synthId; }
+    juce::String getParamSchemaTitle() const { return schema_.title; }
     uint32_t getParamSchemaHash() const { return schema_.hash; }
 
 private:

@@ -19,7 +19,7 @@ fi
 
 NAME="$(basename "$VST3")"
 echo "Removing old bundles (if any)..."
-rm -rf "$DEST/HdlVerilator.vst3" "$DEST/$NAME"
+rm -rf "$DEST/HdlVerilator.vst3" "$DEST/VitaSound Remote Synth.vst3" "$DEST/$NAME"
 echo "Installing $NAME ..."
 cp -r "$VST3" "$DEST/"
 echo "Done: $DEST/$NAME"

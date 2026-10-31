@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#ifdef VM_TRACE
+#if defined(VM_TRACE) && VM_TRACE
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"

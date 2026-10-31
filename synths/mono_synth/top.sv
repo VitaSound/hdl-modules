@@ -8,7 +8,7 @@ module mono_synth (
 );
 
     localparam integer CLK_HZ              = 1_000_000;
-    localparam integer AUDIO_HZ            = 44100;
+    localparam integer AUDIO_HZ            = 48000;
     localparam integer LEGACY_ADSR_CLK_HZ  = 50_000_000;
 
     wire       midi_command_ready;

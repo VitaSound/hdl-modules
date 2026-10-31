@@ -15,7 +15,7 @@ HdlVerilatorAudioProcessorEditor::HdlVerilatorAudioProcessorEditor(HdlVerilatorA
     setSize(kEditorWidth, kEditorHeight);
     addAndMakeVisible(*synthEditor_);
 
-    titleLabel_.setText("VitaSound Remote Synth", juce::dontSendNotification);
+    titleLabel_.setText("VitaSound Remote", juce::dontSendNotification);
     titleLabel_.setFont(juce::FontOptions(18.0f, juce::Font::bold));
     titleLabel_.setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(titleLabel_);
@@ -315,17 +315,21 @@ void HdlVerilatorAudioProcessorEditor::applySettings() {
 
 void HdlVerilatorAudioProcessorEditor::updateStatusText() {
     const auto& bridge = processor_.getNetBridge();
+    const auto engineId = processor_.getParamSchemaSynthId();
+    const juce::String engineTag =
+        engineId.isNotEmpty() ? ("engine " + engineId) : "engine ?";
+
     juce::String status;
     if (bridge.isMuted()) {
-        status = "Status: MUTED - click Play (Stop silences output)";
+        status = "Status: MUTED (" + engineTag + ") - click Play";
     } else if (bridge.isPrimed() && bridge.getBufferedSamples() > 0) {
-        status = "Status: streaming PCM (pull mode)";
+        status = "Status: streaming (" + engineTag + ")";
     } else if (bridge.isConnected()) {
-        status = "Status: connected, warming up buffer";
+        status = "Status: connected (" + engineTag + "), warming up";
     } else if (bridge.getBufferedSamples() > 0) {
-        status = "Status: receiving PCM (no ACK yet)";
+        status = "Status: receiving PCM (" + engineTag + ", no ACK yet)";
     } else {
-        status = "Status: waiting for engine - check IP, WSL, firewall";
+        status = "Status: waiting for engine - check IP, WSL, firewall [" + engineTag + "]";
     }
 
     if (bridge.getDeliveryQuality() == DeliveryQuality::Bursty &&

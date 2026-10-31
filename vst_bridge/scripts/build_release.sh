@@ -8,14 +8,14 @@
 #   ./scripts/build_release.sh --windows-only
 #   ./scripts/build_release.sh --skip-build # package existing build/ artifacts
 #
-# Output: vst_bridge/dist/VitaSound-Remote-Synth-<ver>-{linux,windows}-x86_64.zip
+# Output: vst_bridge/dist/VitaSound-Remote-<ver>-{linux,windows}-x86_64.zip
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
 
-PRODUCT_SLUG="VitaSound-Remote-Synth"
+PRODUCT_SLUG="VitaSound-Remote"
 DIST_DIR="$ROOT/dist"
 
 DO_LINUX=1
@@ -63,32 +63,33 @@ write_install_txt() {
   local dest="$1"
   local platform="$2"
   cat >"$dest/INSTALL.txt" <<EOF
-VitaSound Remote Synth VST3
+VitaSound Remote VST3
 Version: $VERSION
 Platform: $platform
 
 Install
 -------
 Linux (Reaper / Bitwig):
-  unzip VitaSound-Remote-Synth-${VERSION}-linux-x86_64.zip
-  cp -r "VitaSound Remote Synth.vst3" ~/.vst3/
+  unzip VitaSound-Remote-${VERSION}-linux-x86_64.zip
+  cp -r "VitaSound Remote.vst3" ~/.vst3/
   rescan plugins in your DAW
 
 Windows (Reaper / FL Studio):
-  unzip VitaSound-Remote-Synth-${VERSION}-windows-x86_64.zip
-  copy "VitaSound Remote Synth.vst3" to:
+  unzip VitaSound-Remote-${VERSION}-windows-x86_64.zip
+  copy "VitaSound Remote.vst3" to:
     C:\\Program Files\\Common Files\\VST3\\
-  remove old HdlVerilator.vst3 if present
+  remove old "VitaSound Remote Synth.vst3" / HdlVerilator.vst3 if present
   rescan plugins (Reaper: Clear cache / rescan)
 
 Runtime
 -------
+  Run a VitaSound-Engine-<id> binary (see docs/ENGINES.md)
   Engine host: 127.0.0.1 (native Windows engine)
+  Sample rate: 48000 (match DAW)
   UDP ports: 5004 (control), 5005 (audio)
   Network profile: Local (native engine) or WSL for engine in WSL2
-  Reserve packets: auto-tuned; pull protocol v2
 
-Docs: https://github.com/UA3MQJ/hdl-modules/tree/master/vst_bridge
+Docs: https://github.com/VitaSound/hdl-modules/blob/master/docs/ENGINES.md
 EOF
 }
 

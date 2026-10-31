@@ -16,9 +16,9 @@ _(пусто — `frqdivmod` odd DIV исправлен в `common/frqdivmod.v`,
 
 ## mono_synth / VST
 
-- [ ] **mono-001 Soft Hello** — на reconnect того же `plugin_ssrc` не пульсировать `rst` в `synthOnSessionStart()` ([`synths/mono_synth/synth_core.cpp`](../synths/mono_synth/synth_core.cpp)); edge case: [`EC-030`](../synths/mono_synth/docs/edge-cases.md#ec-030-reconnect-same-plugin_ssrc).
+- [x] **mono-001 Soft Hello** — cancelled (2026-10-28): не актуально; `mono_synth` через VSTi уже ок, polish reconnect не нужен. Edge case [`EC-030`](../synths/mono_synth/docs/edge-cases.md#ec-030-reconnect-same-plugin_ssrc) — wontfix.
 - [ ] **mono-002 VST Play** — меньше `fullReconnect` при уже живом UDP ([`vst_bridge/Source/PluginProcessor.cpp`](../vst_bridge/Source/PluginProcessor.cpp)); edge case: [`EC-031`](../synths/mono_synth/docs/edge-cases.md#ec-031-vst-play-while-udp-is-already-alive).
-- [ ] **mono-003 48 kHz vs 44.1 kHz** — RTL `AUDIO_HZ=44100`; DAW/VST Hello может слать 48000; edge case: [`EC-001`](../synths/mono_synth/docs/edge-cases.md#ec-001-sample-rate-mismatch).
+- [x] **mono-003 48 kHz** — platform default **48000**: `mono_synth`/`mini_fx` `AUDIO_HZ` + run defaults; edge case [`EC-001`](../synths/mono_synth/docs/edge-cases.md#ec-001-sample-rate-mismatch) — держать DAW на 48000.
 - [ ] **mono-004 DDS phase sync** — legato: скачок частоты без sync фазы ([`mono_voice/mono_voice.v`](../mono_voice/mono_voice.v)); edge case: [`EC-033`](../synths/mono_synth/docs/edge-cases.md#ec-033-legato-without-note-off).
 - [ ] **mono-005 VCF matrix** — fc 10–15 Hz в LUT ([`tools/gen_svf_cc_lut.py`](../tools/gen_svf_cc_lut.py), [`mono_voice/test/vcf_matrix_tb.v`](../mono_voice/test/vcf_matrix_tb.v)); edge case: [`EC-024`](../synths/mono_synth/docs/edge-cases.md#ec-024-cutoff-clamp-and-low-frequency-matrix).
 - [ ] **mono-006 MIDI log** — `--midi-log` не печатает sys realtime (`0xFC` Stop); DAW transport stop часто шлёт pitch center, не CC123; edge case: [`EC-032`](../synths/mono_synth/docs/edge-cases.md#ec-032-daw-transport-stop).
@@ -28,7 +28,7 @@ _(пусто — `frqdivmod` odd DIV исправлен в `common/frqdivmod.v`,
 
 ### Следующие шаги ручного тестирования
 
-1. **CtrlrX panels** — `python3 tools/gen_ctrlrx_panel.py`; FL/REAPER: CtrlrX (`mono_synth.panel`) → VitaSound; cutoff = CC74+CC106; dual path с APVTS OK.
+1. **CtrlrX panels** — отложено: gen без `panelLayers` (пустой канвас); для демо — APVTS UI Remote.
 2. **SVF high-Q (mono_synth)** — LP, загнать Res/Cut в зону свиста, вернуть назад: нет залипшей генерации (state limit в `svf.v`).
 3. **Filter env pluck** — `./scripts/run_mono_synth.sh --midi-log`; CC28=127 до ноты; яркий pluck → тёмный sustain.
 4. **VST HELLO / schema** — instance 0.7.1, WSL IP, schema `server`; spot-check waveform/LFO/PWM.

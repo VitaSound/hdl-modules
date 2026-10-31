@@ -14,7 +14,7 @@ class Vmono_synth;
 
 struct SynthCore {
     Vmono_synth* top = nullptr;
-    uint32_t sampleRate = 44100;
+    uint32_t sampleRate = 48000;
     uint32_t fractional = 0;
     bool midiLog = false;
     MidiDecodeState midiDecode{};

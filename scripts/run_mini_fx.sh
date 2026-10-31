@@ -9,6 +9,6 @@ sleep 0.2
 
 make -C synths/mini_fx obj_dir/MiniFX
 exec ./synths/mini_fx/obj_dir/MiniFX \
-  --sample-rate "${SAMPLE_RATE:-44100}" \
+  --sample-rate "${SAMPLE_RATE:-48000}" \
   --udp-bind "${UDP_BIND:-0.0.0.0:5004}" \
   "$@"

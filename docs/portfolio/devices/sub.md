@@ -12,12 +12,13 @@ sale: not_started
 Класс: синтезатор. Полностью цифровой классический голос: осциллятор, SVF, ADSR, VCA.
 
 - Виртуальная база: **`synths/mono_synth`** + `mono_voice` + `svf`.
-- Главный пробел: backlog `mono-001`…`007` ([docs/TODO.md](../../TODO.md)); закрыть как эталон портфеля.
+- Публичный engine id / binary: **`VitaSound-Engine-mono_synth`** (не `sub`); см. [ENGINES.md](../../ENGINES.md). Sample rate **48000**.
+- Главный пробел: backlog `mono-002`…`007` ([docs/TODO.md](../../TODO.md)); закрыть как эталон портфеля.
 
 ## Модули
 
 - Есть: dds, dds_transform, note2dds, adsr, vca, lfo, svf, midi_in (parser), mono_voice, UDP/VST.
-- Нужно: надёжность моста (Soft Hello, sample rate), phase-sync legato, сверка LFO→pitch.
+- Нужно: phase-sync legato, сверка LFO→pitch; Soft Hello / 48k platform default — закрыты или wontfix.
 
 ## DoD виртуала
 
@@ -25,4 +26,4 @@ sale: not_started
 
 ## На железе проверить
 
-Клок 44.1 vs 48, MIDI DIN, PWM/I2S тон, нет клиппинга на выходе.
+Клок 48 kHz, MIDI DIN, PWM/I2S тон, нет клиппинга на выходе.

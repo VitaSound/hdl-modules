@@ -1,6 +1,16 @@
-# Changelog — VitaSound Remote Synth
+# Changelog — VitaSound Remote
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
+
+## [0.8.0] — 2026-10-31
+
+### Naming / engines
+
+- Product name: **VitaSound Remote** (was «Remote Synth»); zip slug `VitaSound-Remote-*`.
+- Status line shows connected schema engine id (e.g. `engine mono_synth`).
+- Platform sample rate default **48000** for `mono_synth` / `mini_fx` / `noise_box`.
+- Release packages: `VitaSound-Engine-<id>-*` (see [`docs/ENGINES.md`](../docs/ENGINES.md)).
+- Manual check: [`docs/TEST_ENGINES.md`](../docs/TEST_ENGINES.md).
 
 ## [0.7.1] — 2026-07-31
 

@@ -19,15 +19,21 @@ repo:
         url: https://github.com/VitaSound/fhdlgen
         role_ru: генератор Verilog из Forth (будущий фронтенд для этой библиотеки)
   daw:
-    title_ru: VitaSound Remote Synth (DAW ↔ Verilator)
-    intro_ru: Плагин VST3 и UDP-engine для Reaper / других DAW
+    title_ru: VitaSound Remote (DAW ↔ Verilator engines)
+    intro_ru: "Плагин VST3 и скачиваемые UDP engines (`VitaSound-Engine-*`, 48000 Hz)"
     links:
+      - name: Модель / zip
+        path: docs/ENGINES.md
+        hint: null
       - name: VST
         path: vst_bridge/README.md
-        hint: сборка `vst_bridge/scripts/build_windows_mingw.sh` (Win) или `build_linux.sh` (Linux)
-      - name: Engine
-        path: hdl-modules-tester/README.md
-        hint: "`make` или `hdl-modules-tester/scripts/build_windows_mingw.sh`"
+        hint: "`build_windows_mingw.sh` / `build_linux.sh`"
+      - name: Тест трёх ядер
+        path: docs/TEST_ENGINES.md
+        hint: null
+      - name: Demo mono
+        path: docs/DEMO_MONO_SYNTH.md
+        hint: null
       - name: Сеть WSL
         path: docs/WSL_NETWORKING.md
         hint: null

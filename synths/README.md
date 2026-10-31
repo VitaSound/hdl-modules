@@ -1,14 +1,14 @@
 # synths
 
-Варианты синтезатора для отладки RTL «на слух» через UDP + VST.
+UDP engines для отладки RTL «на слух» через **VitaSound Remote** (VST3).
 
-Каждый синт — отдельный каталог:
+Публичные имена, sample rate (**48000**), zip: [`docs/ENGINES.md`](../docs/ENGINES.md).
 
-| Каталог | Описание |
-|---------|----------|
-| [`noise_box/`](noise_box/) | 16-bit шум (`rndx`), gate от любой MIDI-ноты |
-| [`mono_synth/`](mono_synth/) | Моно-голос: note_mono + ADSR/wave CC + mono_voice |
-| [`mini_fx/`](mini_fx/) | Insert SVF-фильтр (AudioPush + AudioPull) |
+| Каталог | Публичный binary | Тип | Описание |
+|---------|------------------|-----|----------|
+| [`mono_synth/`](mono_synth/) | `VitaSound-Engine-mono_synth` | synth | Моно-голос: note_mono + ADSR/wave + mono_voice |
+| [`mini_fx/`](mini_fx/) | `VitaSound-Engine-mini_fx` | fx | Insert SVF (AudioPush + AudioPull) |
+| [`noise_box/`](noise_box/) | `VitaSound-Engine-noise_box` | synth | 16-bit шум (`rndx`), gate от MIDI-ноты |
 
 ## Паттерн
 

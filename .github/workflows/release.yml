@@ -78,6 +78,73 @@ jobs:
           path: vst_bridge/dist/*-windows-x86_64.zip
           if-no-files-found: error
 
+  build-engines-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        id: [mono_synth, mini_fx, noise_box]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Verilator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator g++ make zip
+
+      - name: Build engine
+        run: make -C "synths/${{ matrix.id }}" clean all
+
+      - name: Package Linux engine
+        env:
+          PACKAGE_TARGET: engine-${{ matrix.id }}-linux
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          ./scripts/package_engine_release.sh "$VERSION" dist
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-${{ matrix.id }}-linux-zip
+          path: dist/VitaSound-Engine-${{ matrix.id }}-*-linux-x86_64.zip
+          if-no-files-found: error
+
+  build-engines-windows:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    strategy:
+      matrix:
+        id: [mono_synth, mini_fx, noise_box]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator g++ make zip curl
+
+      - name: Download llvm-mingw toolchain
+        timeout-minutes: 20
+        working-directory: vst_bridge
+        run: ./scripts/download_llvm_mingw.sh
+
+      - name: Cross-build Windows engine
+        run: ./scripts/build_synth_windows_mingw.sh "${{ matrix.id }}" --clean
+
+      - name: Package Windows engine
+        env:
+          PACKAGE_TARGET: engine-${{ matrix.id }}-windows
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          ./scripts/package_engine_release.sh "$VERSION" dist
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-${{ matrix.id }}-windows-zip
+          path: dist/VitaSound-Engine-${{ matrix.id }}-*-windows-x86_64.zip
+          if-no-files-found: error
+
   build-tester-linux:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
@@ -171,6 +238,8 @@ jobs:
     needs:
       - build-vst-linux
       - build-vst-windows
+      - build-engines-linux
+      - build-engines-windows
       - build-tester-linux
       - build-tester-windows
       - build-legacy-linux
@@ -209,26 +278,30 @@ jobs:
           files: dist/*.zip
           generate_release_notes: true
           body: |
-            ## VitaSound Remote Synth (VST3)
+            ## VitaSound Remote (VST3)
 
             | Platform | Archive |
             |----------|---------|
-            | Linux | `VitaSound-Remote-Synth-*-linux-x86_64.zip` |
-            | Windows | `VitaSound-Remote-Synth-*-windows-x86_64.zip` |
+            | Linux | `VitaSound-Remote-*-linux-x86_64.zip` |
+            | Windows | `VitaSound-Remote-*-windows-x86_64.zip` |
 
-            ## hdl-modules-tester (UDP engine)
+            ## Engines (download + run, then connect Remote)
 
-            | Platform | Archive |
-            |----------|---------|
-            | Linux | `HdlModulesTester-*-linux-x86_64.zip` |
-            | Windows | `HdlModulesTester-*-windows-x86_64.zip` |
+            Sample rate **48000**. Docs: [docs/ENGINES.md](https://github.com/${{ github.repository }}/blob/master/docs/ENGINES.md)
 
-            ## verilator_tests (legacy local synth)
+            | Engine | Linux | Windows |
+            |--------|-------|---------|
+            | mono_synth | `VitaSound-Engine-mono_synth-*-linux-x86_64.zip` | `VitaSound-Engine-mono_synth-*-windows-x86_64.zip` |
+            | mini_fx | `VitaSound-Engine-mini_fx-*-linux-x86_64.zip` | `VitaSound-Engine-mini_fx-*-windows-x86_64.zip` |
+            | noise_box | `VitaSound-Engine-noise_box-*-linux-x86_64.zip` | `VitaSound-Engine-noise_box-*-windows-x86_64.zip` |
 
-            | Platform | Archive |
-            |----------|---------|
-            | Linux | `VgeneratorLegacy-*-linux-x86_64.zip` |
+            ## Internal / CI (optional)
 
-            Docs: [ARCHITECTURE.md](https://github.com/${{ github.repository }}/blob/master/ARCHITECTURE.md), [vst_bridge/README.md](https://github.com/${{ github.repository }}/blob/master/vst_bridge/README.md).
+            | Archive | Notes |
+            |---------|-------|
+            | `HdlModulesTester-*` | MVP square `Vgenerator` |
+            | `VgeneratorLegacy-*` | Legacy local soundcard path |
+
+            VST: [vst_bridge/README.md](https://github.com/${{ github.repository }}/blob/master/vst_bridge/README.md).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

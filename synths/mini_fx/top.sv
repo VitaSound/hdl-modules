@@ -10,7 +10,7 @@ module mini_fx (
 );
 
     localparam integer CLK_HZ   = 1_000_000;
-    localparam integer AUDIO_HZ = 44_100;
+    localparam integer AUDIO_HZ = 48_000;
 
     wire       midi_command_ready;
     wire [3:0] ch_message;
