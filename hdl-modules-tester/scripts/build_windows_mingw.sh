@@ -53,6 +53,7 @@ SOURCES=(
   main.cpp
   engine.cpp
   synth_core.cpp
+  midi_decode.cpp
   net_socket.cpp
 )
 
@@ -66,7 +67,7 @@ verilator --cc --exe generator.sv "${SOURCES[@]}" \
 
 make -C "$OBJ_DIR" -f Vgenerator.mk \
   CXX="$CXX" AR="$AR" \
-  engine.o main.o net_socket.o synth_core.o verilated.o \
+  engine.o main.o net_socket.o synth_core.o midi_decode.o verilated.o \
   Vgenerator__ALL.a
 
 "$CXX" \
@@ -74,6 +75,7 @@ make -C "$OBJ_DIR" -f Vgenerator.mk \
   "$OBJ_DIR/main.o" \
   "$OBJ_DIR/net_socket.o" \
   "$OBJ_DIR/synth_core.o" \
+  "$OBJ_DIR/midi_decode.o" \
   "$OBJ_DIR/verilated.o" \
   "$OBJ_DIR/Vgenerator__ALL.a" \
   -lws2_32 -static \

@@ -2,6 +2,13 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
+## [0.8.1] — 2026-10-31
+
+### Fix
+
+- Restore full `SynthCore` definition in `hdl-modules-tester` (broken since APVTS/MiniFX commit); CI `build-tester-*` failed on incomplete type.
+- Windows tester build includes `midi_decode.cpp`.
+
 ## [0.8.0] — 2026-10-31
 
 ### Naming / engines
@@ -11,6 +18,7 @@
 - Platform sample rate default **48000** for `mono_synth` / `mini_fx` / `noise_box`.
 - Release packages: `VitaSound-Engine-<id>-*` (see [`docs/ENGINES.md`](../docs/ENGINES.md)).
 - Manual check: [`docs/TEST_ENGINES.md`](../docs/TEST_ENGINES.md).
+- Note: `v0.8.0` release job failed on tester CI; use **v0.8.1**.
 
 ## [0.7.1] — 2026-07-31
 
