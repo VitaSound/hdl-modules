@@ -2,7 +2,7 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
-## [Unreleased]
+## [0.8.2] — 2026-11-01
 
 ### Release packaging
 
