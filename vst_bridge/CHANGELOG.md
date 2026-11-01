@@ -2,12 +2,19 @@
 
 Формат версий: [Semantic Versioning](https://semver.org/). Тег релиза репозитория: `vX.Y.Z` (файл [`VERSION`](../VERSION), VST — `CMakeLists.txt`).
 
+## [Unreleased]
+
+### Release packaging
+
+- GitHub Release no longer ships `HdlModulesTester-*` or `VgeneratorLegacy-*` (dev-only; build locally from `hdl-modules-tester/` / `verilator_tests/`).
+
 ## [0.8.1] — 2026-10-31
 
 ### Fix
 
 - Restore full `SynthCore` definition in `hdl-modules-tester` (broken since APVTS/MiniFX commit); CI `build-tester-*` failed on incomplete type.
 - Windows tester build includes `midi_decode.cpp`.
+
 
 ## [0.8.0] — 2026-10-31
 

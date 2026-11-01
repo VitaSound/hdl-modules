@@ -10,7 +10,8 @@
 | Одноголосный синт | **VitaSound-Engine-mono_synth** | synth | [`synths/mono_synth/`](../synths/mono_synth/) | **48000** |
 | Insert FX | **VitaSound-Engine-mini_fx** | fx | [`synths/mini_fx/`](../synths/mini_fx/) | **48000** |
 | Шум | **VitaSound-Engine-noise_box** | synth | [`synths/noise_box/`](../synths/noise_box/) | **48000** |
-| MVP (CI / smoke) | `HdlModulesTester` / `Vgenerator` | — | [`hdl-modules-tester/`](../hdl-modules-tester/) | 48000; не для «скачай и играй» |
+
+`hdl-modules-tester` (`Vgenerator`) и `verilator_tests` (legacy) **не входят в GitHub Release** — только локальная разработка / smoke.
 
 Правило имени engine: `VitaSound-Engine-<id>`, где `<id>` = имя каталога в `synths/`. Портфельный id (`sub`) — только в [`docs/portfolio/`](portfolio/).
 

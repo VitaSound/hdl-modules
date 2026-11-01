@@ -145,104 +145,12 @@ jobs:
           path: dist/VitaSound-Engine-${{ matrix.id }}-*-windows-x86_64.zip
           if-no-files-found: error
 
-  build-tester-linux:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Verilator
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y verilator g++ make zip
-
-      - name: Build hdl-modules-tester
-        run: make -C hdl-modules-tester clean obj_dir/Vgenerator
-
-      - name: Package Linux engine
-        env:
-          PACKAGE_TARGET: tester-linux
-        run: |
-          VERSION="$(tr -d '[:space:]' < VERSION)"
-          ./scripts/package_engine_release.sh "$VERSION" dist
-          ls -la dist/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tester-linux-zip
-          path: dist/HdlModulesTester-*-linux-x86_64.zip
-          if-no-files-found: error
-
-  build-tester-windows:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y verilator g++ make zip curl
-
-      - name: Download llvm-mingw toolchain
-        timeout-minutes: 20
-        working-directory: vst_bridge
-        run: ./scripts/download_llvm_mingw.sh
-
-      - name: Cross-build Windows engine
-        run: ./hdl-modules-tester/scripts/build_windows_mingw.sh --clean
-
-      - name: Package Windows engine
-        env:
-          PACKAGE_TARGET: tester-windows
-        run: |
-          VERSION="$(tr -d '[:space:]' < VERSION)"
-          ./scripts/package_engine_release.sh "$VERSION" dist
-          ls -la dist/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tester-windows-zip
-          path: dist/HdlModulesTester-*-windows-x86_64.zip
-          if-no-files-found: error
-
-  build-legacy-linux:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install legacy build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y verilator g++ make zip portaudio19-dev libasound2-dev
-
-      - name: Build verilator_tests legacy
-        run: make -C verilator_tests clean obj_dir/Vgenerator
-
-      - name: Package legacy engine
-        env:
-          PACKAGE_TARGET: legacy-linux
-        run: |
-          VERSION="$(tr -d '[:space:]' < VERSION)"
-          ./scripts/package_engine_release.sh "$VERSION" dist
-          ls -la dist/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: legacy-linux-zip
-          path: dist/VgeneratorLegacy-*-linux-x86_64.zip
-          if-no-files-found: error
-
   release:
     needs:
       - build-vst-linux
       - build-vst-windows
       - build-engines-linux
       - build-engines-windows
-      - build-tester-linux
-      - build-tester-windows
-      - build-legacy-linux
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -295,13 +203,7 @@ jobs:
             | mini_fx | `VitaSound-Engine-mini_fx-*-linux-x86_64.zip` | `VitaSound-Engine-mini_fx-*-windows-x86_64.zip` |
             | noise_box | `VitaSound-Engine-noise_box-*-linux-x86_64.zip` | `VitaSound-Engine-noise_box-*-windows-x86_64.zip` |
 
-            ## Internal / CI (optional)
-
-            | Archive | Notes |
-            |---------|-------|
-            | `HdlModulesTester-*` | MVP square `Vgenerator` |
-            | `VgeneratorLegacy-*` | Legacy local soundcard path |
-
+            Manual check: [docs/TEST_ENGINES.md](https://github.com/${{ github.repository }}/blob/master/docs/TEST_ENGINES.md).
             VST: [vst_bridge/README.md](https://github.com/${{ github.repository }}/blob/master/vst_bridge/README.md).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

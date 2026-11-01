@@ -3,11 +3,13 @@
 # Usage:
 #   PACKAGE_TARGET=<target> ./scripts/package_engine_release.sh <version> <staging_dir>
 #
-# Targets:
-#   tester-linux | tester-windows | legacy-linux
+# Targets (GitHub Release packages only engine-*):
 #   engine-mono_synth-linux | engine-mono_synth-windows
 #   engine-mini_fx-linux | engine-mini_fx-windows
 #   engine-noise_box-linux | engine-noise_box-windows
+# Local/dev only (not published in release.yml):
+#   tester-linux | tester-windows | legacy-linux
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
